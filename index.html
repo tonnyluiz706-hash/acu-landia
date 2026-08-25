@@ -2,8 +2,8 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Acuílandia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Acuílandnia</title>
     <style>
         * {
             margin: 0;
@@ -11,60 +11,37 @@
             box-sizing: border-box;
         }
         body {
-            background: #1a1a2e;
+            background: #000;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            font-family: sans-serif;
-        }
-        .game-wrapper {
-            background: #16213e;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            width: 100vw;
+            height: 100vh;
         }
         canvas {
             display: block;
-            width: 800px;
-            height: 400px;
-            border-radius: 8px;
+            width: 100vw;
+            height: 100vh;
             background: #000;
         }
     </style>
 </head>
 <body>
-    <div class="game-wrapper">
-        <canvas id="gameCanvas" width="800" height="400"></canvas>
-        <!-- Nenhuma instrução de teclas visível -->
-    </div>
+    <canvas id="gameCanvas"></canvas>
 
     <script>
-        // ============================================================
-        //  1. CANVAS E CONTEXTO
-        // ============================================================
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const W = 800, H = 400;
 
-        // ============================================================
-        //  2. BACKGROUND (IMAGEM OU GRADIENTE)
-        //     Para usar sua própria imagem:
-        //       1. Descomente as linhas abaixo envolvendo 'backgroundImage'
-        //       2. Substitua 'caminho/para/sua-imagem.jpg' pela URL da sua imagem
-        //       3. Comente ou remova a função drawFallbackBackground() se preferir
-        // ============================================================
-        // const backgroundImage = new Image();
-        // backgroundImage.src = 'caminho/para/sua-imagem.jpg';
+        let W = window.innerWidth;
+        let H = window.innerHeight;
+        canvas.width = W;
+        canvas.height = H;
 
-        // Função de desenho do fundo (gradiente simples)
+        const WORLD_WIDTH = 2000;
+
         function drawBackground() {
-            // Se você tiver uma imagem, use o bloco abaixo:
-            // if (backgroundImage.complete && backgroundImage.naturalWidth !== 0) {
-            //     ctx.drawImage(backgroundImage, 0, 0, W, H);
-            //     return;
-            // }
-            // Fallback: gradiente bonito
             const grad = ctx.createLinearGradient(0, 0, 0, H);
             grad.addColorStop(0, '#1a2a6c');
             grad.addColorStop(0.5, '#b21f1f');
@@ -73,95 +50,109 @@
             ctx.fillRect(0, 0, W, H);
         }
 
-        // ============================================================
-        //  3. CHÃO
-        // ============================================================
-        const CHAO_ALTURA = 60;
+        const CHAO_ALTURA = Math.floor(H * 0.15);
         const chaoY = H - CHAO_ALTURA;
+        const PLAYER_SIZE = Math.min(W, H) * 0.045;
 
-        // ============================================================
-        //  4. JOGADOR (QUADRADO)
-        // ============================================================
+        const platforms = [
+            { x: 0, y: chaoY, width: WORLD_WIDTH, height: CHAO_ALTURA },
+            { x: 900, y: chaoY - 100 - PLAYER_SIZE, width: 160, height: 20 }
+        ];
+
         const player = {
             x: 100,
-            y: chaoY - 40,
-            w: 40,
-            h: 40,
+            y: chaoY - PLAYER_SIZE,
+            w: PLAYER_SIZE,
+            h: PLAYER_SIZE,
             vx: 0,
             vy: 0,
             speed: 5,
-            jumpPower: -10,
-            gravity: 0.5,
+            jumpPower: -9,
+            gravity: 0.45,
             onGround: false,
         };
 
-        // ============================================================
-        //  5. CONTROLE DE TECLAS
-        // ============================================================
+        let cameraX = 0;
         const keys = { a: false, d: false, w: false };
 
-        // ============================================================
-        //  6. LÓGICA DO JOGO
-        // ============================================================
         function update() {
-            // Movimento horizontal
             if (keys.a) player.vx = -player.speed;
             else if (keys.d) player.vx = player.speed;
             else player.vx = 0;
 
             player.x += player.vx;
             if (player.x < 0) player.x = 0;
-            if (player.x + player.w > W) player.x = W - player.w;
+            if (player.x + player.w > WORLD_WIDTH) player.x = WORLD_WIDTH - player.w;
 
-            // Pulo
             if (keys.w && player.onGround) {
                 player.vy = player.jumpPower;
                 player.onGround = false;
             }
 
-            // Gravidade
             player.vy += player.gravity;
             player.y += player.vy;
 
-            // Colisão com o chão
-            if (player.y + player.h >= chaoY) {
-                player.y = chaoY - player.h;
-                player.vy = 0;
-                player.onGround = true;
-            } else {
-                player.onGround = false;
+            player.onGround = false;
+            for (let plat of platforms) {
+                if (player.x + player.w > plat.x && player.x < plat.x + plat.width) {
+                    if (player.vy >= 0 &&
+                        player.y + player.h >= plat.y &&
+                        player.y + player.h <= plat.y + plat.height + player.vy) {
+                        player.y = plat.y - player.h;
+                        player.vy = 0;
+                        player.onGround = true;
+                    }
+                }
             }
+
+            cameraX = player.x - W / 2;
+            cameraX = Math.max(0, Math.min(cameraX, WORLD_WIDTH - W));
         }
 
         function draw() {
             ctx.clearRect(0, 0, W, H);
-
-            // 1. Fundo
             drawBackground();
 
-            // 2. Chão
-            ctx.fillStyle = '#4a7c59';
-            ctx.fillRect(0, chaoY, W, CHAO_ALTURA);
-            ctx.fillStyle = '#3b6e4a';
-            ctx.fillRect(0, chaoY, W, 4);
+            for (let plat of platforms) {
+                const sx = plat.x - cameraX;
+                const sy = plat.y;
+                if (plat.y === chaoY) {
+                    ctx.fillStyle = '#4a7c59';
+                    ctx.fillRect(sx, sy, plat.width, plat.height);
+                    ctx.fillStyle = '#3b6e4a';
+                    ctx.fillRect(sx, sy, plat.width, 4);
+                } else {
+                    ctx.fillStyle = '#8e44ad';
+                    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+                    ctx.shadowBlur = 12;
+                    ctx.fillRect(sx, sy, plat.width, plat.height);
+                    ctx.shadowBlur = 0;
+                    ctx.strokeStyle = '#6c3483';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(sx, sy, plat.width, plat.height);
+                }
+            }
 
-            // 3. Jogador (quadrado)
-            ctx.fillStyle = '#e74c3c';
+            const px = player.x - cameraX;
+            const py = player.y;
             ctx.shadowColor = 'rgba(0,0,0,0.3)';
-            ctx.shadowBlur = 10;
-            ctx.fillRect(player.x, player.y, player.w, player.h);
+            ctx.shadowBlur = 12;
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(px, py, player.w, player.h);
             ctx.shadowBlur = 0;
             ctx.strokeStyle = '#c0392b';
             ctx.lineWidth = 2;
-            ctx.strokeRect(player.x, player.y, player.w, player.h);
+            ctx.strokeRect(px, py, player.w, player.h);
 
-            // Olhos (detalhe)
+            const eyeSize = player.w * 0.2;
+            const eyeOffset = player.w * 0.2;
             ctx.fillStyle = '#fff';
-            ctx.fillRect(player.x + 8, player.y + 10, 8, 8);
-            ctx.fillRect(player.x + 24, player.y + 10, 8, 8);
+            ctx.fillRect(px + eyeOffset, py + eyeOffset, eyeSize, eyeSize);
+            ctx.fillRect(px + player.w - eyeOffset - eyeSize, py + eyeOffset, eyeSize, eyeSize);
             ctx.fillStyle = '#2c3e50';
-            ctx.fillRect(player.x + 10, player.y + 12, 4, 4);
-            ctx.fillRect(player.x + 26, player.y + 12, 4, 4);
+            const pupil = eyeSize * 0.4;
+            ctx.fillRect(px + eyeOffset + pupil * 0.5, py + eyeOffset + pupil * 0.5, pupil, pupil);
+            ctx.fillRect(px + player.w - eyeOffset - eyeSize + pupil * 0.5, py + eyeOffset + pupil * 0.5, pupil, pupil);
         }
 
         function gameLoop() {
@@ -170,9 +161,31 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // ============================================================
-        //  7. EVENTOS DE TECLADO
-        // ============================================================
+        function resize() {
+            W = window.innerWidth;
+            H = window.innerHeight;
+            canvas.width = W;
+            canvas.height = H;
+
+            const newChaoAltura = Math.floor(H * 0.15);
+            const newPlayerSize = Math.min(W, H) * 0.045;
+
+            platforms[0].y = H - newChaoAltura;
+            platforms[0].height = newChaoAltura;
+            platforms[1].y = H - newChaoAltura - 100 - newPlayerSize;
+
+            const oldPlayerSize = player.w;
+            const scale = newPlayerSize / oldPlayerSize;
+            player.w = newPlayerSize;
+            player.h = newPlayerSize;
+            player.y = platforms[0].y - player.h;
+            if (player.onGround) {
+                player.y = platforms[0].y - player.h;
+            }
+        }
+
+        window.addEventListener('resize', resize);
+
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (key === 'a' || key === 'd' || key === 'w') {
@@ -188,9 +201,7 @@
             }
         });
 
-        // ============================================================
-        //  8. INICIAR
-        // ============================================================
+        resize();
         gameLoop();
     </script>
 </body>
