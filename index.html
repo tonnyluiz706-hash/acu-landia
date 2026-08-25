@@ -56,7 +56,7 @@
 
         const platforms = [
             { x: 0, y: chaoY, width: WORLD_WIDTH, height: CHAO_ALTURA },
-            { x: 900, y: chaoY - 100 - PLAYER_SIZE, width: 160, height: 20 }
+            { x: 900, y: chaoY - 80 - PLAYER_SIZE, width: 160, height: 20 }
         ];
 
         const player = {
@@ -67,7 +67,7 @@
             vx: 0,
             vy: 0,
             speed: 5,
-            jumpPower: -9,
+            jumpPower: -10.5,
             gravity: 0.45,
             onGround: false,
         };
@@ -172,7 +172,7 @@
 
             platforms[0].y = H - newChaoAltura;
             platforms[0].height = newChaoAltura;
-            platforms[1].y = H - newChaoAltura - 100 - newPlayerSize;
+            platforms[1].y = H - newChaoAltura - 80 - newPlayerSize;
 
             const oldPlayerSize = player.w;
             const scale = newPlayerSize / oldPlayerSize;
