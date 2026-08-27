@@ -31,6 +31,9 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
+        // ============================================
+        // CANVAS E CONFIGURAÇÕES INICIAIS
+        // ============================================
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -39,8 +42,12 @@
         canvas.width = W;
         canvas.height = H;
 
-        const WORLD_WIDTH = 2000;
+        const WORLD_WIDTH = 4000;
+        let vidas = 3;
 
+        // ============================================
+        // DESENHO DO BACKGROUND
+        // ============================================
         function drawBackground() {
             const grad = ctx.createLinearGradient(0, 0, 0, H);
             grad.addColorStop(0, '#1a2a6c');
@@ -50,15 +57,26 @@
             ctx.fillRect(0, 0, W, H);
         }
 
+        // ============================================
+        // DEFINIÇÕES DO CHÃO, PLATAFORMAS E BURACO
+        // ============================================
         const CHAO_ALTURA = Math.floor(H * 0.15);
         const chaoY = H - CHAO_ALTURA;
         const PLAYER_SIZE = Math.min(W, H) * 0.045;
+        const MOB_RADIUS = Math.min(W, H) * 0.025;
+
+        const BURACO_INICIO = 1600;
+        const BURACO_FIM = 1850;
 
         const platforms = [
-            { x: 0, y: chaoY, width: WORLD_WIDTH, height: CHAO_ALTURA },
+            { x: 0, y: chaoY, width: BURACO_INICIO, height: CHAO_ALTURA },
+            { x: BURACO_FIM, y: chaoY, width: WORLD_WIDTH - BURACO_FIM, height: CHAO_ALTURA },
             { x: 900, y: chaoY - 80 - PLAYER_SIZE, width: 160, height: 20 }
         ];
 
+        // ============================================
+        // JOGADOR
+        // ============================================
         const player = {
             x: 100,
             y: chaoY - PLAYER_SIZE,
@@ -70,12 +88,75 @@
             jumpPower: -10.5,
             gravity: 0.45,
             onGround: false,
+            spawnX: 100,
+            spawnY: chaoY - PLAYER_SIZE,
         };
 
+        // ============================================
+        // MOBS (INIMIGOS)
+        // ============================================
+        const mobs = [
+            {
+                x: 1200,
+                y: chaoY - MOB_RADIUS,
+                radius: MOB_RADIUS,
+                speed: 2.5,
+                minX: 1050,
+                maxX: 1400,
+                direction: 1,
+                color: '#f1c40f',
+                stroke: '#d4ac0d'
+            },
+            {
+                x: 2200,
+                y: chaoY - MOB_RADIUS,
+                radius: MOB_RADIUS,
+                speed: 3.0,
+                minX: 2000,
+                maxX: 2400,
+                direction: 1,
+                color: '#2ecc71',
+                stroke: '#27ae60'
+            }
+        ];
+
+        // ============================================
+        // CÂMERA E CONTROLES
+        // ============================================
         let cameraX = 0;
         const keys = { a: false, d: false, w: false };
 
+        // ============================================
+        // FUNÇÕES DE COLISÃO E RESPAWN
+        // ============================================
+        function resetPlayer() {
+            player.x = player.spawnX;
+            player.y = player.spawnY;
+            player.vx = 0;
+            player.vy = 0;
+            player.onGround = false;
+            vidas--;
+            if (vidas < 0) vidas = 0;
+        }
+
+        function checkCollisions() {
+            for (let mob of mobs) {
+                const dx = (player.x + player.w/2) - mob.x;
+                const dy = (player.y + player.h/2) - mob.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                const threshold = player.w/2 + mob.radius;
+                if (dist < threshold) {
+                    resetPlayer();
+                    return;
+                }
+            }
+        }
+
+        // ============================================
+        // ATUALIZAÇÃO DO JOGO
+        // ============================================
         function update() {
+            // Movimento horizontal
             if (keys.a) player.vx = -player.speed;
             else if (keys.d) player.vx = player.speed;
             else player.vx = 0;
@@ -84,6 +165,7 @@
             if (player.x < 0) player.x = 0;
             if (player.x + player.w > WORLD_WIDTH) player.x = WORLD_WIDTH - player.w;
 
+            // Pulo e gravidade
             if (keys.w && player.onGround) {
                 player.vy = player.jumpPower;
                 player.onGround = false;
@@ -92,6 +174,12 @@
             player.vy += player.gravity;
             player.y += player.vy;
 
+            // Queda no buraco
+            if (player.y > chaoY + 50) {
+                resetPlayer();
+            }
+
+            // Colisão com plataformas
             player.onGround = false;
             for (let plat of platforms) {
                 if (player.x + player.w > plat.x && player.x < plat.x + plat.width) {
@@ -105,14 +193,29 @@
                 }
             }
 
+            // Movimentação dos mobs
+            for (let mob of mobs) {
+                mob.x += mob.speed * mob.direction;
+                if (mob.x > mob.maxX || mob.x < mob.minX) {
+                    mob.direction *= -1;
+                }
+            }
+
+            checkCollisions();
+
+            // Atualiza câmera
             cameraX = player.x - W / 2;
             cameraX = Math.max(0, Math.min(cameraX, WORLD_WIDTH - W));
         }
 
+        // ============================================
+        // RENDERIZAÇÃO
+        // ============================================
         function draw() {
             ctx.clearRect(0, 0, W, H);
             drawBackground();
 
+            // Plataformas
             for (let plat of platforms) {
                 const sx = plat.x - cameraX;
                 const sy = plat.y;
@@ -133,6 +236,23 @@
                 }
             }
 
+            // Mobs
+            for (let mob of mobs) {
+                const mx = mob.x - cameraX;
+                const my = mob.y;
+                ctx.beginPath();
+                ctx.arc(mx, my, mob.radius, 0, Math.PI * 2);
+                ctx.fillStyle = mob.color;
+                ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                ctx.shadowBlur = 15;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = mob.stroke;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            }
+
+            // Jogador
             const px = player.x - cameraX;
             const py = player.y;
             ctx.shadowColor = 'rgba(0,0,0,0.3)';
@@ -144,6 +264,7 @@
             ctx.lineWidth = 2;
             ctx.strokeRect(px, py, player.w, player.h);
 
+            // Olhos do jogador
             const eyeSize = player.w * 0.2;
             const eyeOffset = player.w * 0.2;
             ctx.fillStyle = '#fff';
@@ -153,14 +274,28 @@
             const pupil = eyeSize * 0.4;
             ctx.fillRect(px + eyeOffset + pupil * 0.5, py + eyeOffset + pupil * 0.5, pupil, pupil);
             ctx.fillRect(px + player.w - eyeOffset - eyeSize + pupil * 0.5, py + eyeOffset + pupil * 0.5, pupil, pupil);
+
+            // UI: vidas
+            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            ctx.font = '20px monospace';
+            ctx.shadowColor = 'rgba(0,0,0,0.8)';
+            ctx.shadowBlur = 8;
+            ctx.fillText('Vidas: ' + vidas, 20, 40);
+            ctx.shadowBlur = 0;
         }
 
+        // ============================================
+        // LOOP PRINCIPAL
+        // ============================================
         function gameLoop() {
             update();
             draw();
             requestAnimationFrame(gameLoop);
         }
 
+        // ============================================
+        // REDIMENSIONAMENTO DA TELA
+        // ============================================
         function resize() {
             W = window.innerWidth;
             H = window.innerHeight;
@@ -169,23 +304,35 @@
 
             const newChaoAltura = Math.floor(H * 0.15);
             const newPlayerSize = Math.min(W, H) * 0.045;
+            const newMobRadius = Math.min(W, H) * 0.025;
 
             platforms[0].y = H - newChaoAltura;
             platforms[0].height = newChaoAltura;
-            platforms[1].y = H - newChaoAltura - 80 - newPlayerSize;
+            platforms[1].y = H - newChaoAltura;
+            platforms[1].height = newChaoAltura;
+            platforms[2].y = H - newChaoAltura - 80 - newPlayerSize;
 
             const oldPlayerSize = player.w;
             const scale = newPlayerSize / oldPlayerSize;
             player.w = newPlayerSize;
             player.h = newPlayerSize;
             player.y = platforms[0].y - player.h;
+            player.spawnY = player.y;
             if (player.onGround) {
                 player.y = platforms[0].y - player.h;
+            }
+
+            for (let mob of mobs) {
+                mob.radius = newMobRadius;
+                mob.y = platforms[0].y - mob.radius;
             }
         }
 
         window.addEventListener('resize', resize);
 
+        // ============================================
+        // EVENTOS DE TECLADO
+        // ============================================
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (key === 'a' || key === 'd' || key === 'w') {
@@ -201,6 +348,9 @@
             }
         });
 
+        // ============================================
+        // INICIALIZAÇÃO
+        // ============================================
         resize();
         gameLoop();
     </script>
