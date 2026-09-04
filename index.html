@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <title>Acuílandnia - Nível 1</title>
+    <!-- Fonte Pixelify Sans do Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet" />
     <style>
         * {
             margin: 0;
@@ -231,17 +233,13 @@
             player.onGround = false;
             mostrarTitulo = true;
             contadorTitulo = 0;
-            // Reseta posição dos mobs para os valores iniciais (opcional)
-            // Como os mobs se movem, podemos redefinir suas posições.
             mobs[0].x = 900;
             mobs[1].x = 2000;
             mobs[2].x = 3300;
             mobs[3].x = 5000;
-            // Direção também pode ser resetada
             for (let mob of mobs) {
                 mob.direction = 1;
             }
-            // Atualiza câmera
             cameraX = player.x - W / 2;
             cameraX = Math.max(0, Math.min(cameraX, WORLD_WIDTH - W));
         }
@@ -252,7 +250,6 @@
         function update() {
             if (nivelConcluido || isResizing || gameOver) return;
 
-            // Movimento horizontal
             if (keys.a) player.vx = -player.speed;
             else if (keys.d) player.vx = player.speed;
             else player.vx = 0;
@@ -261,7 +258,6 @@
             if (player.x < 0) player.x = 0;
             if (player.x + player.w > WORLD_WIDTH) player.x = WORLD_WIDTH - player.w;
 
-            // Pulo e gravidade
             if (keys.w && player.onGround) {
                 player.vy = player.jumpPower;
                 player.onGround = false;
@@ -270,7 +266,6 @@
             player.vy += player.gravity;
             player.y += player.vy;
 
-            // Colisão com plataformas
             player.onGround = false;
             for (let plat of platforms) {
                 if (player.x + player.w > plat.x && player.x < plat.x + plat.width) {
@@ -284,7 +279,6 @@
                 }
             }
 
-            // Verifica se caiu em um buraco (só se estiver caindo e abaixo do chão)
             if (!player.onGround && player.vy > 0 && player.y > chaoY + 30) {
                 let caiuNoBuraco = false;
                 for (let buraco of BURACOS) {
@@ -299,7 +293,6 @@
                 }
             }
 
-            // Movimentação dos mobs
             for (let mob of mobs) {
                 mob.x += mob.speed * mob.direction;
                 if (mob.x > mob.maxX || mob.x < mob.minX) {
@@ -328,7 +321,6 @@
             ctx.clearRect(0, 0, W, H);
             drawBackground();
 
-            // Plataformas
             for (let plat of platforms) {
                 const sx = plat.x - cameraX;
                 const sy = plat.y;
@@ -349,17 +341,15 @@
                 }
             }
 
-            // Marcadores de buraco
             for (let buraco of BURACOS) {
                 const bx = buraco.inicio - cameraX;
                 ctx.fillStyle = 'rgba(255,0,0,0.15)';
                 ctx.fillRect(bx, chaoY, buraco.fim - buraco.inicio, 10);
                 ctx.fillStyle = 'rgba(255,255,255,0.3)';
-                ctx.font = '16px monospace';
+                ctx.font = '16px "Pixelify Sans", monospace';
                 ctx.fillText('💀', bx + 10, chaoY - 10);
             }
 
-            // Bandeira
             const fx = flag.x - cameraX;
             const fy = flag.y;
             ctx.fillStyle = '#888';
@@ -383,7 +373,6 @@
             ctx.lineWidth = 1;
             ctx.stroke();
 
-            // Mobs
             for (let mob of mobs) {
                 const mx = mob.x - cameraX;
                 const my = mob.y;
@@ -399,7 +388,6 @@
                 ctx.stroke();
             }
 
-            // Jogador (só desenha se não estiver em game over)
             if (!gameOver) {
                 const px = player.x - cameraX;
                 const py = player.y;
@@ -423,16 +411,15 @@
                 ctx.fillRect(px + player.w - eyeOffset - eyeSize + pupil * 0.5, py + eyeOffset + pupil * 0.5, pupil, pupil);
             }
 
-            // UI: vidas (só mostra se não estiver em game over)
+            // UI: vidas e barra de progresso (Pixelify Sans)
             if (!gameOver) {
                 ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                ctx.font = '20px monospace';
+                ctx.font = '20px "Pixelify Sans", monospace';
                 ctx.shadowColor = 'rgba(0,0,0,0.8)';
                 ctx.shadowBlur = 8;
                 ctx.fillText('❤️ ' + vidas, 20, 40);
                 ctx.shadowBlur = 0;
 
-                // Barra de progresso
                 const progresso = Math.min(1, player.x / WORLD_WIDTH);
                 ctx.fillStyle = 'rgba(255,255,255,0.3)';
                 ctx.fillRect(W/2 - 100, 20, 200, 8);
@@ -443,12 +430,12 @@
                 ctx.strokeRect(W/2 - 100, 20, 200, 8);
             }
 
-            // Título "NÍVEL 1"
+            // Título "NÍVEL 1" com Pixelify Sans
             if (mostrarTitulo && !gameOver) {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = 'rgba(255,255,255,0.5)';
-                ctx.font = 'bold 80px monospace';
+                ctx.font = 'bold 80px "Pixelify Sans", monospace';
                 ctx.shadowColor = 'rgba(0,0,0,0.8)';
                 ctx.shadowBlur = 20;
                 ctx.fillText('NÍVEL 1', W/2, H/2 - 50);
@@ -457,12 +444,12 @@
                 ctx.textBaseline = 'alphabetic';
             }
 
-            // Nível concluído
+            // Nível concluído com Pixelify Sans
             if (nivelConcluido) {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = 'rgba(46, 204, 113, 0.9)';
-                ctx.font = 'bold 60px monospace';
+                ctx.font = 'bold 60px "Pixelify Sans", monospace';
                 ctx.shadowColor = 'rgba(0,0,0,0.8)';
                 ctx.shadowBlur = 20;
                 ctx.fillText('🏆 NÍVEL CONCLUÍDO! 🏆', W/2, H/2);
@@ -471,23 +458,22 @@
                 ctx.textBaseline = 'alphabetic';
             }
 
-            // GAME OVER
+            // GAME OVER com Pixelify Sans
             if (gameOver) {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                // Fundo escuro semi-transparente
                 ctx.fillStyle = 'rgba(0,0,0,0.7)';
                 ctx.fillRect(0, 0, W, H);
 
                 ctx.fillStyle = '#ff0000';
-                ctx.font = 'bold 90px monospace';
+                ctx.font = 'bold 90px "Pixelify Sans", monospace';
                 ctx.shadowColor = '#ff0000';
                 ctx.shadowBlur = 40;
                 ctx.fillText('PERDEU OTÁRIO', W/2, H/2 - 30);
                 ctx.shadowBlur = 0;
 
                 ctx.fillStyle = '#ffffff';
-                ctx.font = '24px monospace';
+                ctx.font = '24px "Pixelify Sans", monospace';
                 ctx.fillText('Pressione R para reiniciar', W/2, H/2 + 70);
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'alphabetic';
