@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>Acuílandnia - Nível 1</title>
-    <!-- Fonte Pixelify Sans do Google Fonts -->
+    <title>Acuílandnia - Níveis 1 e 2</title>
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet" />
     <style>
         * {
@@ -44,16 +43,28 @@
         canvas.width = W;
         canvas.height = H;
 
-        const WORLD_WIDTH = 6000;
+        const WORLD_WIDTH = 10000;
         let vidas = 5;
+        let nivelAtual = 1;
         let nivelConcluido = false;
         let mostrarTitulo = true;
+        let mostrarTituloNivel2 = false;
         let contadorTitulo = 0;
+        let contadorTituloNivel2 = 0;
         let isResizing = false;
         let gameOver = false;
 
+        let checkpointX = 100;
+        let checkpointY = 0;
+
+        let temEspada = false;
+        let atacando = false;
+        let ataqueTimer = 0;
+        const ALCANCE_ATAQUE = 120;
+        const DURACAO_ATAQUE = 15;
+
         // ============================================
-        // BACKGROUND (IMAGEM + FALLBACK)
+        // BACKGROUND
         // ============================================
         const bgImage = new Image();
         bgImage.src = 'Bacground.jpg';
@@ -72,18 +83,24 @@
         }
 
         // ============================================
-        // DEFINIÇÕES DO CHÃO, PLATAFORMAS E BURACOS
+        // CHÃO, PLATAFORMAS E BURACOS
         // ============================================
         const CHAO_ALTURA = Math.floor(H * 0.15);
         const chaoY = H - CHAO_ALTURA;
         const PLAYER_SIZE = Math.min(W, H) * 0.045;
         const MOB_RADIUS = Math.min(W, H) * 0.025;
 
-        const BURACOS = [
+        const BURACOS_NIVEL1 = [
             { inicio: 1400, fim: 1600 },
             { inicio: 2800, fim: 3000 },
             { inicio: 4500, fim: 4700 }
         ];
+        const BURACOS_NIVEL2 = [
+            { inicio: 6500, fim: 6700 },
+            { inicio: 7400, fim: 7600 },
+            { inicio: 8200, fim: 8400 }
+        ];
+        const BURACOS = [...BURACOS_NIVEL1, ...BURACOS_NIVEL2];
 
         function estaSobreBuraco(x) {
             for (let buraco of BURACOS) {
@@ -117,18 +134,27 @@
         }
 
         const platforms = [
-            { x: 0, y: chaoY, width: BURACOS[0].inicio, height: CHAO_ALTURA },
-            { x: BURACOS[0].fim, y: chaoY, width: BURACOS[1].inicio - BURACOS[0].fim, height: CHAO_ALTURA },
-            { x: BURACOS[1].fim, y: chaoY, width: BURACOS[2].inicio - BURACOS[1].fim, height: CHAO_ALTURA },
-            { x: BURACOS[2].fim, y: chaoY, width: WORLD_WIDTH - BURACOS[2].fim, height: CHAO_ALTURA },
-            
+            { x: 0, y: chaoY, width: BURACOS_NIVEL1[0].inicio, height: CHAO_ALTURA },
+            { x: BURACOS_NIVEL1[0].fim, y: chaoY, width: BURACOS_NIVEL1[1].inicio - BURACOS_NIVEL1[0].fim, height: CHAO_ALTURA },
+            { x: BURACOS_NIVEL1[1].fim, y: chaoY, width: BURACOS_NIVEL1[2].inicio - BURACOS_NIVEL1[1].fim, height: CHAO_ALTURA },
+            { x: BURACOS_NIVEL1[2].fim, y: chaoY, width: BURACOS_NIVEL2[0].inicio - BURACOS_NIVEL1[2].fim, height: CHAO_ALTURA },
+            { x: BURACOS_NIVEL2[0].fim, y: chaoY, width: BURACOS_NIVEL2[1].inicio - BURACOS_NIVEL2[0].fim, height: CHAO_ALTURA },
+            { x: BURACOS_NIVEL2[1].fim, y: chaoY, width: BURACOS_NIVEL2[2].inicio - BURACOS_NIVEL2[1].fim, height: CHAO_ALTURA },
+            { x: BURACOS_NIVEL2[2].fim, y: chaoY, width: WORLD_WIDTH - BURACOS_NIVEL2[2].fim, height: CHAO_ALTURA },
             { x: 500, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 800, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 1900, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 2200, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 3500, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 3800, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 5000, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 }
+            { x: 5000, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 6300, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 6600, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 7000, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 7300, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 7800, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 8100, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 8700, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 }
         ];
 
         // ============================================
@@ -150,17 +176,23 @@
         };
 
         // ============================================
-        // MOBS
+        // MOBS (com flag emKnockback)
         // ============================================
         const mobs = [
-            { x: 900, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.0, minX: 700, maxX: 1200, direction: 1, color: '#f1c40f', stroke: '#d4ac0d' },
-            { x: 2000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.8, minX: 1800, maxX: 2300, direction: 1, color: '#2ecc71', stroke: '#27ae60' },
-            { x: 3300, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.2, minX: 3100, maxX: 3600, direction: 1, color: '#9b59b6', stroke: '#8e44ad' },
-            { x: 5000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.5, minX: 4800, maxX: 5300, direction: 1, color: '#e67e22', stroke: '#d35400' }
+            // Nível 1
+            { x: 900, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.0, minX: 700, maxX: 1200, direction: 1, color: '#f1c40f', stroke: '#d4ac0d', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false },
+            { x: 2000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.8, minX: 1800, maxX: 2300, direction: 1, color: '#2ecc71', stroke: '#27ae60', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false },
+            { x: 3300, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.2, minX: 3100, maxX: 3600, direction: 1, color: '#9b59b6', stroke: '#8e44ad', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false },
+            { x: 5000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.5, minX: 4800, maxX: 5300, direction: 1, color: '#e67e22', stroke: '#d35400', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false },
+            // Nível 2
+            { x: 6400, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.0, minX: 6200, maxX: 6600, direction: 1, color: '#e74c3c', stroke: '#c0392b', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false },
+            { x: 7100, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.8, minX: 6900, maxX: 7300, direction: 1, color: '#3498db', stroke: '#2980b9', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false },
+            { x: 7900, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.2, minX: 7700, maxX: 8100, direction: 1, color: '#1abc9c', stroke: '#16a085', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false },
+            { x: 8800, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.5, minX: 8600, maxX: 9000, direction: 1, color: '#e91e63', stroke: '#c2185b', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false }
         ];
 
         // ============================================
-        // BANDEIRA
+        // BANDEIRA E SÁBIO
         // ============================================
         const flag = {
             x: 5700,
@@ -170,11 +202,30 @@
             ativada: false
         };
 
+        const sabio = {
+            x: 5950,
+            y: chaoY - 50,
+            largura: 40,
+            altura: 40,
+            cor: '#3498db',
+            conversaAtiva: false,
+            timer: 0,
+            falas: [
+                "Olá meu jovem!",
+                "Soube que está indo atrás do rei orc",
+                "É um caminho perigoso e cheio de criaturas terríveis",
+                "Tome esse presente pra conseguir se virar"
+            ],
+            falaIndex: 0,
+            conversaTerminada: false,
+            esperandoProxima: false
+        };
+
         // ============================================
         // CÂMERA E CONTROLES
         // ============================================
         let cameraX = 0;
-        const keys = { a: false, d: false, w: false };
+        const keys = { a: false, d: false, w: false, space: false };
 
         // ============================================
         // FUNÇÕES DE COLISÃO E RESPAWN
@@ -184,8 +235,13 @@
                 gameOver = true;
                 return;
             }
-            player.x = player.spawnX;
-            player.y = player.spawnY;
+            if (flag.ativada) {
+                player.x = checkpointX;
+                player.y = checkpointY;
+            } else {
+                player.x = player.spawnX;
+                player.y = player.spawnY;
+            }
             player.vx = 0;
             player.vy = 0;
             player.onGround = false;
@@ -197,6 +253,9 @@
 
         function checkCollisions() {
             for (let mob of mobs) {
+                if (mob.morto) continue;
+                // Ignora colisão se o mob estiver em knockback
+                if (mob.emKnockback) continue;
                 const dx = (player.x + player.w/2) - mob.x;
                 const dy = (player.y + player.h/2) - mob.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
@@ -213,43 +272,159 @@
                 player.x < flag.x + flag.w &&
                 player.y + player.h > flag.y && 
                 player.y < flag.y + flag.h) {
-                flag.ativada = true;
-                nivelConcluido = true;
+                if (!flag.ativada) {
+                    flag.ativada = true;
+                    checkpointX = flag.x - player.w/2;
+                    checkpointY = chaoY - player.h;
+                }
             }
         }
 
         // ============================================
-        // REINICIAR JOGO COMPLETO
+        // CONVERSA COM O SÁBIO
+        // ============================================
+        function iniciarConversa() {
+            if (sabio.conversaTerminada) return;
+            if (!flag.ativada) return;
+            if (sabio.conversaAtiva) return;
+            sabio.conversaAtiva = true;
+            sabio.falaIndex = 0;
+            sabio.timer = 0;
+            sabio.esperandoProxima = false;
+        }
+
+        function avancarConversa() {
+            sabio.falaIndex++;
+            if (sabio.falaIndex >= sabio.falas.length) {
+                sabio.conversaTerminada = true;
+                sabio.conversaAtiva = false;
+                temEspada = true;
+                return;
+            }
+            sabio.timer = 0;
+            sabio.esperandoProxima = false;
+        }
+
+        function updateConversa() {
+            if (!sabio.conversaAtiva) return;
+            if (sabio.conversaTerminada) return;
+
+            const dx = (player.x + player.w/2) - (sabio.x + sabio.largura/2);
+            const dy = (player.y + player.h/2) - (sabio.y + sabio.altura/2);
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist > 150) return;
+
+            if (!sabio.esperandoProxima) {
+                sabio.timer++;
+                if (sabio.timer > 120) {
+                    avancarConversa();
+                }
+            }
+        }
+
+        // ============================================
+        // ATAQUE COM KNOCKBACK CORRIGIDO
+        // ============================================
+        function executarAtaque() {
+            if (!temEspada) return;
+            if (atacando) return;
+            atacando = true;
+            ataqueTimer = 0;
+
+            for (let mob of mobs) {
+                if (mob.morto) continue;
+                const dx = (player.x + player.w/2) - mob.x;
+                const dy = (player.y + player.h/2) - mob.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < ALCANCE_ATAQUE) {
+                    mob.hp--;
+                    if (mob.hp <= 0) {
+                        mob.morto = true;
+                    } else {
+                        // Aplica knockback com força maior
+                        const angulo = Math.atan2(dy, dx);
+                        const forca = 30; // AUMENTADO de 15 para 30
+                        mob.knockbackX = Math.cos(angulo) * forca;
+                        mob.knockbackY = Math.sin(angulo) * forca;
+                        mob.emKnockback = true;
+
+                        // Reposiciona o mob para fora do jogador imediatamente
+                        const separacao = ALCANCE_ATAQUE + 10;
+                        mob.x = (player.x + player.w/2) + Math.cos(angulo) * separacao;
+                        mob.y = (player.y + player.h/2) + Math.sin(angulo) * separacao;
+                        // Garante que não saia do chão
+                        if (mob.y > chaoY - mob.radius) {
+                            mob.y = chaoY - mob.radius;
+                            mob.knockbackY = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        // ============================================
+        // REINICIAR JOGO
         // ============================================
         function restartGame() {
             gameOver = false;
             nivelConcluido = false;
+            nivelAtual = 1;
             vidas = 5;
             flag.ativada = false;
+            temEspada = false;
+            atacando = false;
+            sabio.conversaAtiva = false;
+            sabio.conversaTerminada = false;
+            sabio.falaIndex = 0;
+            sabio.timer = 0;
+            sabio.esperandoProxima = false;
+            checkpointX = player.spawnX;
+            checkpointY = player.spawnY;
+            mostrarTitulo = true;
+            mostrarTituloNivel2 = false;
+            contadorTitulo = 0;
+            contadorTituloNivel2 = 0;
+
             player.x = player.spawnX;
             player.y = player.spawnY;
             player.vx = 0;
             player.vy = 0;
             player.onGround = false;
-            mostrarTitulo = true;
-            contadorTitulo = 0;
-            mobs[0].x = 900;
-            mobs[1].x = 2000;
-            mobs[2].x = 3300;
-            mobs[3].x = 5000;
-            for (let mob of mobs) {
-                mob.direction = 1;
+
+            const posicoesIniciais = [900, 2000, 3300, 5000, 6400, 7100, 7900, 8800];
+            for (let i = 0; i < mobs.length; i++) {
+                mobs[i].x = posicoesIniciais[i];
+                mobs[i].morto = false;
+                mobs[i].direction = 1;
+                mobs[i].hp = 2;
+                mobs[i].knockbackX = 0;
+                mobs[i].knockbackY = 0;
+                mobs[i].emKnockback = false;
             }
+
             cameraX = player.x - W / 2;
             cameraX = Math.max(0, Math.min(cameraX, WORLD_WIDTH - W));
         }
 
         // ============================================
-        // ATUALIZAÇÃO DO JOGO
+        // SISTEMA DE PROGRESSÃO (Nível 2)
+        // ============================================
+        function entrarNivel2() {
+            if (nivelAtual === 2) return;
+            if (!temEspada) return;
+            if (player.x < 6200) return;
+            nivelAtual = 2;
+            mostrarTituloNivel2 = true;
+            contadorTituloNivel2 = 0;
+        }
+
+        // ============================================
+        // ATUALIZAÇÃO
         // ============================================
         function update() {
             if (nivelConcluido || isResizing || gameOver) return;
 
+            // Movimento horizontal
             if (keys.a) player.vx = -player.speed;
             else if (keys.d) player.vx = player.speed;
             else player.vx = 0;
@@ -258,6 +433,7 @@
             if (player.x < 0) player.x = 0;
             if (player.x + player.w > WORLD_WIDTH) player.x = WORLD_WIDTH - player.w;
 
+            // Pulo e gravidade
             if (keys.w && player.onGround) {
                 player.vy = player.jumpPower;
                 player.onGround = false;
@@ -266,6 +442,7 @@
             player.vy += player.gravity;
             player.y += player.vy;
 
+            // Colisão com plataformas
             player.onGround = false;
             for (let plat of platforms) {
                 if (player.x + player.w > plat.x && player.x < plat.x + plat.width) {
@@ -279,6 +456,7 @@
                 }
             }
 
+            // Queda em buraco
             if (!player.onGround && player.vy > 0 && player.y > chaoY + 30) {
                 let caiuNoBuraco = false;
                 for (let buraco of BURACOS) {
@@ -293,34 +471,97 @@
                 }
             }
 
+            // Movimentação dos mobs (com knockback)
             for (let mob of mobs) {
+                if (mob.morto) continue;
+
+                // Aplica knockback com atrito
+                if (mob.knockbackX !== 0 || mob.knockbackY !== 0) {
+                    mob.x += mob.knockbackX;
+                    mob.y += mob.knockbackY;
+                    mob.knockbackX *= 0.85;
+                    mob.knockbackY *= 0.85;
+                    if (Math.abs(mob.knockbackX) < 0.1) mob.knockbackX = 0;
+                    if (Math.abs(mob.knockbackY) < 0.1) mob.knockbackY = 0;
+                    // Impede que o mob saia do chão
+                    if (mob.y > chaoY - mob.radius) {
+                        mob.y = chaoY - mob.radius;
+                        mob.knockbackY = 0;
+                    }
+                    // Se o knockback zerou, desativa a flag
+                    if (mob.knockbackX === 0 && mob.knockbackY === 0) {
+                        mob.emKnockback = false;
+                    }
+                    continue; // não aplica movimento padrão neste frame
+                }
+
                 mob.x += mob.speed * mob.direction;
                 if (mob.x > mob.maxX || mob.x < mob.minX) {
                     mob.direction *= -1;
                 }
             }
 
+            // Ataque (timer)
+            if (atacando) {
+                ataqueTimer++;
+                if (ataqueTimer > DURACAO_ATAQUE) {
+                    atacando = false;
+                }
+            }
+
             checkCollisions();
             checkFlag();
 
+            // Interação com o sábio
+            const dxSabio = (player.x + player.w/2) - (sabio.x + sabio.largura/2);
+            const dySabio = (player.y + player.h/2) - (sabio.y + sabio.altura/2);
+            const distSabio = Math.sqrt(dxSabio*dxSabio + dySabio*dySabio);
+
+            if (distSabio < 120 && flag.ativada && !sabio.conversaTerminada) {
+                if (!sabio.conversaAtiva) {
+                    iniciarConversa();
+                }
+            }
+
+            updateConversa();
+
+            // Progressão para Nível 2
+            if (temEspada && player.x > 6200) {
+                entrarNivel2();
+            }
+
+            // Conclusão do jogo
+            if (nivelAtual === 2 && player.x > 9500) {
+                nivelConcluido = true;
+            }
+
+            // Câmera
             cameraX = player.x - W / 2;
             cameraX = Math.max(0, Math.min(cameraX, WORLD_WIDTH - W));
 
+            // Títulos
             if (mostrarTitulo) {
                 contadorTitulo++;
                 if (contadorTitulo > 120) {
                     mostrarTitulo = false;
                 }
             }
+            if (mostrarTituloNivel2) {
+                contadorTituloNivel2++;
+                if (contadorTituloNivel2 > 120) {
+                    mostrarTituloNivel2 = false;
+                }
+            }
         }
 
         // ============================================
-        // RENDERIZAÇÃO
+        // RENDERIZAÇÃO (igual ao anterior, sem alterações)
         // ============================================
         function draw() {
             ctx.clearRect(0, 0, W, H);
             drawBackground();
 
+            // Plataformas
             for (let plat of platforms) {
                 const sx = plat.x - cameraX;
                 const sy = plat.y;
@@ -341,6 +582,7 @@
                 }
             }
 
+            // Buracos
             for (let buraco of BURACOS) {
                 const bx = buraco.inicio - cameraX;
                 ctx.fillStyle = 'rgba(255,0,0,0.15)';
@@ -350,6 +592,7 @@
                 ctx.fillText('💀', bx + 10, chaoY - 10);
             }
 
+            // Bandeira
             const fx = flag.x - cameraX;
             const fy = flag.y;
             ctx.fillStyle = '#888';
@@ -373,7 +616,82 @@
             ctx.lineWidth = 1;
             ctx.stroke();
 
+            // Sábio
+            const sxSabio = sabio.x - cameraX;
+            const sySabio = sabio.y;
+            ctx.shadowColor = 'rgba(0,0,0,0.4)';
+            ctx.shadowBlur = 12;
+            ctx.fillStyle = sabio.cor;
+            ctx.beginPath();
+            ctx.moveTo(sxSabio + sabio.largura/2, sySabio);
+            ctx.lineTo(sxSabio + sabio.largura, sySabio + sabio.altura);
+            ctx.lineTo(sxSabio, sySabio + sabio.altura);
+            ctx.closePath();
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#2980b9';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(sxSabio + 8, sySabio + 12, 6, 6);
+            ctx.fillRect(sxSabio + sabio.largura - 14, sySabio + 12, 6, 6);
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(sxSabio + 10, sySabio + 14, 3, 3);
+            ctx.fillRect(sxSabio + sabio.largura - 12, sySabio + 14, 3, 3);
+
+            // Balão de fala
+            if (sabio.conversaAtiva && !sabio.conversaTerminada) {
+                const falaAtual = sabio.falas[sabio.falaIndex] || '';
+                ctx.font = '16px "Pixelify Sans", monospace';
+                const metrics = ctx.measureText(falaAtual);
+                const larguraTexto = metrics.width;
+                const alturaTexto = 24;
+                const padding = 20;
+                const bw = Math.max(larguraTexto + padding * 2, 60);
+                const bh = alturaTexto + padding;
+                const bx = sxSabio + sabio.largura/2 - bw/2;
+                const by = sySabio - bh - 16;
+
+                ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                ctx.shadowBlur = 12;
+                ctx.fillStyle = 'rgba(255,255,255,0.95)';
+                ctx.beginPath();
+                ctx.roundRect(bx, by, bw, bh, 12);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(bx, by, bw, bh, 12);
+                ctx.stroke();
+                ctx.fillStyle = 'rgba(255,255,255,0.95)';
+                ctx.beginPath();
+                ctx.moveTo(sxSabio + sabio.largura/2 - 8, by + bh);
+                ctx.lineTo(sxSabio + sabio.largura/2, by + bh + 12);
+                ctx.lineTo(sxSabio + sabio.largura/2 + 8, by + bh);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(sxSabio + sabio.largura/2 - 8, by + bh);
+                ctx.lineTo(sxSabio + sabio.largura/2, by + bh + 12);
+                ctx.lineTo(sxSabio + sabio.largura/2 + 8, by + bh);
+                ctx.stroke();
+
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#222';
+                ctx.font = '16px "Pixelify Sans", monospace';
+                ctx.shadowBlur = 0;
+                ctx.fillText(falaAtual, bx + bw/2, by + bh/2);
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'alphabetic';
+            }
+
+            // Mobs
             for (let mob of mobs) {
+                if (mob.morto) continue;
                 const mx = mob.x - cameraX;
                 const my = mob.y;
                 ctx.beginPath();
@@ -386,8 +704,15 @@
                 ctx.strokeStyle = mob.stroke;
                 ctx.lineWidth = 3;
                 ctx.stroke();
+                // Barrinha de vida
+                ctx.fillStyle = 'rgba(255,0,0,0.7)';
+                ctx.fillRect(mx - mob.radius, my - mob.radius - 10, mob.radius * 2, 4);
+                ctx.fillStyle = 'rgba(0,255,0,0.7)';
+                const lifePercent = mob.hp / 2;
+                ctx.fillRect(mx - mob.radius, my - mob.radius - 10, mob.radius * 2 * lifePercent, 4);
             }
 
+            // Jogador
             if (!gameOver) {
                 const px = player.x - cameraX;
                 const py = player.y;
@@ -409,15 +734,47 @@
                 const pupil = eyeSize * 0.4;
                 ctx.fillRect(px + eyeOffset + pupil * 0.5, py + eyeOffset + pupil * 0.5, pupil, pupil);
                 ctx.fillRect(px + player.w - eyeOffset - eyeSize + pupil * 0.5, py + eyeOffset + pupil * 0.5, pupil, pupil);
+
+                if (temEspada) {
+                    ctx.fillStyle = '#f1c40f';
+                    ctx.shadowColor = 'rgba(241,196,15,0.6)';
+                    ctx.shadowBlur = 15;
+                    ctx.fillRect(px + player.w + 2, py + 4, 4, player.h - 8);
+                    ctx.fillRect(px + player.w - 2, py + 2, 12, 6);
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = 'rgba(241,196,15,0.3)';
+                    ctx.beginPath();
+                    ctx.arc(px + player.w + 4, py + player.h/2, 12, 0, Math.PI*2);
+                    ctx.fill();
+                }
+
+                if (atacando) {
+                    const progresso = ataqueTimer / DURACAO_ATAQUE;
+                    const angulo = progresso * Math.PI * 1.5 - Math.PI/2;
+                    const raio = 50;
+                    ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+                    ctx.lineWidth = 6;
+                    ctx.shadowColor = 'rgba(255,255,255,0.5)';
+                    ctx.shadowBlur = 20;
+                    ctx.beginPath();
+                    ctx.arc(px + player.w/2, py + player.h/2, raio, -Math.PI/2, -Math.PI/2 + angulo);
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                }
             }
 
-            // UI: vidas e barra de progresso (Pixelify Sans)
+            // UI
             if (!gameOver) {
                 ctx.fillStyle = 'rgba(255,255,255,0.8)';
                 ctx.font = '20px "Pixelify Sans", monospace';
                 ctx.shadowColor = 'rgba(0,0,0,0.8)';
                 ctx.shadowBlur = 8;
                 ctx.fillText('❤️ ' + vidas, 20, 40);
+                ctx.fillText('Nível ' + nivelAtual, 20, 70);
+                if (temEspada) {
+                    ctx.fillStyle = 'rgba(241,196,15,0.8)';
+                    ctx.fillText('🗡️ Espada Mágica', 20, 100);
+                }
                 ctx.shadowBlur = 0;
 
                 const progresso = Math.min(1, player.x / WORLD_WIDTH);
@@ -430,7 +787,7 @@
                 ctx.strokeRect(W/2 - 100, 20, 200, 8);
             }
 
-            // Título "NÍVEL 1" com Pixelify Sans
+            // Títulos
             if (mostrarTitulo && !gameOver) {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -444,7 +801,19 @@
                 ctx.textBaseline = 'alphabetic';
             }
 
-            // Nível concluído com Pixelify Sans
+            if (mostrarTituloNivel2 && !gameOver) {
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx.font = 'bold 80px "Pixelify Sans", monospace';
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.shadowBlur = 20;
+                ctx.fillText('NÍVEL 2', W/2, H/2 - 50);
+                ctx.shadowBlur = 0;
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'alphabetic';
+            }
+
             if (nivelConcluido) {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -452,32 +821,49 @@
                 ctx.font = 'bold 60px "Pixelify Sans", monospace';
                 ctx.shadowColor = 'rgba(0,0,0,0.8)';
                 ctx.shadowBlur = 20;
-                ctx.fillText('🏆 NÍVEL CONCLUÍDO! 🏆', W/2, H/2);
+                ctx.fillText('🏆 JOGO CONCLUÍDO! 🏆', W/2, H/2);
                 ctx.shadowBlur = 0;
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'alphabetic';
             }
 
-            // GAME OVER com Pixelify Sans
             if (gameOver) {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = 'rgba(0,0,0,0.7)';
                 ctx.fillRect(0, 0, W, H);
-
                 ctx.fillStyle = '#ff0000';
                 ctx.font = 'bold 90px "Pixelify Sans", monospace';
                 ctx.shadowColor = '#ff0000';
                 ctx.shadowBlur = 40;
                 ctx.fillText('PERDEU OTÁRIO', W/2, H/2 - 30);
                 ctx.shadowBlur = 0;
-
                 ctx.fillStyle = '#ffffff';
                 ctx.font = '24px "Pixelify Sans", monospace';
                 ctx.fillText('Pressione R para reiniciar', W/2, H/2 + 70);
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'alphabetic';
             }
+        }
+
+        // ============================================
+        // POLYFILL roundRect
+        // ============================================
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+                if (r > w/2) r = w/2;
+                if (r > h/2) r = h/2;
+                this.moveTo(x + r, y);
+                this.lineTo(x + w - r, y);
+                this.quadraticCurveTo(x + w, y, x + w, y + r);
+                this.lineTo(x + w, y + h - r);
+                this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                this.lineTo(x + r, y + h);
+                this.quadraticCurveTo(x, y + h, x, y + h - r);
+                this.lineTo(x, y + r);
+                this.quadraticCurveTo(x, y, x + r, y);
+                return this;
+            };
         }
 
         // ============================================
@@ -490,7 +876,7 @@
         }
 
         // ============================================
-        // REDIMENSIONAMENTO DA TELA
+        // REDIMENSIONAMENTO
         // ============================================
         function resize() {
             isResizing = true;
@@ -504,14 +890,12 @@
             const newPlayerSize = Math.min(W, H) * 0.045;
             const newMobRadius = Math.min(W, H) * 0.025;
 
-            platforms[0].y = H - newChaoAltura;
-            platforms[0].height = newChaoAltura;
-            platforms[1].y = H - newChaoAltura;
-            platforms[1].height = newChaoAltura;
-            platforms[2].y = H - newChaoAltura;
-            platforms[2].height = newChaoAltura;
-            platforms[3].y = H - newChaoAltura;
-            platforms[3].height = newChaoAltura;
+            for (let plat of platforms) {
+                if (plat.y === chaoY) {
+                    plat.y = H - newChaoAltura;
+                    plat.height = newChaoAltura;
+                }
+            }
 
             const alturasRelativas = [
                 -80 - newPlayerSize,
@@ -520,12 +904,18 @@
                 -160 - newPlayerSize,
                 -80 - newPlayerSize,
                 -160 - newPlayerSize,
+                -80 - newPlayerSize,
+                -80 - newPlayerSize,
+                -100 - newPlayerSize,
+                -80 - newPlayerSize,
+                -160 - newPlayerSize,
+                -80 - newPlayerSize,
+                -160 - newPlayerSize,
                 -80 - newPlayerSize
             ];
-            
-            for (let i = 0; i < 7; i++) {
-                platforms[4 + i].y = H - newChaoAltura + alturasRelativas[i];
-                platforms[4 + i].height = 20;
+            for (let i = 0; i < 14; i++) {
+                platforms[7 + i].y = H - newChaoAltura + alturasRelativas[i];
+                platforms[7 + i].height = 20;
             }
 
             const oldPlayerSize = player.w;
@@ -538,6 +928,8 @@
                 player.y = platforms[0].y - player.h;
             }
 
+            checkpointY = platforms[0].y - player.h;
+
             ajustarPosicaoBuraco();
 
             for (let mob of mobs) {
@@ -547,6 +939,10 @@
 
             flag.y = platforms[0].y - 60;
             flag.h = 60;
+
+            sabio.y = platforms[0].y - 50;
+            sabio.largura = 40;
+            sabio.altura = 40;
 
             setTimeout(() => {
                 isResizing = false;
@@ -563,6 +959,10 @@
             if (key === 'a' || key === 'd' || key === 'w') {
                 e.preventDefault();
                 keys[key] = true;
+            }
+            if (key === ' ') {
+                e.preventDefault();
+                executarAtaque();
             }
             if (key === 'r') {
                 e.preventDefault();
@@ -583,6 +983,7 @@
         // INICIALIZAÇÃO
         // ============================================
         resize();
+        checkpointY = player.spawnY;
         gameLoop();
     </script>
 </body>
