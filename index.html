@@ -49,19 +49,16 @@
         let contadorTitulo = 0;
 
         // ============================================
-        // BACKGROUND COM IMAGEM
+        // BACKGROUND (IMAGEM + FALLBACK)
         // ============================================
         const bgImage = new Image();
-        bgImage.src = 'background.jpg'; // imagem local na mesma pasta
-        let bgLoaded = false;
-        bgImage.onload = () => { bgLoaded = true; };
+        bgImage.src = 'bacground.jpg'; // Coloque a imagem na mesma pasta
 
         function drawBackground() {
-            if (bgLoaded) {
-                // Desenha a imagem cobrindo todo o canvas
+            // Se a imagem carregou, desenha ela; senão, usa gradiente
+            if (bgImage.complete && bgImage.naturalWidth !== 0) {
                 ctx.drawImage(bgImage, 0, 0, W, H);
             } else {
-                // Fallback: gradiente
                 const grad = ctx.createLinearGradient(0, 0, 0, H);
                 grad.addColorStop(0, '#1a2a6c');
                 grad.addColorStop(0.5, '#b21f1f');
@@ -79,6 +76,7 @@
         const PLAYER_SIZE = Math.min(W, H) * 0.045;
         const MOB_RADIUS = Math.min(W, H) * 0.025;
 
+        // Buracos no chão
         const BURACOS = [
             { inicio: 1400, fim: 1600 },
             { inicio: 2800, fim: 3000 },
@@ -87,13 +85,13 @@
 
         // Plataformas (chão + elevadas)
         const platforms = [
-            // Chão dividido pelos buracos
+            // Chão: dividido pelos buracos
             { x: 0, y: chaoY, width: BURACOS[0].inicio, height: CHAO_ALTURA },
             { x: BURACOS[0].fim, y: chaoY, width: BURACOS[1].inicio - BURACOS[0].fim, height: CHAO_ALTURA },
             { x: BURACOS[1].fim, y: chaoY, width: BURACOS[2].inicio - BURACOS[1].fim, height: CHAO_ALTURA },
             { x: BURACOS[2].fim, y: chaoY, width: WORLD_WIDTH - BURACOS[2].fim, height: CHAO_ALTURA },
-
-            // Plataformas elevadas
+            
+            // Plataformas elevadas (em escada)
             { x: 500, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 800, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 1900, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
@@ -250,8 +248,9 @@
             player.vy += player.gravity;
             player.y += player.vy;
 
-            // Colisão com plataformas
+            // Colisão com plataformas (inclui chão)
             player.onGround = false;
+            
             for (let plat of platforms) {
                 if (player.x + player.w > plat.x && player.x < plat.x + plat.width) {
                     if (player.vy >= 0 &&
@@ -264,7 +263,7 @@
                 }
             }
 
-            // Verifica se caiu em um buraco
+            // Verifica se caiu em um buraco (somente se não estiver no chão)
             if (!player.onGround && player.y > chaoY + 30) {
                 let caiuNoBuraco = false;
                 for (let buraco of BURACOS) {
@@ -290,7 +289,6 @@
             checkCollisions();
             checkFlag();
 
-            // Câmera
             cameraX = player.x - W / 2;
             cameraX = Math.max(0, Math.min(cameraX, WORLD_WIDTH - W));
 
@@ -345,7 +343,7 @@
             const fy = flag.y;
             ctx.fillStyle = '#888';
             ctx.fillRect(fx + 4, fy, 3, flag.h);
-
+            
             if (flag.ativada) {
                 ctx.fillStyle = '#2ecc71';
             } else {
@@ -479,23 +477,25 @@
             platforms[3].y = H - newChaoAltura;
             platforms[3].height = newChaoAltura;
 
-            // Atualiza plataformas elevadas (agora com as alturas corretas)
+            // Atualiza plataformas elevadas com as alturas corretas
             const alturasRelativas = [
                 -80 - newPlayerSize,
-                -100 - newPlayerSize,
+                -100 - newPlayerSize, // <-- corrigido para -100
                 -80 - newPlayerSize,
                 -160 - newPlayerSize,
                 -80 - newPlayerSize,
                 -160 - newPlayerSize,
                 -80 - newPlayerSize
             ];
-
+            
             for (let i = 0; i < 7; i++) {
                 platforms[4 + i].y = H - newChaoAltura + alturasRelativas[i];
                 platforms[4 + i].height = 20;
             }
 
             // Atualiza jogador
+            const oldPlayerSize = player.w;
+            const scale = newPlayerSize / oldPlayerSize;
             player.w = newPlayerSize;
             player.h = newPlayerSize;
             player.y = platforms[0].y - player.h;
