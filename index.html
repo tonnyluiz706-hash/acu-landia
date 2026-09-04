@@ -49,15 +49,26 @@
         let contadorTitulo = 0;
 
         // ============================================
-        // DESENHO DO BACKGROUND
+        // BACKGROUND COM IMAGEM
         // ============================================
+        const bgImage = new Image();
+        bgImage.src = 'background.jpg'; // imagem local na mesma pasta
+        let bgLoaded = false;
+        bgImage.onload = () => { bgLoaded = true; };
+
         function drawBackground() {
-            const grad = ctx.createLinearGradient(0, 0, 0, H);
-            grad.addColorStop(0, '#1a2a6c');
-            grad.addColorStop(0.5, '#b21f1f');
-            grad.addColorStop(1, '#fdbb2d');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, W, H);
+            if (bgLoaded) {
+                // Desenha a imagem cobrindo todo o canvas
+                ctx.drawImage(bgImage, 0, 0, W, H);
+            } else {
+                // Fallback: gradiente
+                const grad = ctx.createLinearGradient(0, 0, 0, H);
+                grad.addColorStop(0, '#1a2a6c');
+                grad.addColorStop(0.5, '#b21f1f');
+                grad.addColorStop(1, '#fdbb2d');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, W, H);
+            }
         }
 
         // ============================================
@@ -68,34 +79,23 @@
         const PLAYER_SIZE = Math.min(W, H) * 0.045;
         const MOB_RADIUS = Math.min(W, H) * 0.025;
 
-        // Buracos no chão
         const BURACOS = [
             { inicio: 1400, fim: 1600 },
             { inicio: 2800, fim: 3000 },
             { inicio: 4500, fim: 4700 }
         ];
 
-        // Função para verificar se está sobre um buraco
-        function estaSobreBuraco(x) {
-            for (let buraco of BURACOS) {
-                if (x + PLAYER_SIZE > buraco.inicio && x < buraco.fim) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         // Plataformas (chão + elevadas)
         const platforms = [
-            // Chão: dividido pelos buracos
+            // Chão dividido pelos buracos
             { x: 0, y: chaoY, width: BURACOS[0].inicio, height: CHAO_ALTURA },
             { x: BURACOS[0].fim, y: chaoY, width: BURACOS[1].inicio - BURACOS[0].fim, height: CHAO_ALTURA },
             { x: BURACOS[1].fim, y: chaoY, width: BURACOS[2].inicio - BURACOS[1].fim, height: CHAO_ALTURA },
             { x: BURACOS[2].fim, y: chaoY, width: WORLD_WIDTH - BURACOS[2].fim, height: CHAO_ALTURA },
-            
+
             // Plataformas elevadas
             { x: 500, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 800, y: chaoY - 100- PLAYER_SIZE, width: 120, height: 20 },
+            { x: 800, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 1900, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 2200, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 3500, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
@@ -250,10 +250,8 @@
             player.vy += player.gravity;
             player.y += player.vy;
 
-            // Colisão com plataformas (inclui chão)
+            // Colisão com plataformas
             player.onGround = false;
-            let colidiuComChao = false;
-            
             for (let plat of platforms) {
                 if (player.x + player.w > plat.x && player.x < plat.x + plat.width) {
                     if (player.vy >= 0 &&
@@ -262,16 +260,12 @@
                         player.y = plat.y - player.h;
                         player.vy = 0;
                         player.onGround = true;
-                        if (plat.y === chaoY) {
-                            colidiuComChao = true;
-                        }
                     }
                 }
             }
 
-            // Verifica se caiu em um buraco (somente se não estiver no chão)
+            // Verifica se caiu em um buraco
             if (!player.onGround && player.y > chaoY + 30) {
-                // Verifica se está sobre algum buraco
                 let caiuNoBuraco = false;
                 for (let buraco of BURACOS) {
                     if (player.x + player.w > buraco.inicio && player.x < buraco.fim) {
@@ -296,6 +290,7 @@
             checkCollisions();
             checkFlag();
 
+            // Câmera
             cameraX = player.x - W / 2;
             cameraX = Math.max(0, Math.min(cameraX, WORLD_WIDTH - W));
 
@@ -350,7 +345,7 @@
             const fy = flag.y;
             ctx.fillStyle = '#888';
             ctx.fillRect(fx + 4, fy, 3, flag.h);
-            
+
             if (flag.ativada) {
                 ctx.fillStyle = '#2ecc71';
             } else {
@@ -484,24 +479,23 @@
             platforms[3].y = H - newChaoAltura;
             platforms[3].height = newChaoAltura;
 
-            // Atualiza plataformas elevadas
+            // Atualiza plataformas elevadas (agora com as alturas corretas)
             const alturasRelativas = [
                 -80 - newPlayerSize,
-                -160 - newPlayerSize,
+                -100 - newPlayerSize,
                 -80 - newPlayerSize,
                 -160 - newPlayerSize,
                 -80 - newPlayerSize,
                 -160 - newPlayerSize,
                 -80 - newPlayerSize
             ];
-            
+
             for (let i = 0; i < 7; i++) {
                 platforms[4 + i].y = H - newChaoAltura + alturasRelativas[i];
                 platforms[4 + i].height = 20;
             }
 
-            const oldPlayerSize = player.w;
-            const scale = newPlayerSize / oldPlayerSize;
+            // Atualiza jogador
             player.w = newPlayerSize;
             player.h = newPlayerSize;
             player.y = platforms[0].y - player.h;
@@ -510,11 +504,13 @@
                 player.y = platforms[0].y - player.h;
             }
 
+            // Atualiza mobs
             for (let mob of mobs) {
                 mob.radius = newMobRadius;
                 mob.y = platforms[0].y - mob.radius;
             }
 
+            // Atualiza bandeira
             flag.y = platforms[0].y - 60;
             flag.h = 60;
         }
