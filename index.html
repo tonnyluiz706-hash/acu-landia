@@ -47,12 +47,13 @@
         let nivelConcluido = false;
         let mostrarTitulo = true;
         let contadorTitulo = 0;
+        let isResizing = false;
 
         // ============================================
         // BACKGROUND (IMAGEM + FALLBACK)
         // ============================================
         const bgImage = new Image();
-        bgImage.src = 'Bacground.jpg'; // Nome com B maiúsculo
+        bgImage.src = 'Bacground.jpg';
 
         function drawBackground() {
             if (bgImage.complete && bgImage.naturalWidth !== 0) {
@@ -80,6 +81,39 @@
             { inicio: 2800, fim: 3000 },
             { inicio: 4500, fim: 4700 }
         ];
+
+        function estaSobreBuraco(x) {
+            for (let buraco of BURACOS) {
+                if (x + PLAYER_SIZE > buraco.inicio && x < buraco.fim) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Ajusta a posição do jogador para não ficar sobre um buraco
+        function ajustarPosicaoBuraco() {
+            if (estaSobreBuraco(player.x)) {
+                // Encontra o buraco mais próximo e reposiciona para a borda
+                let menorDistancia = Infinity;
+                let novaX = player.x;
+                for (let buraco of BURACOS) {
+                    if (player.x + player.w > buraco.inicio && player.x < buraco.fim) {
+                        const distEsquerda = player.x - buraco.inicio;
+                        const distDireita = buraco.fim - (player.x + player.w);
+                        if (distEsquerda < menorDistancia) {
+                            menorDistancia = distEsquerda;
+                            novaX = buraco.inicio - player.w;
+                        }
+                        if (distDireita < menorDistancia) {
+                            menorDistancia = distDireita;
+                            novaX = buraco.fim;
+                        }
+                    }
+                }
+                player.x = Math.max(0, Math.min(novaX, WORLD_WIDTH - player.w));
+            }
+        }
 
         const platforms = [
             { x: 0, y: chaoY, width: BURACOS[0].inicio, height: CHAO_ALTURA },
@@ -115,57 +149,17 @@
         };
 
         // ============================================
-        // MOBS (INIMIGOS)
+        // MOBS
         // ============================================
         const mobs = [
-            {
-                x: 900,
-                y: chaoY - MOB_RADIUS,
-                radius: MOB_RADIUS,
-                speed: 2.0,
-                minX: 700,
-                maxX: 1200,
-                direction: 1,
-                color: '#f1c40f',
-                stroke: '#d4ac0d'
-            },
-            {
-                x: 2000,
-                y: chaoY - MOB_RADIUS,
-                radius: MOB_RADIUS,
-                speed: 2.8,
-                minX: 1800,
-                maxX: 2300,
-                direction: 1,
-                color: '#2ecc71',
-                stroke: '#27ae60'
-            },
-            {
-                x: 3300,
-                y: chaoY - MOB_RADIUS,
-                radius: MOB_RADIUS,
-                speed: 3.2,
-                minX: 3100,
-                maxX: 3600,
-                direction: 1,
-                color: '#9b59b6',
-                stroke: '#8e44ad'
-            },
-            {
-                x: 5000,
-                y: chaoY - MOB_RADIUS,
-                radius: MOB_RADIUS,
-                speed: 3.5,
-                minX: 4800,
-                maxX: 5300,
-                direction: 1,
-                color: '#e67e22',
-                stroke: '#d35400'
-            }
+            { x: 900, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.0, minX: 700, maxX: 1200, direction: 1, color: '#f1c40f', stroke: '#d4ac0d' },
+            { x: 2000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.8, minX: 1800, maxX: 2300, direction: 1, color: '#2ecc71', stroke: '#27ae60' },
+            { x: 3300, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.2, minX: 3100, maxX: 3600, direction: 1, color: '#9b59b6', stroke: '#8e44ad' },
+            { x: 5000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.5, minX: 4800, maxX: 5300, direction: 1, color: '#e67e22', stroke: '#d35400' }
         ];
 
         // ============================================
-        // BANDEIRA (CHECKPOINT)
+        // BANDEIRA
         // ============================================
         const flag = {
             x: 5700,
@@ -223,8 +217,9 @@
         // ATUALIZAÇÃO DO JOGO
         // ============================================
         function update() {
-            if (nivelConcluido) return;
+            if (nivelConcluido || isResizing) return;
 
+            // Movimento horizontal
             if (keys.a) player.vx = -player.speed;
             else if (keys.d) player.vx = player.speed;
             else player.vx = 0;
@@ -233,6 +228,7 @@
             if (player.x < 0) player.x = 0;
             if (player.x + player.w > WORLD_WIDTH) player.x = WORLD_WIDTH - player.w;
 
+            // Pulo e gravidade
             if (keys.w && player.onGround) {
                 player.vy = player.jumpPower;
                 player.onGround = false;
@@ -241,6 +237,7 @@
             player.vy += player.gravity;
             player.y += player.vy;
 
+            // Colisão com plataformas
             player.onGround = false;
             for (let plat of platforms) {
                 if (player.x + player.w > plat.x && player.x < plat.x + plat.width) {
@@ -254,7 +251,8 @@
                 }
             }
 
-            if (!player.onGround && player.y > chaoY + 30) {
+            // Verifica se caiu em um buraco (só se estiver caindo e abaixo do chão)
+            if (!player.onGround && player.vy > 0 && player.y > chaoY + 30) {
                 let caiuNoBuraco = false;
                 for (let buraco of BURACOS) {
                     if (player.x + player.w > buraco.inicio && player.x < buraco.fim) {
@@ -268,6 +266,7 @@
                 }
             }
 
+            // Movimentação dos mobs
             for (let mob of mobs) {
                 mob.x += mob.speed * mob.direction;
                 if (mob.x > mob.maxX || mob.x < mob.minX) {
@@ -440,6 +439,8 @@
         // REDIMENSIONAMENTO DA TELA
         // ============================================
         function resize() {
+            isResizing = true;
+
             W = window.innerWidth;
             H = window.innerHeight;
             canvas.width = W;
@@ -449,6 +450,7 @@
             const newPlayerSize = Math.min(W, H) * 0.045;
             const newMobRadius = Math.min(W, H) * 0.025;
 
+            // Atualiza chão
             platforms[0].y = H - newChaoAltura;
             platforms[0].height = newChaoAltura;
             platforms[1].y = H - newChaoAltura;
@@ -458,6 +460,7 @@
             platforms[3].y = H - newChaoAltura;
             platforms[3].height = newChaoAltura;
 
+            // Atualiza plataformas elevadas
             const alturasRelativas = [
                 -80 - newPlayerSize,
                 -100 - newPlayerSize,
@@ -473,6 +476,7 @@
                 platforms[4 + i].height = 20;
             }
 
+            // Atualiza jogador
             const oldPlayerSize = player.w;
             const scale = newPlayerSize / oldPlayerSize;
             player.w = newPlayerSize;
@@ -483,13 +487,28 @@
                 player.y = platforms[0].y - player.h;
             }
 
+            // Ajusta a posição do jogador para não cair em buraco
+            ajustarPosicaoBuraco();
+
+            // Atualiza mobs
             for (let mob of mobs) {
                 mob.radius = newMobRadius;
                 mob.y = platforms[0].y - mob.radius;
             }
 
+            // Atualiza bandeira
             flag.y = platforms[0].y - 60;
             flag.h = 60;
+
+            // Atualiza o chaoY e outras variáveis globais
+            // (Elas já foram recalculadas no início)
+            // Mas precisamos atualizar as referências nos objetos que usam chaoY
+            // Como os mobs e a bandeira já foram atualizados, está ok.
+
+            // Pequeno delay para garantir que o redimensionamento terminou
+            setTimeout(() => {
+                isResizing = false;
+            }, 50);
         }
 
         window.addEventListener('resize', resize);
