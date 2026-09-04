@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>Acuílandnia</title>
+    <title>Acuílandnia - Nível 1</title>
     <style>
         * {
             margin: 0;
@@ -48,6 +48,7 @@
         let mostrarTitulo = true;
         let contadorTitulo = 0;
         let isResizing = false;
+        let gameOver = false;
 
         // ============================================
         // BACKGROUND (IMAGEM + FALLBACK)
@@ -91,10 +92,8 @@
             return false;
         }
 
-        // Ajusta a posição do jogador para não ficar sobre um buraco
         function ajustarPosicaoBuraco() {
             if (estaSobreBuraco(player.x)) {
-                // Encontra o buraco mais próximo e reposiciona para a borda
                 let menorDistancia = Infinity;
                 let novaX = player.x;
                 for (let buraco of BURACOS) {
@@ -179,6 +178,10 @@
         // FUNÇÕES DE COLISÃO E RESPAWN
         // ============================================
         function resetPlayer() {
+            if (vidas <= 0) {
+                gameOver = true;
+                return;
+            }
             player.x = player.spawnX;
             player.y = player.spawnY;
             player.vx = 0;
@@ -214,10 +217,40 @@
         }
 
         // ============================================
+        // REINICIAR JOGO COMPLETO
+        // ============================================
+        function restartGame() {
+            gameOver = false;
+            nivelConcluido = false;
+            vidas = 5;
+            flag.ativada = false;
+            player.x = player.spawnX;
+            player.y = player.spawnY;
+            player.vx = 0;
+            player.vy = 0;
+            player.onGround = false;
+            mostrarTitulo = true;
+            contadorTitulo = 0;
+            // Reseta posição dos mobs para os valores iniciais (opcional)
+            // Como os mobs se movem, podemos redefinir suas posições.
+            mobs[0].x = 900;
+            mobs[1].x = 2000;
+            mobs[2].x = 3300;
+            mobs[3].x = 5000;
+            // Direção também pode ser resetada
+            for (let mob of mobs) {
+                mob.direction = 1;
+            }
+            // Atualiza câmera
+            cameraX = player.x - W / 2;
+            cameraX = Math.max(0, Math.min(cameraX, WORLD_WIDTH - W));
+        }
+
+        // ============================================
         // ATUALIZAÇÃO DO JOGO
         // ============================================
         function update() {
-            if (nivelConcluido || isResizing) return;
+            if (nivelConcluido || isResizing || gameOver) return;
 
             // Movimento horizontal
             if (keys.a) player.vx = -player.speed;
@@ -295,6 +328,7 @@
             ctx.clearRect(0, 0, W, H);
             drawBackground();
 
+            // Plataformas
             for (let plat of platforms) {
                 const sx = plat.x - cameraX;
                 const sy = plat.y;
@@ -315,6 +349,7 @@
                 }
             }
 
+            // Marcadores de buraco
             for (let buraco of BURACOS) {
                 const bx = buraco.inicio - cameraX;
                 ctx.fillStyle = 'rgba(255,0,0,0.15)';
@@ -324,6 +359,7 @@
                 ctx.fillText('💀', bx + 10, chaoY - 10);
             }
 
+            // Bandeira
             const fx = flag.x - cameraX;
             const fy = flag.y;
             ctx.fillStyle = '#888';
@@ -347,6 +383,7 @@
             ctx.lineWidth = 1;
             ctx.stroke();
 
+            // Mobs
             for (let mob of mobs) {
                 const mx = mob.x - cameraX;
                 const my = mob.y;
@@ -362,44 +399,52 @@
                 ctx.stroke();
             }
 
-            const px = player.x - cameraX;
-            const py = player.y;
-            ctx.shadowColor = 'rgba(0,0,0,0.3)';
-            ctx.shadowBlur = 12;
-            ctx.fillStyle = '#e74c3c';
-            ctx.fillRect(px, py, player.w, player.h);
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = '#c0392b';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(px, py, player.w, player.h);
+            // Jogador (só desenha se não estiver em game over)
+            if (!gameOver) {
+                const px = player.x - cameraX;
+                const py = player.y;
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 12;
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillRect(px, py, player.w, player.h);
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#c0392b';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(px, py, player.w, player.h);
 
-            const eyeSize = player.w * 0.2;
-            const eyeOffset = player.w * 0.2;
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(px + eyeOffset, py + eyeOffset, eyeSize, eyeSize);
-            ctx.fillRect(px + player.w - eyeOffset - eyeSize, py + eyeOffset, eyeSize, eyeSize);
-            ctx.fillStyle = '#2c3e50';
-            const pupil = eyeSize * 0.4;
-            ctx.fillRect(px + eyeOffset + pupil * 0.5, py + eyeOffset + pupil * 0.5, pupil, pupil);
-            ctx.fillRect(px + player.w - eyeOffset - eyeSize + pupil * 0.5, py + eyeOffset + pupil * 0.5, pupil, pupil);
+                const eyeSize = player.w * 0.2;
+                const eyeOffset = player.w * 0.2;
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(px + eyeOffset, py + eyeOffset, eyeSize, eyeSize);
+                ctx.fillRect(px + player.w - eyeOffset - eyeSize, py + eyeOffset, eyeSize, eyeSize);
+                ctx.fillStyle = '#2c3e50';
+                const pupil = eyeSize * 0.4;
+                ctx.fillRect(px + eyeOffset + pupil * 0.5, py + eyeOffset + pupil * 0.5, pupil, pupil);
+                ctx.fillRect(px + player.w - eyeOffset - eyeSize + pupil * 0.5, py + eyeOffset + pupil * 0.5, pupil, pupil);
+            }
 
-            ctx.fillStyle = 'rgba(255,255,255,0.8)';
-            ctx.font = '20px monospace';
-            ctx.shadowColor = 'rgba(0,0,0,0.8)';
-            ctx.shadowBlur = 8;
-            ctx.fillText('❤️ ' + vidas, 20, 40);
-            ctx.shadowBlur = 0;
+            // UI: vidas (só mostra se não estiver em game over)
+            if (!gameOver) {
+                ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                ctx.font = '20px monospace';
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.shadowBlur = 8;
+                ctx.fillText('❤️ ' + vidas, 20, 40);
+                ctx.shadowBlur = 0;
 
-            const progresso = Math.min(1, player.x / WORLD_WIDTH);
-            ctx.fillStyle = 'rgba(255,255,255,0.3)';
-            ctx.fillRect(W/2 - 100, 20, 200, 8);
-            ctx.fillStyle = 'rgba(46, 204, 113, 0.6)';
-            ctx.fillRect(W/2 - 100, 20, 200 * progresso, 8);
-            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(W/2 - 100, 20, 200, 8);
+                // Barra de progresso
+                const progresso = Math.min(1, player.x / WORLD_WIDTH);
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.fillRect(W/2 - 100, 20, 200, 8);
+                ctx.fillStyle = 'rgba(46, 204, 113, 0.6)';
+                ctx.fillRect(W/2 - 100, 20, 200 * progresso, 8);
+                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(W/2 - 100, 20, 200, 8);
+            }
 
-            if (mostrarTitulo) {
+            // Título "NÍVEL 1"
+            if (mostrarTitulo && !gameOver) {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = 'rgba(255,255,255,0.5)';
@@ -412,6 +457,7 @@
                 ctx.textBaseline = 'alphabetic';
             }
 
+            // Nível concluído
             if (nivelConcluido) {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -421,6 +467,28 @@
                 ctx.shadowBlur = 20;
                 ctx.fillText('🏆 NÍVEL CONCLUÍDO! 🏆', W/2, H/2);
                 ctx.shadowBlur = 0;
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'alphabetic';
+            }
+
+            // GAME OVER
+            if (gameOver) {
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                // Fundo escuro semi-transparente
+                ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                ctx.fillRect(0, 0, W, H);
+
+                ctx.fillStyle = '#ff0000';
+                ctx.font = 'bold 90px monospace';
+                ctx.shadowColor = '#ff0000';
+                ctx.shadowBlur = 40;
+                ctx.fillText('PERDEU OTÁRIO', W/2, H/2 - 30);
+                ctx.shadowBlur = 0;
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '24px monospace';
+                ctx.fillText('Pressione R para reiniciar', W/2, H/2 + 70);
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'alphabetic';
             }
@@ -450,7 +518,6 @@
             const newPlayerSize = Math.min(W, H) * 0.045;
             const newMobRadius = Math.min(W, H) * 0.025;
 
-            // Atualiza chão
             platforms[0].y = H - newChaoAltura;
             platforms[0].height = newChaoAltura;
             platforms[1].y = H - newChaoAltura;
@@ -460,7 +527,6 @@
             platforms[3].y = H - newChaoAltura;
             platforms[3].height = newChaoAltura;
 
-            // Atualiza plataformas elevadas
             const alturasRelativas = [
                 -80 - newPlayerSize,
                 -100 - newPlayerSize,
@@ -476,7 +542,6 @@
                 platforms[4 + i].height = 20;
             }
 
-            // Atualiza jogador
             const oldPlayerSize = player.w;
             const scale = newPlayerSize / oldPlayerSize;
             player.w = newPlayerSize;
@@ -487,25 +552,16 @@
                 player.y = platforms[0].y - player.h;
             }
 
-            // Ajusta a posição do jogador para não cair em buraco
             ajustarPosicaoBuraco();
 
-            // Atualiza mobs
             for (let mob of mobs) {
                 mob.radius = newMobRadius;
                 mob.y = platforms[0].y - mob.radius;
             }
 
-            // Atualiza bandeira
             flag.y = platforms[0].y - 60;
             flag.h = 60;
 
-            // Atualiza o chaoY e outras variáveis globais
-            // (Elas já foram recalculadas no início)
-            // Mas precisamos atualizar as referências nos objetos que usam chaoY
-            // Como os mobs e a bandeira já foram atualizados, está ok.
-
-            // Pequeno delay para garantir que o redimensionamento terminou
             setTimeout(() => {
                 isResizing = false;
             }, 50);
@@ -521,6 +577,12 @@
             if (key === 'a' || key === 'd' || key === 'w') {
                 e.preventDefault();
                 keys[key] = true;
+            }
+            if (key === 'r') {
+                e.preventDefault();
+                if (gameOver) {
+                    restartGame();
+                }
             }
         });
         document.addEventListener('keyup', (e) => {
