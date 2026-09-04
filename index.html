@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>Acuílandnia - Nível 1</title>
+    <title>Acuílandnia</title>
     <style>
         * {
             margin: 0;
@@ -52,10 +52,9 @@
         // BACKGROUND (IMAGEM + FALLBACK)
         // ============================================
         const bgImage = new Image();
-        bgImage.src = 'bacground.jpg'; // Coloque a imagem na mesma pasta
+        bgImage.src = 'Bacground.jpg'; // Nome com B maiúsculo
 
         function drawBackground() {
-            // Se a imagem carregou, desenha ela; senão, usa gradiente
             if (bgImage.complete && bgImage.naturalWidth !== 0) {
                 ctx.drawImage(bgImage, 0, 0, W, H);
             } else {
@@ -76,22 +75,18 @@
         const PLAYER_SIZE = Math.min(W, H) * 0.045;
         const MOB_RADIUS = Math.min(W, H) * 0.025;
 
-        // Buracos no chão
         const BURACOS = [
             { inicio: 1400, fim: 1600 },
             { inicio: 2800, fim: 3000 },
             { inicio: 4500, fim: 4700 }
         ];
 
-        // Plataformas (chão + elevadas)
         const platforms = [
-            // Chão: dividido pelos buracos
             { x: 0, y: chaoY, width: BURACOS[0].inicio, height: CHAO_ALTURA },
             { x: BURACOS[0].fim, y: chaoY, width: BURACOS[1].inicio - BURACOS[0].fim, height: CHAO_ALTURA },
             { x: BURACOS[1].fim, y: chaoY, width: BURACOS[2].inicio - BURACOS[1].fim, height: CHAO_ALTURA },
             { x: BURACOS[2].fim, y: chaoY, width: WORLD_WIDTH - BURACOS[2].fim, height: CHAO_ALTURA },
             
-            // Plataformas elevadas (em escada)
             { x: 500, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 800, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 1900, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
@@ -230,7 +225,6 @@
         function update() {
             if (nivelConcluido) return;
 
-            // Movimento horizontal
             if (keys.a) player.vx = -player.speed;
             else if (keys.d) player.vx = player.speed;
             else player.vx = 0;
@@ -239,7 +233,6 @@
             if (player.x < 0) player.x = 0;
             if (player.x + player.w > WORLD_WIDTH) player.x = WORLD_WIDTH - player.w;
 
-            // Pulo e gravidade
             if (keys.w && player.onGround) {
                 player.vy = player.jumpPower;
                 player.onGround = false;
@@ -248,9 +241,7 @@
             player.vy += player.gravity;
             player.y += player.vy;
 
-            // Colisão com plataformas (inclui chão)
             player.onGround = false;
-            
             for (let plat of platforms) {
                 if (player.x + player.w > plat.x && player.x < plat.x + plat.width) {
                     if (player.vy >= 0 &&
@@ -263,7 +254,6 @@
                 }
             }
 
-            // Verifica se caiu em um buraco (somente se não estiver no chão)
             if (!player.onGround && player.y > chaoY + 30) {
                 let caiuNoBuraco = false;
                 for (let buraco of BURACOS) {
@@ -278,7 +268,6 @@
                 }
             }
 
-            // Movimentação dos mobs
             for (let mob of mobs) {
                 mob.x += mob.speed * mob.direction;
                 if (mob.x > mob.maxX || mob.x < mob.minX) {
@@ -307,7 +296,6 @@
             ctx.clearRect(0, 0, W, H);
             drawBackground();
 
-            // Plataformas
             for (let plat of platforms) {
                 const sx = plat.x - cameraX;
                 const sy = plat.y;
@@ -328,7 +316,6 @@
                 }
             }
 
-            // Marcadores de buraco
             for (let buraco of BURACOS) {
                 const bx = buraco.inicio - cameraX;
                 ctx.fillStyle = 'rgba(255,0,0,0.15)';
@@ -338,7 +325,6 @@
                 ctx.fillText('💀', bx + 10, chaoY - 10);
             }
 
-            // Bandeira
             const fx = flag.x - cameraX;
             const fy = flag.y;
             ctx.fillStyle = '#888';
@@ -362,7 +348,6 @@
             ctx.lineWidth = 1;
             ctx.stroke();
 
-            // Mobs
             for (let mob of mobs) {
                 const mx = mob.x - cameraX;
                 const my = mob.y;
@@ -378,7 +363,6 @@
                 ctx.stroke();
             }
 
-            // Jogador
             const px = player.x - cameraX;
             const py = player.y;
             ctx.shadowColor = 'rgba(0,0,0,0.3)';
@@ -400,7 +384,6 @@
             ctx.fillRect(px + eyeOffset + pupil * 0.5, py + eyeOffset + pupil * 0.5, pupil, pupil);
             ctx.fillRect(px + player.w - eyeOffset - eyeSize + pupil * 0.5, py + eyeOffset + pupil * 0.5, pupil, pupil);
 
-            // UI
             ctx.fillStyle = 'rgba(255,255,255,0.8)';
             ctx.font = '20px monospace';
             ctx.shadowColor = 'rgba(0,0,0,0.8)';
@@ -408,7 +391,6 @@
             ctx.fillText('❤️ ' + vidas, 20, 40);
             ctx.shadowBlur = 0;
 
-            // Barra de progresso
             const progresso = Math.min(1, player.x / WORLD_WIDTH);
             ctx.fillStyle = 'rgba(255,255,255,0.3)';
             ctx.fillRect(W/2 - 100, 20, 200, 8);
@@ -467,7 +449,6 @@
             const newPlayerSize = Math.min(W, H) * 0.045;
             const newMobRadius = Math.min(W, H) * 0.025;
 
-            // Atualiza chão
             platforms[0].y = H - newChaoAltura;
             platforms[0].height = newChaoAltura;
             platforms[1].y = H - newChaoAltura;
@@ -477,10 +458,9 @@
             platforms[3].y = H - newChaoAltura;
             platforms[3].height = newChaoAltura;
 
-            // Atualiza plataformas elevadas com as alturas corretas
             const alturasRelativas = [
                 -80 - newPlayerSize,
-                -100 - newPlayerSize, // <-- corrigido para -100
+                -100 - newPlayerSize,
                 -80 - newPlayerSize,
                 -160 - newPlayerSize,
                 -80 - newPlayerSize,
@@ -493,7 +473,6 @@
                 platforms[4 + i].height = 20;
             }
 
-            // Atualiza jogador
             const oldPlayerSize = player.w;
             const scale = newPlayerSize / oldPlayerSize;
             player.w = newPlayerSize;
@@ -504,13 +483,11 @@
                 player.y = platforms[0].y - player.h;
             }
 
-            // Atualiza mobs
             for (let mob of mobs) {
                 mob.radius = newMobRadius;
                 mob.y = platforms[0].y - mob.radius;
             }
 
-            // Atualiza bandeira
             flag.y = platforms[0].y - 60;
             flag.h = 60;
         }
