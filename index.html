@@ -43,7 +43,7 @@
         canvas.width = W;
         canvas.height = H;
 
-        const WORLD_WIDTH = 50000; // 5x maior
+        const WORLD_WIDTH = 50000;
         let vidas = 5;
         let nivelAtual = 1;
         let nivelConcluido = false;
@@ -98,7 +98,6 @@
         const PLAYER_SIZE = Math.min(W, H) * 0.045;
         const MOB_RADIUS = Math.min(W, H) * 0.025;
 
-        // Buracos (Nível 1, 2 e 3)
         const BURACOS_NIVEL1 = [
             { inicio: 1400, fim: 1600 },
             { inicio: 2800, fim: 3000 },
@@ -183,7 +182,7 @@
         // PLATAFORMAS (Níveis 1, 2 e 3)
         // ============================================
         const platforms = [
-            // Chão (Nível 1 e 2) - os mesmos de antes
+            // Chão (Nível 1 e 2)
             { x: 0, y: chaoY, width: BURACOS_NIVEL1[0].inicio, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL1[0].fim, y: chaoY, width: BURACOS_NIVEL1[1].inicio - BURACOS_NIVEL1[0].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL1[1].fim, y: chaoY, width: BURACOS_NIVEL1[2].inicio - BURACOS_NIVEL1[1].fim, height: CHAO_ALTURA },
@@ -191,7 +190,7 @@
             { x: BURACOS_NIVEL2[0].fim, y: chaoY, width: BURACOS_NIVEL2[1].inicio - BURACOS_NIVEL2[0].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL2[1].fim, y: chaoY, width: BURACOS_NIVEL2[2].inicio - BURACOS_NIVEL2[1].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL2[2].fim, y: chaoY, width: BURACOS_NIVEL3[0].inicio - BURACOS_NIVEL2[2].fim, height: CHAO_ALTURA },
-            // Chão (Nível 3) - dividido pelos buracos do nível 3
+            // Chão (Nível 3)
             { x: BURACOS_NIVEL3[0].fim, y: chaoY, width: BURACOS_NIVEL3[1].inicio - BURACOS_NIVEL3[0].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL3[1].fim, y: chaoY, width: BURACOS_NIVEL3[2].inicio - BURACOS_NIVEL3[1].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL3[2].fim, y: chaoY, width: BURACOS_NIVEL3[3].inicio - BURACOS_NIVEL3[2].fim, height: CHAO_ALTURA },
@@ -202,7 +201,7 @@
             { x: BURACOS_NIVEL3[7].fim, y: chaoY, width: BURACOS_NIVEL3[8].inicio - BURACOS_NIVEL3[7].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL3[8].fim, y: chaoY, width: BURACOS_NIVEL3[9].inicio - BURACOS_NIVEL3[8].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL3[9].fim, y: chaoY, width: WORLD_WIDTH - BURACOS_NIVEL3[9].fim, height: CHAO_ALTURA },
-            // Plataformas elevadas (Nível 1 e 2) - as mesmas de antes
+            // Plataformas elevadas (Nível 1 e 2)
             { x: 500, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 800, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 1900, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
@@ -216,7 +215,7 @@
             { x: 7300, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 7800, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 8100, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
-            // Plataformas elevadas (Nível 3) - para pular sobre espinhos e buracos
+            // Plataformas elevadas (Nível 3)
             { x: 10200, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 10700, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 11200, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
@@ -318,16 +317,22 @@
         ];
 
         // ============================================
-        // BANDEIRA E SÁBIO
+        // CHECKPOINTS (novos)
         // ============================================
-        const flag = {
-            x: 5700,
-            y: chaoY - 60,
-            w: 10,
-            h: 60,
-            ativada: false
-        };
+        const checkpoints = [
+            // Bandeira original (também ativa o sábio)
+            { x: 5700, y: chaoY - 60, w: 10, h: 60, ativado: false, tipo: 'bandeira' },
+            // Final do Nível 2
+            { x: 9300, y: chaoY - 30, w: 30, h: 30, ativado: false, tipo: 'normal' },
+            // Meio do Nível 3
+            { x: 25000, y: chaoY - 30, w: 30, h: 30, ativado: false, tipo: 'normal' },
+            // Final do Nível 3
+            { x: 47000, y: chaoY - 30, w: 30, h: 30, ativado: false, tipo: 'normal' }
+        ];
 
+        // ============================================
+        // SÁBIO
+        // ============================================
         const sabio = {
             x: 5950,
             y: chaoY - 50,
@@ -361,7 +366,14 @@
                 gameOver = true;
                 return;
             }
-            if (flag.ativada) {
+            // Usa o último checkpoint ativado (o mais recente)
+            let checkpointEncontrado = null;
+            for (let cp of checkpoints) {
+                if (cp.ativado) {
+                    checkpointEncontrado = cp;
+                }
+            }
+            if (checkpointEncontrado) {
                 player.x = checkpointX;
                 player.y = checkpointY;
             } else {
@@ -402,15 +414,35 @@
             }
         }
 
+        function checkCheckpoints() {
+            for (let cp of checkpoints) {
+                if (cp.ativado) continue;
+                if (player.x + player.w > cp.x && player.x < cp.x + cp.w &&
+                    player.y + player.h > cp.y && player.y < cp.y + cp.h) {
+                    cp.ativado = true;
+                    checkpointX = player.x;
+                    checkpointY = player.y;
+                    // Se for a bandeira, ativa a bandeira também (para manter compatibilidade)
+                    if (cp.tipo === 'bandeira') {
+                        // A bandeira já é ativada pela função checkFlag, mas mantemos
+                    }
+                }
+            }
+        }
+
+        // ============================================
+        // BANDEIRA (antiga) - agora integrada aos checkpoints
+        // ============================================
         function checkFlag() {
-            if (player.x + player.w > flag.x && 
-                player.x < flag.x + flag.w &&
-                player.y + player.h > flag.y && 
-                player.y < flag.y + flag.h) {
-                if (!flag.ativada) {
-                    flag.ativada = true;
-                    checkpointX = flag.x - player.w/2;
-                    checkpointY = chaoY - player.h;
+            const bandeira = checkpoints[0]; // primeiro checkpoint é a bandeira
+            if (!bandeira.ativado) {
+                if (player.x + player.w > bandeira.x && 
+                    player.x < bandeira.x + bandeira.w &&
+                    player.y + player.h > bandeira.y && 
+                    player.y < bandeira.y + bandeira.h) {
+                    bandeira.ativado = true;
+                    checkpointX = player.x;
+                    checkpointY = player.y;
                 }
             }
         }
@@ -420,7 +452,7 @@
         // ============================================
         function iniciarConversa() {
             if (sabio.conversaTerminada) return;
-            if (!flag.ativada) return;
+            if (!checkpoints[0].ativado) return;
             if (sabio.conversaAtiva) return;
             sabio.conversaAtiva = true;
             sabio.falaIndex = 0;
@@ -477,8 +509,6 @@
                         mob.morto = true;
                     } else {
                         const forca = 20;
-                        // Para voadores, o knockback é na direção do jogador (padrão)
-                        // Mas mantemos a direção oposta ao movimento para terrestres
                         if (mob.tipo === 'voador') {
                             const angulo = Math.atan2(dy, dx);
                             mob.knockbackX = Math.cos(angulo) * forca;
@@ -502,7 +532,6 @@
             nivelConcluido = false;
             nivelAtual = 1;
             vidas = 5;
-            flag.ativada = false;
             temEspada = false;
             atacando = false;
             sabio.conversaAtiva = false;
@@ -518,6 +547,11 @@
             contadorTitulo = 0;
             contadorTituloNivel2 = 0;
             contadorTituloNivel3 = 0;
+
+            // Resetar checkpoints
+            for (let cp of checkpoints) {
+                cp.ativado = false;
+            }
 
             player.x = player.spawnX;
             player.y = player.spawnY;
@@ -614,7 +648,6 @@
             for (let mob of mobs) {
                 if (mob.morto) continue;
 
-                // Knockback
                 if (mob.knockbackX !== 0 || mob.knockbackY !== 0) {
                     mob.x += mob.knockbackX;
                     mob.y += mob.knockbackY;
@@ -644,21 +677,17 @@
                     continue;
                 }
 
-                // Movimento padrão
                 if (mob.tipo === 'voador') {
-                    // Movimento horizontal
                     mob.x += mob.speed * mob.direction;
                     if (mob.x > mob.maxX || mob.x < mob.minX) {
                         mob.direction *= -1;
                         if (mob.x < mob.minX) mob.x = mob.minX;
                         if (mob.x > mob.maxX) mob.x = mob.maxX;
                     }
-                    // Movimento vertical (senoidal)
                     mob.fase += 0.03;
                     const oscilacao = Math.sin(mob.fase) * mob.amplitude;
-                    mob.y = (chaoY - 100) + oscilacao; // Altura base
+                    mob.y = (chaoY - 100) + oscilacao;
                 } else {
-                    // Terrestre
                     mob.x += mob.speed * mob.direction;
                     if (mob.x > mob.maxX || mob.x < mob.minX) {
                         mob.direction *= -1;
@@ -678,14 +707,15 @@
 
             checkCollisions();
             checkEspinhos();
-            checkFlag();
+            checkFlag(); // bandeira original
+            checkCheckpoints(); // novos checkpoints
 
             // Interação com o sábio
             const dxSabio = (player.x + player.w/2) - (sabio.x + sabio.largura/2);
             const dySabio = (player.y + player.h/2) - (sabio.y + sabio.altura/2);
             const distSabio = Math.sqrt(dxSabio*dxSabio + dySabio*dySabio);
 
-            if (distSabio < 120 && flag.ativada && !sabio.conversaTerminada) {
+            if (distSabio < 120 && checkpoints[0].ativado && !sabio.conversaTerminada) {
                 if (!sabio.conversaAtiva) {
                     iniciarConversa();
                 }
@@ -796,30 +826,56 @@
             }
 
             // ============================================
-            // BANDEIRA
+            // CHECKPOINTS (incluindo a bandeira)
             // ============================================
-            const fx = flag.x - cameraX;
-            const fy = flag.y;
-            ctx.fillStyle = '#888';
-            ctx.fillRect(fx + 4, fy, 3, flag.h);
-            
-            if (flag.ativada) {
-                ctx.fillStyle = '#2ecc71';
-            } else {
-                ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            for (let cp of checkpoints) {
+                const cx = cp.x - cameraX;
+                const cy = cp.y;
+                if (cp.tipo === 'bandeira') {
+                    // Desenha a bandeira (mastro + tecido)
+                    ctx.fillStyle = '#888';
+                    ctx.fillRect(cx + 4, cy, 3, cp.h);
+                    ctx.fillStyle = cp.ativado ? '#2ecc71' : 'rgba(255,255,255,0.9)';
+                    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                    ctx.shadowBlur = 8;
+                    ctx.beginPath();
+                    ctx.moveTo(cx + 7, cy + 5);
+                    ctx.lineTo(cx + 30, cy + 15);
+                    ctx.lineTo(cx + 7, cy + 30);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.strokeStyle = '#666';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                } else {
+                    // Checkpoints normais (estrela ou bandeirinha simples)
+                    const tamanho = cp.w / 2;
+                    ctx.fillStyle = cp.ativado ? '#2ecc71' : 'rgba(255,255,255,0.7)';
+                    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                    ctx.shadowBlur = 10;
+                    // Desenha uma estrela simples de 4 pontas
+                    ctx.beginPath();
+                    ctx.moveTo(cx + cp.w/2, cy);
+                    ctx.lineTo(cx + cp.w, cy + cp.h/2);
+                    ctx.lineTo(cx + cp.w/2, cy + cp.h);
+                    ctx.lineTo(cx, cy + cp.h/2);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.strokeStyle = '#555';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    // Ícone de "salvar" dentro
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '12px "Pixelify Sans", monospace';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('💾', cx + cp.w/2, cy + cp.h/2);
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'alphabetic';
+                }
             }
-            ctx.shadowColor = 'rgba(0,0,0,0.3)';
-            ctx.shadowBlur = 8;
-            ctx.beginPath();
-            ctx.moveTo(fx + 7, fy + 5);
-            ctx.lineTo(fx + 30, fy + 15);
-            ctx.lineTo(fx + 7, fy + 30);
-            ctx.closePath();
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = '#666';
-            ctx.lineWidth = 1;
-            ctx.stroke();
 
             // ============================================
             // SÁBIO
@@ -919,7 +975,6 @@
                 ctx.fillStyle = 'rgba(0,255,0,0.7)';
                 const lifePercent = mob.hp / 2;
                 ctx.fillRect(mx - mob.radius, my - mob.radius - 10, mob.radius * 2 * lifePercent, 4);
-                // Indicador de voador (asas)
                 if (mob.tipo === 'voador') {
                     ctx.fillStyle = 'rgba(255,255,255,0.3)';
                     ctx.beginPath();
@@ -1136,7 +1191,6 @@
                 }
             }
 
-            // Atualiza as plataformas elevadas (índices a partir de 17)
             const alturasRelativas = [
                 -80 - newPlayerSize, -100 - newPlayerSize,
                 -80 - newPlayerSize, -160 - newPlayerSize,
@@ -1171,11 +1225,10 @@
                 -60 - newPlayerSize, -120 - newPlayerSize,
                 -60 - newPlayerSize, -120 - newPlayerSize,
                 -60 - newPlayerSize, -120 - newPlayerSize,
-                -60 - newPlayerSize, -120 - newPlayerSize,
                 -60 - newPlayerSize, -120 - newPlayerSize
             ];
             for (let i = 0; i < alturasRelativas.length; i++) {
-                const idx = 17 + i; // As primeiras 17 são chão e primeiras plataformas do nível 1 e 2
+                const idx = 17 + i;
                 if (idx < platforms.length) {
                     platforms[idx].y = H - newChaoAltura + alturasRelativas[i];
                     platforms[idx].height = 20;
@@ -1200,19 +1253,24 @@
             for (let mob of mobs) {
                 mob.radius = newMobRadius;
                 if (mob.tipo === 'voador') {
-                    mob.y = (chaoY - 100); // ajusta a posição base
+                    mob.y = (chaoY - 100);
                 } else {
                     mob.y = platforms[0].y - mob.radius;
                 }
             }
 
-            // Ajusta a posição dos espinhos (eles ficam no chão)
             for (let espinho of ESPINHOS) {
                 espinho.y = platforms[0].y - 20;
             }
 
-            flag.y = platforms[0].y - 60;
-            flag.h = 60;
+            // Atualiza os checkpoints com a nova posição do chão
+            for (let cp of checkpoints) {
+                if (cp.tipo === 'bandeira') {
+                    cp.y = platforms[0].y - 60;
+                } else {
+                    cp.y = platforms[0].y - 30;
+                }
+            }
 
             sabio.y = platforms[0].y - 50;
             sabio.largura = 40;
