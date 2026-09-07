@@ -87,10 +87,7 @@
         // ============================================
         const imgPlataforma = new Image();
         imgPlataforma.src = 'plataforma.png';
-        let padraoPlataforma = null;
-        imgPlataforma.onload = function() {
-            padraoPlataforma = ctx.createPattern(imgPlataforma, 'repeat');
-        };
+        // Removemos a criação do padrão para usar drawImage corretamente
 
         // ============================================
         // CHÃO, PLATAFORMAS E BURACOS
@@ -152,21 +149,21 @@
             { x: BURACOS_NIVEL2[0].fim, y: chaoY, width: BURACOS_NIVEL2[1].inicio - BURACOS_NIVEL2[0].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL2[1].fim, y: chaoY, width: BURACOS_NIVEL2[2].inicio - BURACOS_NIVEL2[1].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL2[2].fim, y: chaoY, width: WORLD_WIDTH - BURACOS_NIVEL2[2].fim, height: CHAO_ALTURA },
-            // Plataformas elevadas (altura fixa 20)
-            { x: 500, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 800, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 1900, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 2200, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 3500, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 3800, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 5000, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 6300, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 6600, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 7000, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 7300, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 7800, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 8100, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 8700, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 }
+            // Plataformas elevadas (altura fixa 20, mas escaláveis no resize)
+            { x: 500, y: chaoY - 80 - PLAYER_SIZE, width: Math.min(W, H) * 0.12, height: 20 },
+            { x: 800, y: chaoY - 100 - PLAYER_SIZE, width: Math.min(W, H) * 0.12, height: 20 },
+            { x: 1900, y: chaoY - 80 - PLAYER_SIZE, width: Math.min(W, H) * 0.12, height: 20 },
+            { x: 2200, y: chaoY - 160 - PLAYER_SIZE, width: Math.min(W, H) * 0.12, height: 20 },
+            { x: 3500, y: chaoY - 80 - PLAYER_SIZE, width: Math.min(W, H) * 0.12, height: 20 },
+            { x: 3800, y: chaoY - 160 - PLAYER_SIZE, width: Math.min(W, H) * 0.12, height: 20 },
+            { x: 5000, y: chaoY - 80 - PLAYER_SIZE, width: Math.min(W, H) * 0.12, height: 20 },
+            { x: 6300, y: chaoY - 80 - PLAYER_SIZE, width: Math.min(W, H) * 0.12, height: 20 },
+            { x: 6600, y: chaoY - 100 - PLAYER_SIZE, width: Math.min(W, H) * 0.12, height: 20 },
+            { x: 7000, y: chaoY - 80 - PLAYER_SIZE, width: Math.min(W, H) * 0.12, height: 20 },
+            { x: 7300, y: chaoY - 160 - PLAYER_SIZE, width: Math.min(W, H) * 0.12, height: 20 },
+            { x: 7800, y: chaoY - 80 - PLAYER_SIZE, width: Math.min(W, H) * 0.12, height: 20 },
+            { x: 8100, y: chaoY - 160 - PLAYER_SIZE, width: Math.min(W, H) * 0.12, height: 20 },
+            { x: 8700, y: chaoY - 80 - PLAYER_SIZE, width: Math.min(W, H) * 0.12, height: 20 }
         ];
 
         // ============================================
@@ -583,12 +580,11 @@
                     ctx.fillStyle = '#3b6e4a';
                     ctx.fillRect(sx, sy, largura, 4);
                 } else {
-                    // Plataformas elevadas: usam a imagem se disponível
-                    if (padraoPlataforma) {
-                        ctx.fillStyle = padraoPlataforma;
-                        ctx.fillRect(sx, sy, largura, altura);
+                    // CORREÇÃO DO BUG: Plataformas elevadas agora esticam a imagem
+                    if (imgPlataforma.complete && imgPlataforma.naturalWidth !== 0) {
+                        ctx.drawImage(imgPlataforma, sx, sy, largura, altura);
                     } else {
-                        // Fallback: roxo com sombra
+                        // Fallback: roxo com sombra caso a imagem não carregue
                         ctx.fillStyle = '#8e44ad';
                         ctx.shadowColor = 'rgba(0,0,0,0.4)';
                         ctx.shadowBlur = 12;
@@ -922,6 +918,7 @@
             const newChaoAltura = Math.floor(H * 0.15);
             const newPlayerSize = Math.min(W, H) * 0.045;
             const newMobRadius = Math.min(W, H) * 0.025;
+            const newPlatformWidth = Math.min(W, H) * 0.12; // Ajuste de largura dinâmico
 
             for (let plat of platforms) {
                 if (plat.y === chaoY) {
@@ -949,6 +946,7 @@
             for (let i = 0; i < 14; i++) {
                 platforms[7 + i].y = H - newChaoAltura + alturasRelativas[i];
                 platforms[7 + i].height = 20;
+                platforms[7 + i].width = newPlatformWidth; // Aplica a nova largura
             }
 
             const oldPlayerSize = player.w;
