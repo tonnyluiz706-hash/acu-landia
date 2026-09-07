@@ -83,6 +83,16 @@
         }
 
         // ============================================
+        // IMAGEM DAS PLATAFORMAS
+        // ============================================
+        const imgPlataforma = new Image();
+        imgPlataforma.src = 'plataforma.png';
+        let padraoPlataforma = null;
+        imgPlataforma.onload = function() {
+            padraoPlataforma = ctx.createPattern(imgPlataforma, 'repeat');
+        };
+
+        // ============================================
         // CHÃO, PLATAFORMAS E BURACOS
         // ============================================
         const CHAO_ALTURA = Math.floor(H * 0.15);
@@ -134,6 +144,7 @@
         }
 
         const platforms = [
+            // Chão (altura definida por CHAO_ALTURA)
             { x: 0, y: chaoY, width: BURACOS_NIVEL1[0].inicio, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL1[0].fim, y: chaoY, width: BURACOS_NIVEL1[1].inicio - BURACOS_NIVEL1[0].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL1[1].fim, y: chaoY, width: BURACOS_NIVEL1[2].inicio - BURACOS_NIVEL1[1].fim, height: CHAO_ALTURA },
@@ -141,6 +152,7 @@
             { x: BURACOS_NIVEL2[0].fim, y: chaoY, width: BURACOS_NIVEL2[1].inicio - BURACOS_NIVEL2[0].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL2[1].fim, y: chaoY, width: BURACOS_NIVEL2[2].inicio - BURACOS_NIVEL2[1].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL2[2].fim, y: chaoY, width: WORLD_WIDTH - BURACOS_NIVEL2[2].fim, height: CHAO_ALTURA },
+            // Plataformas elevadas (altura fixa 20)
             { x: 500, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 800, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 1900, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
@@ -322,7 +334,7 @@
         }
 
         // ============================================
-        // ATAQUE COM KNOCKBACK CORRIGIDO
+        // ATAQUE COM KNOCKBACK
         // ============================================
         function executarAtaque() {
             if (!temEspada) return;
@@ -340,15 +352,11 @@
                     if (mob.hp <= 0) {
                         mob.morto = true;
                     } else {
-                        // ============================================
-                        // KNOCKBACK NA DIREÇÃO OPOSTA AO MOVIMENTO DO MOB
-                        // ============================================
-                        const forca = 20; // reduzido para 20
+                        const forca = 20;
                         const direcaoMob = mob.direction;
                         mob.knockbackX = -direcaoMob * forca;
                         mob.knockbackY = 0;
                         mob.emKnockback = true;
-                        // Não reposicionamos manualmente, deixamos o loop tratar
                     }
                 }
             }
@@ -467,7 +475,6 @@
             for (let mob of mobs) {
                 if (mob.morto) continue;
 
-                // Aplica knockback com atrito
                 if (mob.knockbackX !== 0 || mob.knockbackY !== 0) {
                     mob.x += mob.knockbackX;
                     mob.y += mob.knockbackY;
@@ -475,42 +482,36 @@
                     mob.knockbackY *= 0.85;
                     if (Math.abs(mob.knockbackX) < 0.1) mob.knockbackX = 0;
                     if (Math.abs(mob.knockbackY) < 0.1) mob.knockbackY = 0;
-                    // Impede que o mob saia do chão
                     if (mob.y > chaoY - mob.radius) {
                         mob.y = chaoY - mob.radius;
                         mob.knockbackY = 0;
                     }
-                    // Se o knockback zerou, desativa a flag
                     if (mob.knockbackX === 0 && mob.knockbackY === 0) {
                         mob.emKnockback = false;
                     }
-                    // Verifica se o mob não ultrapassou os limites
                     if (mob.x < mob.minX) {
                         mob.x = mob.minX;
-                        mob.direction = 1; // força a ir para direita
+                        mob.direction = 1;
                         mob.knockbackX = 0;
                         mob.emKnockback = false;
                     }
                     if (mob.x > mob.maxX) {
                         mob.x = mob.maxX;
-                        mob.direction = -1; // força a ir para esquerda
+                        mob.direction = -1;
                         mob.knockbackX = 0;
                         mob.emKnockback = false;
                     }
-                    continue; // não aplica movimento padrão neste frame
+                    continue;
                 }
 
-                // Movimento normal
                 mob.x += mob.speed * mob.direction;
                 if (mob.x > mob.maxX || mob.x < mob.minX) {
                     mob.direction *= -1;
-                    // Corrige a posição para dentro dos limites
                     if (mob.x < mob.minX) mob.x = mob.minX;
                     if (mob.x > mob.maxX) mob.x = mob.maxX;
                 }
             }
 
-            // Ataque (timer)
             if (atacando) {
                 ataqueTimer++;
                 if (ataqueTimer > DURACAO_ATAQUE) {
@@ -534,21 +535,17 @@
 
             updateConversa();
 
-            // Progressão para Nível 2
             if (temEspada && player.x > 6200) {
                 entrarNivel2();
             }
 
-            // Conclusão do jogo
             if (nivelAtual === 2 && player.x > 9500) {
                 nivelConcluido = true;
             }
 
-            // Câmera
             cameraX = player.x - W / 2;
             cameraX = Math.max(0, Math.min(cameraX, WORLD_WIDTH - W));
 
-            // Títulos
             if (mostrarTitulo) {
                 contadorTitulo++;
                 if (contadorTitulo > 120) {
@@ -570,28 +567,42 @@
             ctx.clearRect(0, 0, W, H);
             drawBackground();
 
-            // Plataformas
+            // ============================================
+            // PLATAFORMAS COM IMAGEM
+            // ============================================
             for (let plat of platforms) {
                 const sx = plat.x - cameraX;
                 const sy = plat.y;
-                if (plat.y === chaoY) {
-                    ctx.fillStyle = '#4a7c59';
-                    ctx.fillRect(sx, sy, plat.width, plat.height);
-                    ctx.fillStyle = '#3b6e4a';
-                    ctx.fillRect(sx, sy, plat.width, 4);
+                const largura = plat.width;
+                const altura = plat.height;
+
+                // Se a imagem da plataforma estiver carregada, usa o padrão
+                if (padraoPlataforma) {
+                    ctx.fillStyle = padraoPlataforma;
+                    ctx.fillRect(sx, sy, largura, altura);
                 } else {
-                    ctx.fillStyle = '#8e44ad';
-                    ctx.shadowColor = 'rgba(0,0,0,0.4)';
-                    ctx.shadowBlur = 12;
-                    ctx.fillRect(sx, sy, plat.width, plat.height);
-                    ctx.shadowBlur = 0;
-                    ctx.strokeStyle = '#6c3483';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(sx, sy, plat.width, plat.height);
+                    // Fallback: cores sólidas
+                    if (plat.y === chaoY) {
+                        ctx.fillStyle = '#4a7c59';
+                        ctx.fillRect(sx, sy, largura, altura);
+                        ctx.fillStyle = '#3b6e4a';
+                        ctx.fillRect(sx, sy, largura, 4);
+                    } else {
+                        ctx.fillStyle = '#8e44ad';
+                        ctx.shadowColor = 'rgba(0,0,0,0.4)';
+                        ctx.shadowBlur = 12;
+                        ctx.fillRect(sx, sy, largura, altura);
+                        ctx.shadowBlur = 0;
+                        ctx.strokeStyle = '#6c3483';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(sx, sy, largura, altura);
+                    }
                 }
             }
 
-            // Buracos
+            // ============================================
+            // MARCAS DOS BURACOS (mantido)
+            // ============================================
             for (let buraco of BURACOS) {
                 const bx = buraco.inicio - cameraX;
                 ctx.fillStyle = 'rgba(255,0,0,0.15)';
@@ -601,7 +612,9 @@
                 ctx.fillText('💀', bx + 10, chaoY - 10);
             }
 
-            // Bandeira
+            // ============================================
+            // BANDEIRA
+            // ============================================
             const fx = flag.x - cameraX;
             const fy = flag.y;
             ctx.fillStyle = '#888';
@@ -625,7 +638,9 @@
             ctx.lineWidth = 1;
             ctx.stroke();
 
-            // Sábio
+            // ============================================
+            // SÁBIO
+            // ============================================
             const sxSabio = sabio.x - cameraX;
             const sySabio = sabio.y;
             ctx.shadowColor = 'rgba(0,0,0,0.4)';
@@ -698,7 +713,9 @@
                 ctx.textBaseline = 'alphabetic';
             }
 
-            // Mobs
+            // ============================================
+            // MOBS
+            // ============================================
             for (let mob of mobs) {
                 if (mob.morto) continue;
                 const mx = mob.x - cameraX;
@@ -721,7 +738,9 @@
                 ctx.fillRect(mx - mob.radius, my - mob.radius - 10, mob.radius * 2 * lifePercent, 4);
             }
 
-            // Jogador
+            // ============================================
+            // JOGADOR
+            // ============================================
             if (!gameOver) {
                 const px = player.x - cameraX;
                 const py = player.y;
@@ -772,7 +791,9 @@
                 }
             }
 
+            // ============================================
             // UI
+            // ============================================
             if (!gameOver) {
                 ctx.fillStyle = 'rgba(255,255,255,0.8)';
                 ctx.font = '20px "Pixelify Sans", monospace';
@@ -796,7 +817,9 @@
                 ctx.strokeRect(W/2 - 100, 20, 200, 8);
             }
 
-            // Títulos
+            // ============================================
+            // TÍTULOS E GAME OVER
+            // ============================================
             if (mostrarTitulo && !gameOver) {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
