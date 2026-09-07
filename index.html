@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>Acuílandnia - Níveis 1 e 2</title>
+    <title>Acuílândia</title>
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet" />
     <style>
         * {
@@ -43,14 +43,16 @@
         canvas.width = W;
         canvas.height = H;
 
-        const WORLD_WIDTH = 10000;
+        const WORLD_WIDTH = 50000; // 5x maior
         let vidas = 5;
         let nivelAtual = 1;
         let nivelConcluido = false;
         let mostrarTitulo = true;
         let mostrarTituloNivel2 = false;
+        let mostrarTituloNivel3 = false;
         let contadorTitulo = 0;
         let contadorTituloNivel2 = 0;
+        let contadorTituloNivel3 = 0;
         let isResizing = false;
         let gameOver = false;
 
@@ -96,6 +98,7 @@
         const PLAYER_SIZE = Math.min(W, H) * 0.045;
         const MOB_RADIUS = Math.min(W, H) * 0.025;
 
+        // Buracos (Nível 1, 2 e 3)
         const BURACOS_NIVEL1 = [
             { inicio: 1400, fim: 1600 },
             { inicio: 2800, fim: 3000 },
@@ -106,7 +109,44 @@
             { inicio: 7400, fim: 7600 },
             { inicio: 8200, fim: 8400 }
         ];
-        const BURACOS = [...BURACOS_NIVEL1, ...BURACOS_NIVEL2];
+        const BURACOS_NIVEL3 = [
+            { inicio: 11000, fim: 11300 },
+            { inicio: 13000, fim: 13300 },
+            { inicio: 16000, fim: 16300 },
+            { inicio: 19000, fim: 19300 },
+            { inicio: 22000, fim: 22300 },
+            { inicio: 26000, fim: 26300 },
+            { inicio: 30000, fim: 30300 },
+            { inicio: 35000, fim: 35300 },
+            { inicio: 40000, fim: 40300 },
+            { inicio: 44000, fim: 44300 }
+        ];
+        const BURACOS = [...BURACOS_NIVEL1, ...BURACOS_NIVEL2, ...BURACOS_NIVEL3];
+
+        // ============================================
+        // ESPINHOS (Nível 3)
+        // ============================================
+        const ESPINHOS = [
+            { x: 10500, y: chaoY - 20, w: 30, h: 20 },
+            { x: 11500, y: chaoY - 20, w: 30, h: 20 },
+            { x: 12000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 13500, y: chaoY - 20, w: 30, h: 20 },
+            { x: 14500, y: chaoY - 20, w: 30, h: 20 },
+            { x: 17000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 18500, y: chaoY - 20, w: 30, h: 20 },
+            { x: 20000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 22500, y: chaoY - 20, w: 30, h: 20 },
+            { x: 24000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 27000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 29000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 31000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 34000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 36000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 39000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 41000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 43000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 45000, y: chaoY - 20, w: 30, h: 20 }
+        ];
 
         function estaSobreBuraco(x) {
             for (let buraco of BURACOS) {
@@ -139,16 +179,30 @@
             }
         }
 
+        // ============================================
+        // PLATAFORMAS (Níveis 1, 2 e 3)
+        // ============================================
         const platforms = [
-            // Chão (altura definida por CHAO_ALTURA)
+            // Chão (Nível 1 e 2) - os mesmos de antes
             { x: 0, y: chaoY, width: BURACOS_NIVEL1[0].inicio, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL1[0].fim, y: chaoY, width: BURACOS_NIVEL1[1].inicio - BURACOS_NIVEL1[0].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL1[1].fim, y: chaoY, width: BURACOS_NIVEL1[2].inicio - BURACOS_NIVEL1[1].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL1[2].fim, y: chaoY, width: BURACOS_NIVEL2[0].inicio - BURACOS_NIVEL1[2].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL2[0].fim, y: chaoY, width: BURACOS_NIVEL2[1].inicio - BURACOS_NIVEL2[0].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL2[1].fim, y: chaoY, width: BURACOS_NIVEL2[2].inicio - BURACOS_NIVEL2[1].fim, height: CHAO_ALTURA },
-            { x: BURACOS_NIVEL2[2].fim, y: chaoY, width: WORLD_WIDTH - BURACOS_NIVEL2[2].fim, height: CHAO_ALTURA },
-            // Plataformas elevadas (TAMANHO ORIGINAL: LARGURA 120, ALTURA 20)
+            { x: BURACOS_NIVEL2[2].fim, y: chaoY, width: BURACOS_NIVEL3[0].inicio - BURACOS_NIVEL2[2].fim, height: CHAO_ALTURA },
+            // Chão (Nível 3) - dividido pelos buracos do nível 3
+            { x: BURACOS_NIVEL3[0].fim, y: chaoY, width: BURACOS_NIVEL3[1].inicio - BURACOS_NIVEL3[0].fim, height: CHAO_ALTURA },
+            { x: BURACOS_NIVEL3[1].fim, y: chaoY, width: BURACOS_NIVEL3[2].inicio - BURACOS_NIVEL3[1].fim, height: CHAO_ALTURA },
+            { x: BURACOS_NIVEL3[2].fim, y: chaoY, width: BURACOS_NIVEL3[3].inicio - BURACOS_NIVEL3[2].fim, height: CHAO_ALTURA },
+            { x: BURACOS_NIVEL3[3].fim, y: chaoY, width: BURACOS_NIVEL3[4].inicio - BURACOS_NIVEL3[3].fim, height: CHAO_ALTURA },
+            { x: BURACOS_NIVEL3[4].fim, y: chaoY, width: BURACOS_NIVEL3[5].inicio - BURACOS_NIVEL3[4].fim, height: CHAO_ALTURA },
+            { x: BURACOS_NIVEL3[5].fim, y: chaoY, width: BURACOS_NIVEL3[6].inicio - BURACOS_NIVEL3[5].fim, height: CHAO_ALTURA },
+            { x: BURACOS_NIVEL3[6].fim, y: chaoY, width: BURACOS_NIVEL3[7].inicio - BURACOS_NIVEL3[6].fim, height: CHAO_ALTURA },
+            { x: BURACOS_NIVEL3[7].fim, y: chaoY, width: BURACOS_NIVEL3[8].inicio - BURACOS_NIVEL3[7].fim, height: CHAO_ALTURA },
+            { x: BURACOS_NIVEL3[8].fim, y: chaoY, width: BURACOS_NIVEL3[9].inicio - BURACOS_NIVEL3[8].fim, height: CHAO_ALTURA },
+            { x: BURACOS_NIVEL3[9].fim, y: chaoY, width: WORLD_WIDTH - BURACOS_NIVEL3[9].fim, height: CHAO_ALTURA },
+            // Plataformas elevadas (Nível 1 e 2) - as mesmas de antes
             { x: 500, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 800, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 1900, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
@@ -162,7 +216,50 @@
             { x: 7300, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 7800, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 8100, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 8700, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 }
+            // Plataformas elevadas (Nível 3) - para pular sobre espinhos e buracos
+            { x: 10200, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 10700, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 11200, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 11700, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 12200, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 12700, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 13400, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 13900, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 14400, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 15500, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 16200, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 16800, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 17500, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 18200, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 19500, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 20200, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 21000, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 21800, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 22800, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 23500, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 25000, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 25800, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 26500, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 27500, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 28500, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 29500, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 30500, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 31500, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 32500, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 33500, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 34500, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 35500, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 36500, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 37500, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 38500, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 39500, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 40500, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 41500, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 42500, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 43500, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 44500, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 45500, y: chaoY - 120 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 46500, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 }
         ];
 
         // ============================================
@@ -184,19 +281,40 @@
         };
 
         // ============================================
-        // MOBS (com flag emKnockback)
+        // MOBS (terrestres e voadores)
         // ============================================
         const mobs = [
-            // Nível 1
-            { x: 900, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.0, minX: 700, maxX: 1200, direction: 1, color: '#f1c40f', stroke: '#d4ac0d', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false },
-            { x: 2000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.8, minX: 1800, maxX: 2300, direction: 1, color: '#2ecc71', stroke: '#27ae60', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false },
-            { x: 3300, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.2, minX: 3100, maxX: 3600, direction: 1, color: '#9b59b6', stroke: '#8e44ad', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false },
-            { x: 5000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.5, minX: 4800, maxX: 5300, direction: 1, color: '#e67e22', stroke: '#d35400', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false },
-            // Nível 2
-            { x: 6400, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.0, minX: 6200, maxX: 6600, direction: 1, color: '#e74c3c', stroke: '#c0392b', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false },
-            { x: 7100, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.8, minX: 6900, maxX: 7300, direction: 1, color: '#3498db', stroke: '#2980b9', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false },
-            { x: 7900, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.2, minX: 7700, maxX: 8100, direction: 1, color: '#1abc9c', stroke: '#16a085', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false },
-            { x: 8800, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.5, minX: 8600, maxX: 9000, direction: 1, color: '#e91e63', stroke: '#c2185b', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false }
+            // Nível 1 (terrestres)
+            { x: 900, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.0, minX: 700, maxX: 1200, direction: 1, color: '#f1c40f', stroke: '#d4ac0d', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            { x: 2000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.8, minX: 1800, maxX: 2300, direction: 1, color: '#2ecc71', stroke: '#27ae60', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            { x: 3300, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.2, minX: 3100, maxX: 3600, direction: 1, color: '#9b59b6', stroke: '#8e44ad', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            { x: 5000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.5, minX: 4800, maxX: 5300, direction: 1, color: '#e67e22', stroke: '#d35400', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            // Nível 2 (terrestres)
+            { x: 6400, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.0, minX: 6200, maxX: 6600, direction: 1, color: '#e74c3c', stroke: '#c0392b', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            { x: 7100, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.8, minX: 6900, maxX: 7300, direction: 1, color: '#3498db', stroke: '#2980b9', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            { x: 7900, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.2, minX: 7700, maxX: 8100, direction: 1, color: '#1abc9c', stroke: '#16a085', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            // Nível 3 - Morcegos (voadores)
+            { x: 10500, y: chaoY - 120, radius: MOB_RADIUS, speed: 4.0, minX: 10300, maxX: 10800, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 40, fase: 0 },
+            { x: 11500, y: chaoY - 80, radius: MOB_RADIUS, speed: 4.5, minX: 11300, maxX: 11800, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 1.2 },
+            { x: 12500, y: chaoY - 140, radius: MOB_RADIUS, speed: 5.0, minX: 12300, maxX: 12800, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 2.5 },
+            { x: 14000, y: chaoY - 100, radius: MOB_RADIUS, speed: 4.2, minX: 13800, maxX: 14300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 45, fase: 0.8 },
+            { x: 15500, y: chaoY - 90, radius: MOB_RADIUS, speed: 4.8, minX: 15300, maxX: 15800, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 55, fase: 1.8 },
+            { x: 17000, y: chaoY - 110, radius: MOB_RADIUS, speed: 5.2, minX: 16800, maxX: 17300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 3.0 },
+            { x: 18500, y: chaoY - 70, radius: MOB_RADIUS, speed: 4.0, minX: 18300, maxX: 18800, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 40, fase: 0.3 },
+            { x: 20000, y: chaoY - 130, radius: MOB_RADIUS, speed: 4.7, minX: 19800, maxX: 20300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 1.5 },
+            { x: 21500, y: chaoY - 95, radius: MOB_RADIUS, speed: 5.5, minX: 21300, maxX: 21800, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 2.2 },
+            { x: 23000, y: chaoY - 80, radius: MOB_RADIUS, speed: 4.3, minX: 22800, maxX: 23300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 45, fase: 0.6 },
+            { x: 25000, y: chaoY - 120, radius: MOB_RADIUS, speed: 5.0, minX: 24800, maxX: 25300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 55, fase: 1.9 },
+            { x: 27000, y: chaoY - 100, radius: MOB_RADIUS, speed: 4.6, minX: 26800, maxX: 27300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 2.8 },
+            { x: 29000, y: chaoY - 90, radius: MOB_RADIUS, speed: 5.3, minX: 28800, maxX: 29300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 0.9 },
+            { x: 31000, y: chaoY - 110, radius: MOB_RADIUS, speed: 4.8, minX: 30800, maxX: 31300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 45, fase: 1.4 },
+            { x: 33000, y: chaoY - 130, radius: MOB_RADIUS, speed: 5.1, minX: 32800, maxX: 33300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 55, fase: 2.1 },
+            { x: 35000, y: chaoY - 80, radius: MOB_RADIUS, speed: 4.4, minX: 34800, maxX: 35300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 40, fase: 0.2 },
+            { x: 37000, y: chaoY - 100, radius: MOB_RADIUS, speed: 5.6, minX: 36800, maxX: 37300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 1.7 },
+            { x: 39000, y: chaoY - 120, radius: MOB_RADIUS, speed: 4.9, minX: 38800, maxX: 39300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 2.6 },
+            { x: 41000, y: chaoY - 90, radius: MOB_RADIUS, speed: 5.2, minX: 40800, maxX: 41300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 45, fase: 0.7 },
+            { x: 43000, y: chaoY - 110, radius: MOB_RADIUS, speed: 4.7, minX: 42800, maxX: 43300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 55, fase: 1.3 },
+            { x: 45000, y: chaoY - 100, radius: MOB_RADIUS, speed: 5.4, minX: 44800, maxX: 45300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 2.0 }
         ];
 
         // ============================================
@@ -268,6 +386,16 @@
                 const dist = Math.sqrt(dx*dx + dy*dy);
                 const threshold = player.w/2 + mob.radius;
                 if (dist < threshold) {
+                    resetPlayer();
+                    return;
+                }
+            }
+        }
+
+        function checkEspinhos() {
+            for (let espinho of ESPINHOS) {
+                if (player.x + player.w > espinho.x && player.x < espinho.x + espinho.w &&
+                    player.y + player.h > espinho.y && player.y < espinho.y + espinho.h) {
                     resetPlayer();
                     return;
                 }
@@ -349,9 +477,17 @@
                         mob.morto = true;
                     } else {
                         const forca = 20;
-                        const direcaoMob = mob.direction;
-                        mob.knockbackX = -direcaoMob * forca;
-                        mob.knockbackY = 0;
+                        // Para voadores, o knockback é na direção do jogador (padrão)
+                        // Mas mantemos a direção oposta ao movimento para terrestres
+                        if (mob.tipo === 'voador') {
+                            const angulo = Math.atan2(dy, dx);
+                            mob.knockbackX = Math.cos(angulo) * forca;
+                            mob.knockbackY = Math.sin(angulo) * forca;
+                        } else {
+                            const direcaoMob = mob.direction;
+                            mob.knockbackX = -direcaoMob * forca;
+                            mob.knockbackY = 0;
+                        }
                         mob.emKnockback = true;
                     }
                 }
@@ -378,8 +514,10 @@
             checkpointY = player.spawnY;
             mostrarTitulo = true;
             mostrarTituloNivel2 = false;
+            mostrarTituloNivel3 = false;
             contadorTitulo = 0;
             contadorTituloNivel2 = 0;
+            contadorTituloNivel3 = 0;
 
             player.x = player.spawnX;
             player.y = player.spawnY;
@@ -387,7 +525,7 @@
             player.vy = 0;
             player.onGround = false;
 
-            const posicoesIniciais = [900, 2000, 3300, 5000, 6400, 7100, 7900, 8800];
+            const posicoesIniciais = [900, 2000, 3300, 5000, 6400, 7100, 7900, 10500, 11500, 12500, 14000, 15500, 17000, 18500, 20000, 21500, 23000, 25000, 27000, 29000, 31000, 33000, 35000, 37000, 39000, 41000, 43000, 45000];
             for (let i = 0; i < mobs.length; i++) {
                 mobs[i].x = posicoesIniciais[i];
                 mobs[i].morto = false;
@@ -396,6 +534,7 @@
                 mobs[i].knockbackX = 0;
                 mobs[i].knockbackY = 0;
                 mobs[i].emKnockback = false;
+                mobs[i].fase = 0;
             }
 
             cameraX = player.x - W / 2;
@@ -403,15 +542,19 @@
         }
 
         // ============================================
-        // SISTEMA DE PROGRESSÃO (Nível 2)
+        // SISTEMA DE PROGRESSÃO
         // ============================================
-        function entrarNivel2() {
-            if (nivelAtual === 2) return;
-            if (!temEspada) return;
-            if (player.x < 6200) return;
-            nivelAtual = 2;
-            mostrarTituloNivel2 = true;
-            contadorTituloNivel2 = 0;
+        function atualizarNivel() {
+            if (nivelAtual === 1 && player.x > 6200) {
+                nivelAtual = 2;
+                mostrarTituloNivel2 = true;
+                contadorTituloNivel2 = 0;
+            }
+            if (nivelAtual === 2 && player.x > 9500) {
+                nivelAtual = 3;
+                mostrarTituloNivel3 = true;
+                contadorTituloNivel3 = 0;
+            }
         }
 
         // ============================================
@@ -467,10 +610,11 @@
                 }
             }
 
-            // Movimentação dos mobs (com knockback)
+            // Movimentação dos mobs
             for (let mob of mobs) {
                 if (mob.morto) continue;
 
+                // Knockback
                 if (mob.knockbackX !== 0 || mob.knockbackY !== 0) {
                     mob.x += mob.knockbackX;
                     mob.y += mob.knockbackY;
@@ -500,14 +644,31 @@
                     continue;
                 }
 
-                mob.x += mob.speed * mob.direction;
-                if (mob.x > mob.maxX || mob.x < mob.minX) {
-                    mob.direction *= -1;
-                    if (mob.x < mob.minX) mob.x = mob.minX;
-                    if (mob.x > mob.maxX) mob.x = mob.maxX;
+                // Movimento padrão
+                if (mob.tipo === 'voador') {
+                    // Movimento horizontal
+                    mob.x += mob.speed * mob.direction;
+                    if (mob.x > mob.maxX || mob.x < mob.minX) {
+                        mob.direction *= -1;
+                        if (mob.x < mob.minX) mob.x = mob.minX;
+                        if (mob.x > mob.maxX) mob.x = mob.maxX;
+                    }
+                    // Movimento vertical (senoidal)
+                    mob.fase += 0.03;
+                    const oscilacao = Math.sin(mob.fase) * mob.amplitude;
+                    mob.y = (chaoY - 100) + oscilacao; // Altura base
+                } else {
+                    // Terrestre
+                    mob.x += mob.speed * mob.direction;
+                    if (mob.x > mob.maxX || mob.x < mob.minX) {
+                        mob.direction *= -1;
+                        if (mob.x < mob.minX) mob.x = mob.minX;
+                        if (mob.x > mob.maxX) mob.x = mob.maxX;
+                    }
                 }
             }
 
+            // Ataque (timer)
             if (atacando) {
                 ataqueTimer++;
                 if (ataqueTimer > DURACAO_ATAQUE) {
@@ -516,6 +677,7 @@
             }
 
             checkCollisions();
+            checkEspinhos();
             checkFlag();
 
             // Interação com o sábio
@@ -531,17 +693,18 @@
 
             updateConversa();
 
-            if (temEspada && player.x > 6200) {
-                entrarNivel2();
-            }
+            // Atualiza o nível baseado na posição
+            atualizarNivel();
 
-            if (nivelAtual === 2 && player.x > 9500) {
+            // Conclusão do jogo (após o nível 3)
+            if (nivelAtual === 3 && player.x > 48000) {
                 nivelConcluido = true;
             }
 
             cameraX = player.x - W / 2;
             cameraX = Math.max(0, Math.min(cameraX, WORLD_WIDTH - W));
 
+            // Títulos
             if (mostrarTitulo) {
                 contadorTitulo++;
                 if (contadorTitulo > 120) {
@@ -554,6 +717,12 @@
                     mostrarTituloNivel2 = false;
                 }
             }
+            if (mostrarTituloNivel3) {
+                contadorTituloNivel3++;
+                if (contadorTituloNivel3 > 120) {
+                    mostrarTituloNivel3 = false;
+                }
+            }
         }
 
         // ============================================
@@ -564,7 +733,7 @@
             drawBackground();
 
             // ============================================
-            // PLATAFORMAS (chão e elevadas)
+            // PLATAFORMAS
             // ============================================
             for (let plat of platforms) {
                 const sx = plat.x - cameraX;
@@ -573,18 +742,14 @@
                 const altura = plat.height;
 
                 if (plat.y === chaoY) {
-                    // Chão: sempre cor sólida
                     ctx.fillStyle = '#4a7c59';
                     ctx.fillRect(sx, sy, largura, altura);
                     ctx.fillStyle = '#3b6e4a';
                     ctx.fillRect(sx, sy, largura, 4);
                 } else {
-                    // CORREÇÃO: Plataformas elevadas agora esticam a imagem perfeitamente
-                    // sem criar o padrão quebrado
                     if (imgPlataforma.complete && imgPlataforma.naturalWidth !== 0) {
                         ctx.drawImage(imgPlataforma, sx, sy, largura, altura);
                     } else {
-                        // Fallback: roxo com sombra caso a imagem não carregue
                         ctx.fillStyle = '#8e44ad';
                         ctx.shadowColor = 'rgba(0,0,0,0.4)';
                         ctx.shadowBlur = 12;
@@ -595,6 +760,27 @@
                         ctx.strokeRect(sx, sy, largura, altura);
                     }
                 }
+            }
+
+            // ============================================
+            // ESPINHOS
+            // ============================================
+            for (let espinho of ESPINHOS) {
+                const ex = espinho.x - cameraX;
+                const ey = espinho.y;
+                ctx.fillStyle = '#e74c3c';
+                ctx.shadowColor = 'rgba(231,76,60,0.5)';
+                ctx.shadowBlur = 12;
+                ctx.beginPath();
+                ctx.moveTo(ex + espinho.w/2, ey);
+                ctx.lineTo(ex + espinho.w, ey + espinho.h);
+                ctx.lineTo(ex, ey + espinho.h);
+                ctx.closePath();
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#c0392b';
+                ctx.lineWidth = 1;
+                ctx.stroke();
             }
 
             // ============================================
@@ -733,6 +919,16 @@
                 ctx.fillStyle = 'rgba(0,255,0,0.7)';
                 const lifePercent = mob.hp / 2;
                 ctx.fillRect(mx - mob.radius, my - mob.radius - 10, mob.radius * 2 * lifePercent, 4);
+                // Indicador de voador (asas)
+                if (mob.tipo === 'voador') {
+                    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                    ctx.beginPath();
+                    ctx.ellipse(mx - mob.radius - 6, my - 4, 8, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.ellipse(mx + mob.radius + 6, my - 4, 8, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
             }
 
             // ============================================
@@ -843,6 +1039,19 @@
                 ctx.textBaseline = 'alphabetic';
             }
 
+            if (mostrarTituloNivel3 && !gameOver) {
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx.font = 'bold 80px "Pixelify Sans", monospace';
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.shadowBlur = 20;
+                ctx.fillText('NÍVEL 3', W/2, H/2 - 50);
+                ctx.shadowBlur = 0;
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'alphabetic';
+            }
+
             if (nivelConcluido) {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -918,7 +1127,6 @@
             const newChaoAltura = Math.floor(H * 0.15);
             const newPlayerSize = Math.min(W, H) * 0.045;
             const newMobRadius = Math.min(W, H) * 0.025;
-            // AQUI ESTÁ A CORREÇÃO: LARGURA FIXA EM 120 (TAMANHO NORMAL)
             const newPlatformWidth = 120;
 
             for (let plat of platforms) {
@@ -928,26 +1136,51 @@
                 }
             }
 
+            // Atualiza as plataformas elevadas (índices a partir de 17)
             const alturasRelativas = [
-                -80 - newPlayerSize,
-                -100 - newPlayerSize,
-                -80 - newPlayerSize,
-                -160 - newPlayerSize,
-                -80 - newPlayerSize,
-                -160 - newPlayerSize,
-                -80 - newPlayerSize,
-                -80 - newPlayerSize,
-                -100 - newPlayerSize,
-                -80 - newPlayerSize,
-                -160 - newPlayerSize,
-                -80 - newPlayerSize,
-                -160 - newPlayerSize,
-                -80 - newPlayerSize
+                -80 - newPlayerSize, -100 - newPlayerSize,
+                -80 - newPlayerSize, -160 - newPlayerSize,
+                -80 - newPlayerSize, -160 - newPlayerSize,
+                -80 - newPlayerSize, -80 - newPlayerSize,
+                -100 - newPlayerSize, -80 - newPlayerSize,
+                -160 - newPlayerSize, -80 - newPlayerSize,
+                -160 - newPlayerSize, -80 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize,
+                -60 - newPlayerSize, -120 - newPlayerSize
             ];
-            for (let i = 0; i < 14; i++) {
-                platforms[7 + i].y = H - newChaoAltura + alturasRelativas[i];
-                platforms[7 + i].height = 20;
-                platforms[7 + i].width = newPlatformWidth; // Aplica a largura de 120
+            for (let i = 0; i < alturasRelativas.length; i++) {
+                const idx = 17 + i; // As primeiras 17 são chão e primeiras plataformas do nível 1 e 2
+                if (idx < platforms.length) {
+                    platforms[idx].y = H - newChaoAltura + alturasRelativas[i];
+                    platforms[idx].height = 20;
+                    platforms[idx].width = newPlatformWidth;
+                }
             }
 
             const oldPlayerSize = player.w;
@@ -966,7 +1199,16 @@
 
             for (let mob of mobs) {
                 mob.radius = newMobRadius;
-                mob.y = platforms[0].y - mob.radius;
+                if (mob.tipo === 'voador') {
+                    mob.y = (chaoY - 100); // ajusta a posição base
+                } else {
+                    mob.y = platforms[0].y - mob.radius;
+                }
+            }
+
+            // Ajusta a posição dos espinhos (eles ficam no chão)
+            for (let espinho of ESPINHOS) {
+                espinho.y = platforms[0].y - 20;
             }
 
             flag.y = platforms[0].y - 60;
