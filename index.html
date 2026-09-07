@@ -254,7 +254,6 @@
         function checkCollisions() {
             for (let mob of mobs) {
                 if (mob.morto) continue;
-                // Ignora colisão se o mob estiver em knockback
                 if (mob.emKnockback) continue;
                 const dx = (player.x + player.w/2) - mob.x;
                 const dy = (player.y + player.h/2) - mob.y;
@@ -341,22 +340,15 @@
                     if (mob.hp <= 0) {
                         mob.morto = true;
                     } else {
-                        // Aplica knockback com força maior
-                        const angulo = Math.atan2(dy, dx);
-                        const forca = 30; // AUMENTADO de 15 para 30
-                        mob.knockbackX = Math.cos(angulo) * forca;
-                        mob.knockbackY = Math.sin(angulo) * forca;
+                        // ============================================
+                        // KNOCKBACK NA DIREÇÃO OPOSTA AO MOVIMENTO DO MOB
+                        // ============================================
+                        const forca = 20; // reduzido para 20
+                        const direcaoMob = mob.direction;
+                        mob.knockbackX = -direcaoMob * forca;
+                        mob.knockbackY = 0;
                         mob.emKnockback = true;
-
-                        // Reposiciona o mob para fora do jogador imediatamente
-                        const separacao = ALCANCE_ATAQUE + 10;
-                        mob.x = (player.x + player.w/2) + Math.cos(angulo) * separacao;
-                        mob.y = (player.y + player.h/2) + Math.sin(angulo) * separacao;
-                        // Garante que não saia do chão
-                        if (mob.y > chaoY - mob.radius) {
-                            mob.y = chaoY - mob.radius;
-                            mob.knockbackY = 0;
-                        }
+                        // Não reposicionamos manualmente, deixamos o loop tratar
                     }
                 }
             }
@@ -492,12 +484,29 @@
                     if (mob.knockbackX === 0 && mob.knockbackY === 0) {
                         mob.emKnockback = false;
                     }
+                    // Verifica se o mob não ultrapassou os limites
+                    if (mob.x < mob.minX) {
+                        mob.x = mob.minX;
+                        mob.direction = 1; // força a ir para direita
+                        mob.knockbackX = 0;
+                        mob.emKnockback = false;
+                    }
+                    if (mob.x > mob.maxX) {
+                        mob.x = mob.maxX;
+                        mob.direction = -1; // força a ir para esquerda
+                        mob.knockbackX = 0;
+                        mob.emKnockback = false;
+                    }
                     continue; // não aplica movimento padrão neste frame
                 }
 
+                // Movimento normal
                 mob.x += mob.speed * mob.direction;
                 if (mob.x > mob.maxX || mob.x < mob.minX) {
                     mob.direction *= -1;
+                    // Corrige a posição para dentro dos limites
+                    if (mob.x < mob.minX) mob.x = mob.minX;
+                    if (mob.x > mob.maxX) mob.x = mob.maxX;
                 }
             }
 
@@ -555,7 +564,7 @@
         }
 
         // ============================================
-        // RENDERIZAÇÃO (igual ao anterior, sem alterações)
+        // RENDERIZAÇÃO
         // ============================================
         function draw() {
             ctx.clearRect(0, 0, W, H);
