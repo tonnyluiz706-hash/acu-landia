@@ -94,7 +94,8 @@
         // CHÃO, PLATAFORMAS E BURACOS
         // ============================================
         const CHAO_ALTURA = Math.floor(H * 0.15);
-        const chaoY = H - CHAO_ALTURA;
+        // CORREÇÃO: chaoY agora é let
+        let chaoY = H - CHAO_ALTURA;
         const PLAYER_SIZE = Math.min(W, H) * 0.045;
         const MOB_RADIUS = Math.min(W, H) * 0.025;
 
@@ -1149,7 +1150,7 @@
         }
 
         // ============================================
-        // REDIMENSIONAMENTO
+        // REDIMENSIONAMENTO (CORRIGIDO)
         // ============================================
         function resize() {
             isResizing = true;
@@ -1164,15 +1165,17 @@
             const newMobRadius = Math.min(W, H) * 0.025;
             const newPlatformWidth = 120;
 
+            // ATUALIZA A ALTURA DO CHÃO GLOBALMENTE
+            chaoY = H - newChaoAltura;
+
             for (let plat of platforms) {
                 if (plat.y === chaoY) {
-                    plat.y = H - newChaoAltura;
+                    plat.y = chaoY;
                     plat.height = newChaoAltura;
                 }
             }
 
-            // Atualiza as plataformas elevadas (a partir do índice 33)
-            // Como adicionamos muitas plataformas, vamos usar um array de alturas relativas para cada uma
+            // Atualiza as plataformas elevadas (a partir do índice 17)
             const alturasRelativas = [
                 -80 - newPlayerSize, -100 - newPlayerSize,
                 -80 - newPlayerSize, -160 - newPlayerSize,
@@ -1210,32 +1213,37 @@
                 -60 - newPlayerSize, -60 - newPlayerSize,
                 -60 - newPlayerSize, -60 - newPlayerSize,
                 -60 - newPlayerSize, -60 - newPlayerSize,
+                -60 - newPlayerSize, -60 - newPlayerSize,
+                -60 - newPlayerSize, -60 - newPlayerSize,
                 -60 - newPlayerSize, -60 - newPlayerSize
             ];
-            // Índice inicial das plataformas elevadas (primeiro chão: 0-16, elevadas: 17 até 32, depois novas)
+            
             for (let i = 0; i < alturasRelativas.length; i++) {
                 const idx = 17 + i;
                 if (idx < platforms.length) {
-                    platforms[idx].y = H - newChaoAltura + alturasRelativas[i];
+                    platforms[idx].y = chaoY + alturasRelativas[i];
                     platforms[idx].height = 20;
                     platforms[idx].width = newPlatformWidth;
                 }
             }
 
+            // CORREÇÃO DO JOGADOR (evita teleporte se estiver no ar)
             const oldPlayerSize = player.w;
-            const scale = newPlayerSize / oldPlayerSize;
             player.w = newPlayerSize;
             player.h = newPlayerSize;
-            player.y = platforms[0].y - player.h;
-            player.spawnY = player.y;
-            if (player.onGround) {
+            
+            // Só move o jogador para o chão se ele estiver no chão ou abaixo dele
+            if (player.y + player.h > chaoY || player.onGround) {
                 player.y = platforms[0].y - player.h;
+                player.onGround = true;
             }
-
+            
+            player.spawnY = platforms[0].y - player.h;
             checkpointY = platforms[0].y - player.h;
 
             ajustarPosicaoBuraco();
 
+            // CORREÇÃO DOS MOBS VOADORES (usa o chaoY atualizado)
             for (let mob of mobs) {
                 mob.radius = newMobRadius;
                 if (mob.tipo === 'voador') {
@@ -1245,6 +1253,7 @@
                 }
             }
 
+            // CORREÇÃO DOS ESPINHOS
             for (let espinho of ESPINHOS) {
                 espinho.y = platforms[0].y - 20;
             }
@@ -1254,6 +1263,7 @@
                 cp.y = platforms[0].y - (cp.tipo === 'bandeira' ? (cp.h === 60 ? 60 : 40) : 40);
             }
 
+            // Atualiza sábio
             sabio.y = platforms[0].y - 50;
             sabio.largura = 40;
             sabio.altura = 40;
