@@ -26,26 +26,10 @@
             height: 100vh;
             background: #000;
         }
-        #audio-hint {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            color: rgba(255,255,255,0.6);
-            font-family: 'Pixelify Sans', monospace;
-            font-size: 14px;
-            background: rgba(0,0,0,0.5);
-            padding: 8px 14px;
-            border-radius: 20px;
-            pointer-events: none;
-            z-index: 10;
-            user-select: none;
-            transition: opacity 0.5s;
-        }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
-    <div id="audio-hint">🎵 Clique para ativar o som</div>
 
     <script>
         // ============================================
@@ -83,24 +67,30 @@
         const DURACAO_ATAQUE = 15;
 
         // ============================================
-        // ÁUDIO DE FUNDO
+        // ÁUDIO DE FUNDO (toca automaticamente, sem aviso)
         // ============================================
         const audioFundo = new Audio('fundo.mp3');
         audioFundo.loop = true;
         audioFundo.volume = 0.3;
-        let audioAtivado = false;
 
-        function ativarAudio() {
-            if (!audioAtivado) {
-                audioFundo.play().catch(() => {});
-                audioAtivado = true;
-                document.getElementById('audio-hint').style.opacity = '0';
-            }
+        function tentarTocarAudio() {
+            audioFundo.play().catch(() => {
+                // Falha silenciosa, tentará novamente na próxima interação
+            });
         }
 
-        // Tenta ativar no primeiro clique/touch
-        canvas.addEventListener('click', ativarAudio);
-        canvas.addEventListener('touchstart', ativarAudio);
+        // Tenta tocar assim que a página carregar
+        window.addEventListener('load', () => {
+            tentarTocarAudio();
+        });
+
+        // Se o usuário clicar ou teclar, tenta tocar novamente (caso tenha falhado antes)
+        document.addEventListener('keydown', () => {
+            tentarTocarAudio();
+        });
+        document.addEventListener('click', () => {
+            tentarTocarAudio();
+        });
 
         // ============================================
         // BACKGROUND
@@ -253,7 +243,7 @@
             { x: 7800, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 8100, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
             // ============================================
-            // NOVAS PLATAFORMAS NÍVEL 3 (espaçamento ajustado)
+            // NOVAS PLATAFORMAS NÍVEL 3
             // ============================================
             // Antes do primeiro buraco (11000)
             { x: 10200, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
@@ -326,12 +316,14 @@
         // ============================================
         // GERAR MOEDAS
         // ============================================
+        let moedas = 0;
+        let moedasArray = [];
+
         function gerarMoedas() {
             moedasArray = [];
             const raioMoeda = 12;
             const espacamentoChao = 150;
 
-            // Moedas no chão (evitando buracos e espinhos)
             for (let x = 100; x < WORLD_WIDTH - 100; x += espacamentoChao) {
                 let sobreBuraco = false;
                 for (let buraco of BURACOS) {
@@ -368,7 +360,6 @@
                 }
             }
 
-            // Moedas em plataformas elevadas (uma por plataforma)
             for (let plat of platforms) {
                 if (plat.y !== chaoY) {
                     const xCentro = plat.x + plat.width / 2;
@@ -403,16 +394,8 @@
         let ultimaDirecao = 1;
 
         // ============================================
-        // MOBS (terrestres e voadores)
+        // MOBS
         // ============================================
-        // Função auxiliar para gerar cores diferentes
-        function corAleatoria(cores) {
-            return cores[Math.floor(Math.random() * cores.length)];
-        }
-
-        const coresTerrestres = ['#e67e22', '#e74c3c', '#3498db', '#1abc9c', '#f39c12'];
-        const coresVoadores = ['#8e44ad', '#9b59b6', '#6c3483', '#4a235a'];
-
         const mobs = [
             // Nível 1 (terrestres)
             { x: 900, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.0, minX: 700, maxX: 1200, direction: 1, color: '#f1c40f', stroke: '#d4ac0d', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
@@ -434,56 +417,32 @@
             { x: 20000, y: chaoY - 130, radius: MOB_RADIUS, speed: 4.7, minX: 19800, maxX: 20300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 1.5 },
             { x: 21500, y: chaoY - 95, radius: MOB_RADIUS, speed: 5.5, minX: 21300, maxX: 21800, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 2.2 },
             { x: 23000, y: chaoY - 80, radius: MOB_RADIUS, speed: 4.3, minX: 22800, maxX: 23300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 45, fase: 0.6 },
-            // ============================================
-            // NOVOS MOBS (a partir do checkpoint do nível 3, x=25000)
-            // Alternando terrestres e voadores
-            // ============================================
-            // Terrestre 1
+            // NOVOS MOBS (a partir de x=25000)
             { x: 26000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.0, minX: 25500, maxX: 26500, direction: 1, color: '#e67e22', stroke: '#d35400', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            // Voador 1
             { x: 27000, y: chaoY - 110, radius: MOB_RADIUS, speed: 4.5, minX: 26500, maxX: 27500, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 0.7 },
-            // Terrestre 2
             { x: 28000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.5, minX: 27500, maxX: 28500, direction: 1, color: '#3498db', stroke: '#2980b9', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            // Voador 2
             { x: 29000, y: chaoY - 90, radius: MOB_RADIUS, speed: 4.8, minX: 28500, maxX: 29500, direction: 1, color: '#9b59b6', stroke: '#8e44ad', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 55, fase: 1.3 },
-            // Terrestre 3
             { x: 30000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.8, minX: 29500, maxX: 30500, direction: 1, color: '#e74c3c', stroke: '#c0392b', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            // Voador 3
             { x: 31000, y: chaoY - 120, radius: MOB_RADIUS, speed: 5.0, minX: 30500, maxX: 31500, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 2.0 },
-            // Terrestre 4
             { x: 32000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.0, minX: 31500, maxX: 32500, direction: 1, color: '#f39c12', stroke: '#d68910', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            // Voador 4
             { x: 33000, y: chaoY - 100, radius: MOB_RADIUS, speed: 4.6, minX: 32500, maxX: 33500, direction: 1, color: '#9b59b6', stroke: '#8e44ad', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 45, fase: 0.4 },
-            // Terrestre 5
             { x: 34000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.2, minX: 33500, maxX: 34500, direction: 1, color: '#1abc9c', stroke: '#16a085', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            // Voador 5
             { x: 35000, y: chaoY - 80, radius: MOB_RADIUS, speed: 5.2, minX: 34500, maxX: 35500, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 1.8 },
-            // Terrestre 6
             { x: 36000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.5, minX: 35500, maxX: 36500, direction: 1, color: '#e67e22', stroke: '#d35400', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            // Voador 6
             { x: 37000, y: chaoY - 110, radius: MOB_RADIUS, speed: 5.0, minX: 36500, maxX: 37500, direction: 1, color: '#9b59b6', stroke: '#8e44ad', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 55, fase: 2.5 },
-            // Terrestre 7
             { x: 38000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.8, minX: 37500, maxX: 38500, direction: 1, color: '#3498db', stroke: '#2980b9', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            // Voador 7
             { x: 39000, y: chaoY - 90, radius: MOB_RADIUS, speed: 5.3, minX: 38500, maxX: 39500, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 1.0 },
-            // Terrestre 8
             { x: 40000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 5.0, minX: 39500, maxX: 40500, direction: 1, color: '#e74c3c', stroke: '#c0392b', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            // Voador 8
             { x: 41000, y: chaoY - 120, radius: MOB_RADIUS, speed: 5.5, minX: 40500, maxX: 41500, direction: 1, color: '#9b59b6', stroke: '#8e44ad', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 0.9 },
-            // Terrestre 9
             { x: 42000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 5.2, minX: 41500, maxX: 42500, direction: 1, color: '#f39c12', stroke: '#d68910', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            // Voador 9
             { x: 43000, y: chaoY - 100, radius: MOB_RADIUS, speed: 5.6, minX: 42500, maxX: 43500, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 55, fase: 1.4 },
-            // Terrestre 10
             { x: 44000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 5.4, minX: 43500, maxX: 44500, direction: 1, color: '#1abc9c', stroke: '#16a085', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            // Voador 10
             { x: 45000, y: chaoY - 80, radius: MOB_RADIUS, speed: 5.8, minX: 44500, maxX: 45500, direction: 1, color: '#9b59b6', stroke: '#8e44ad', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 2.2 },
-            // Terrestre 11 (próximo ao final)
             { x: 46000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 5.6, minX: 45500, maxX: 46500, direction: 1, color: '#e67e22', stroke: '#d35400', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' }
         ];
 
         // ============================================
-        // CHECKPOINTS (todos como bandeiras)
+        // CHECKPOINTS
         // ============================================
         const checkpoints = [
             { x: 5700, y: chaoY - 60, w: 10, h: 60, ativado: false, tipo: 'bandeira' },
@@ -578,25 +537,6 @@
         // ============================================
         // CHECKPOINTS (bandeiras) com vida extra
         // ============================================
-        function checkCheckpoints() {
-            for (let cp of checkpoints) {
-                if (cp.ativado) continue;
-                if (player.x + player.w > cp.x && player.x < cp.x + cp.w + 30 &&
-                    player.y + player.h > cp.y && player.y < cp.y + cp.h) {
-                    cp.ativado = true;
-                    checkpointX = player.x;
-                    checkpointY = player.y;
-                    if (vidas < MAX_VIDAS) {
-                        vidas++;
-                        criarParticulas(player.x + player.w/2, player.y + player.h/2, 20, '#ff6b6b', 4, 30);
-                    }
-                }
-            }
-        }
-
-        // ============================================
-        // PARTÍCULAS
-        // ============================================
         let particulas = [];
 
         function criarParticulas(x, y, quantidade, cor, velocidade, vida) {
@@ -616,6 +556,25 @@
             }
         }
 
+        function checkCheckpoints() {
+            for (let cp of checkpoints) {
+                if (cp.ativado) continue;
+                if (player.x + player.w > cp.x && player.x < cp.x + cp.w + 30 &&
+                    player.y + player.h > cp.y && player.y < cp.y + cp.h) {
+                    cp.ativado = true;
+                    checkpointX = player.x;
+                    checkpointY = player.y;
+                    if (vidas < MAX_VIDAS) {
+                        vidas++;
+                        criarParticulas(player.x + player.w/2, player.y + player.h/2, 20, '#ff6b6b', 4, 30);
+                    }
+                }
+            }
+        }
+
+        // ============================================
+        // PARTÍCULAS
+        // ============================================
         function atualizarParticulas() {
             for (let i = particulas.length - 1; i >= 0; i--) {
                 const p = particulas[i];
@@ -767,7 +726,6 @@
             player.vy = 0;
             player.onGround = false;
 
-            // Resetar posições dos mobs (incluindo os novos)
             const posicoesIniciais = [
                 900, 2000, 3300, 5000, 6400, 7100, 7900,
                 10500, 11500, 12500, 14000, 15500, 17000, 18500, 20000, 21500, 23000,
@@ -810,13 +768,9 @@
         // ============================================
         // ATUALIZAÇÃO
         // ============================================
-        let moedas = 0;
-        let moedasArray = [];
-
         function update() {
             if (nivelConcluido || isResizing || gameOver) return;
 
-            // Movimento horizontal
             if (keys.a) {
                 player.vx = -player.speed;
                 ultimaDirecao = -1;
@@ -831,7 +785,6 @@
             if (player.x < 0) player.x = 0;
             if (player.x + player.w > WORLD_WIDTH) player.x = WORLD_WIDTH - player.w;
 
-            // Pulo e gravidade
             if (keys.w && player.onGround) {
                 player.vy = player.jumpPower;
                 player.onGround = false;
@@ -840,7 +793,6 @@
             player.vy += player.gravity;
             player.y += player.vy;
 
-            // Colisão com plataformas
             player.onGround = false;
             for (let plat of platforms) {
                 if (player.x + player.w > plat.x && player.x < plat.x + plat.width) {
@@ -854,7 +806,6 @@
                 }
             }
 
-            // Queda em buraco
             if (!player.onGround && player.vy > 0 && player.y > chaoY + 30) {
                 let caiuNoBuraco = false;
                 for (let buraco of BURACOS) {
@@ -869,7 +820,6 @@
                 }
             }
 
-            // Movimentação dos mobs
             for (let mob of mobs) {
                 if (mob.morto) continue;
 
@@ -922,7 +872,6 @@
                 }
             }
 
-            // Ataque (timer)
             if (atacando) {
                 ataqueTimer++;
                 if (ataqueTimer > DURACAO_ATAQUE) {
@@ -930,9 +879,6 @@
                 }
             }
 
-            // ============================================
-            // COLETA DE MOEDAS
-            // ============================================
             for (let m of moedasArray) {
                 if (m.coletada) continue;
                 const dx = (player.x + player.w/2) - m.x;
@@ -953,7 +899,6 @@
             checkEspinhos();
             checkCheckpoints();
 
-            // Interação com o sábio
             const dxSabio = (player.x + player.w/2) - (sabio.x + sabio.largura/2);
             const dySabio = (player.y + player.h/2) - (sabio.y + sabio.altura/2);
             const distSabio = Math.sqrt(dxSabio*dxSabio + dySabio*dySabio);
@@ -965,22 +910,17 @@
             }
 
             updateConversa();
-
-            // Atualiza o nível
             atualizarNivel();
 
-            // Conclusão do jogo
             if (nivelAtual === 3 && player.x > 48000) {
                 nivelConcluido = true;
             }
 
-            // Atualiza partículas
             atualizarParticulas();
 
             cameraX = player.x - W / 2;
             cameraX = Math.max(0, Math.min(cameraX, WORLD_WIDTH - W));
 
-            // Títulos
             if (mostrarTitulo) {
                 contadorTitulo++;
                 if (contadorTitulo > 120) {
@@ -1008,9 +948,7 @@
             ctx.clearRect(0, 0, W, H);
             drawBackground();
 
-            // ============================================
             // PLATAFORMAS
-            // ============================================
             for (let plat of platforms) {
                 const sx = plat.x - cameraX;
                 const sy = plat.y;
@@ -1038,9 +976,7 @@
                 }
             }
 
-            // ============================================
             // ESPINHOS
-            // ============================================
             for (let espinho of ESPINHOS) {
                 const ex = espinho.x - cameraX;
                 const ey = espinho.y;
@@ -1059,9 +995,7 @@
                 ctx.stroke();
             }
 
-            // ============================================
             // BURACOS
-            // ============================================
             for (let buraco of BURACOS) {
                 const bx = buraco.inicio - cameraX;
                 ctx.fillStyle = 'rgba(255,0,0,0.15)';
@@ -1071,9 +1005,7 @@
                 ctx.fillText('💀', bx + 10, chaoY - 10);
             }
 
-            // ============================================
             // MOEDAS
-            // ============================================
             for (let m of moedasArray) {
                 if (m.coletada) continue;
                 const mx = m.x - cameraX;
@@ -1091,9 +1023,7 @@
                 ctx.fill();
             }
 
-            // ============================================
             // CHECKPOINTS
-            // ============================================
             for (let cp of checkpoints) {
                 const cx = cp.x - cameraX;
                 const cy = cp.y;
@@ -1114,9 +1044,7 @@
                 ctx.stroke();
             }
 
-            // ============================================
             // SÁBIO
-            // ============================================
             const sxSabio = sabio.x - cameraX;
             const sySabio = sabio.y;
             ctx.shadowColor = 'rgba(0,0,0,0.4)';
@@ -1139,7 +1067,6 @@
             ctx.fillRect(sxSabio + 10, sySabio + 14, 3, 3);
             ctx.fillRect(sxSabio + sabio.largura - 12, sySabio + 14, 3, 3);
 
-            // Balão de fala
             if (sabio.conversaAtiva && !sabio.conversaTerminada) {
                 const falaAtual = sabio.falas[sabio.falaIndex] || '';
                 ctx.font = '16px "Pixelify Sans", monospace';
@@ -1189,9 +1116,7 @@
                 ctx.textBaseline = 'alphabetic';
             }
 
-            // ============================================
             // MOBS
-            // ============================================
             for (let mob of mobs) {
                 if (mob.morto) continue;
                 const mx = mob.x - cameraX;
@@ -1206,7 +1131,6 @@
                 ctx.strokeStyle = mob.stroke;
                 ctx.lineWidth = 3;
                 ctx.stroke();
-                // Barrinha de vida
                 ctx.fillStyle = 'rgba(255,0,0,0.7)';
                 ctx.fillRect(mx - mob.radius, my - mob.radius - 10, mob.radius * 2, 4);
                 ctx.fillStyle = 'rgba(0,255,0,0.7)';
@@ -1223,9 +1147,7 @@
                 }
             }
 
-            // ============================================
             // JOGADOR
-            // ============================================
             if (!gameOver) {
                 const px = player.x - cameraX;
                 const py = player.y;
@@ -1276,14 +1198,10 @@
                 }
             }
 
-            // ============================================
             // PARTÍCULAS
-            // ============================================
             desenharParticulas();
 
-            // ============================================
             // UI
-            // ============================================
             if (!gameOver) {
                 ctx.fillStyle = 'rgba(255,255,255,0.8)';
                 ctx.font = '20px "Pixelify Sans", monospace';
@@ -1308,9 +1226,7 @@
                 ctx.strokeRect(W/2 - 100, 20, 200, 8);
             }
 
-            // ============================================
             // TÍTULOS E GAME OVER
-            // ============================================
             if (mostrarTitulo && !gameOver) {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -1431,7 +1347,6 @@
             const deltaY = novoChaoY - chaoY;
             chaoY = novoChaoY;
 
-            // Atualiza plataformas
             for (let plat of platforms) {
                 if (plat.y === chaoY - deltaY) {
                     plat.y = chaoY;
@@ -1443,31 +1358,25 @@
                 }
             }
 
-            // Espinhos
             for (let espinho of ESPINHOS) {
                 espinho.y += deltaY;
             }
 
-            // Mobs
             for (let mob of mobs) {
                 mob.radius = newMobRadius;
                 mob.y += deltaY;
             }
 
-            // Checkpoints
             for (let cp of checkpoints) {
                 cp.y += deltaY;
             }
 
-            // Sábio
             sabio.y += deltaY;
 
-            // Moedas
             for (let m of moedasArray) {
                 m.y += deltaY;
             }
 
-            // Jogador
             player.w = newPlayerSize;
             player.h = newPlayerSize;
             if (player.onGround || player.y + player.h > chaoY) {
