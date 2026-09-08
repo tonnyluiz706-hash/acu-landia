@@ -94,7 +94,7 @@
         // CHÃO, PLATAFORMAS E BURACOS
         // ============================================
         const CHAO_ALTURA = Math.floor(H * 0.15);
-        // CORREÇÃO: chaoY agora é let
+        // AGORA É LET PARA PODERMOS ATUALIZAR
         let chaoY = H - CHAO_ALTURA;
         const PLAYER_SIZE = Math.min(W, H) * 0.045;
         const MOB_RADIUS = Math.min(W, H) * 0.025;
@@ -1150,7 +1150,7 @@
         }
 
         // ============================================
-        // REDIMENSIONAMENTO (CORRIGIDO)
+        // REDIMENSIONAMENTO (CORRIGIDO DEFINITIVAMENTE)
         // ============================================
         function resize() {
             isResizing = true;
@@ -1165,108 +1165,65 @@
             const newMobRadius = Math.min(W, H) * 0.025;
             const newPlatformWidth = 120;
 
-            // ATUALIZA A ALTURA DO CHÃO GLOBALMENTE
-            chaoY = H - newChaoAltura;
+            // Calcula o novo chão
+            const novoChaoY = H - newChaoAltura;
 
+            // Calcula a diferença de altura (deltaY) para reposicionar TODAS as coisas
+            const deltaY = novoChaoY - chaoY;
+
+            // Atualiza o chão global
+            chaoY = novoChaoY;
+
+            // Atualiza plataformas do chão
             for (let plat of platforms) {
-                if (plat.y === chaoY) {
+                if (plat.y === chaoY - deltaY) { // se era plataforma de chão (antes da mudança)
                     plat.y = chaoY;
                     plat.height = newChaoAltura;
+                } else {
+                    plat.y += deltaY; // move plataformas elevadas junto
+                    plat.height = 20;
+                    plat.width = newPlatformWidth;
                 }
             }
 
-            // Atualiza as plataformas elevadas (a partir do índice 17)
-            const alturasRelativas = [
-                -80 - newPlayerSize, -100 - newPlayerSize,
-                -80 - newPlayerSize, -160 - newPlayerSize,
-                -80 - newPlayerSize, -160 - newPlayerSize,
-                -80 - newPlayerSize, -80 - newPlayerSize,
-                -100 - newPlayerSize, -80 - newPlayerSize,
-                -160 - newPlayerSize, -80 - newPlayerSize,
-                -160 - newPlayerSize, -80 - newPlayerSize,
-                // Nível 3 (todas com altura -60)
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize,
-                -60 - newPlayerSize, -60 - newPlayerSize
-            ];
-            
-            for (let i = 0; i < alturasRelativas.length; i++) {
-                const idx = 17 + i;
-                if (idx < platforms.length) {
-                    platforms[idx].y = chaoY + alturasRelativas[i];
-                    platforms[idx].height = 20;
-                    platforms[idx].width = newPlatformWidth;
-                }
+            // Atualiza espinhos
+            for (let espinho of ESPINHOS) {
+                espinho.y += deltaY;
             }
 
-            // CORREÇÃO DO JOGADOR (evita teleporte se estiver no ar)
-            const oldPlayerSize = player.w;
-            player.w = newPlayerSize;
-            player.h = newPlayerSize;
-            
-            // Só move o jogador para o chão se ele estiver no chão ou abaixo dele
-            if (player.y + player.h > chaoY || player.onGround) {
-                player.y = platforms[0].y - player.h;
-                player.onGround = true;
-            }
-            
-            player.spawnY = platforms[0].y - player.h;
-            checkpointY = platforms[0].y - player.h;
-
-            ajustarPosicaoBuraco();
-
-            // CORREÇÃO DOS MOBS VOADORES (usa o chaoY atualizado)
+            // Atualiza mobs
             for (let mob of mobs) {
                 mob.radius = newMobRadius;
-                if (mob.tipo === 'voador') {
-                    mob.y = (chaoY - 100);
-                } else {
-                    mob.y = platforms[0].y - mob.radius;
-                }
-            }
-
-            // CORREÇÃO DOS ESPINHOS
-            for (let espinho of ESPINHOS) {
-                espinho.y = platforms[0].y - 20;
+                mob.y += deltaY;
             }
 
             // Atualiza checkpoints
             for (let cp of checkpoints) {
-                cp.y = platforms[0].y - (cp.tipo === 'bandeira' ? (cp.h === 60 ? 60 : 40) : 40);
+                cp.y += deltaY;
             }
 
             // Atualiza sábio
-            sabio.y = platforms[0].y - 50;
-            sabio.largura = 40;
-            sabio.altura = 40;
+            sabio.y += deltaY;
+
+            // Atualiza tamanho do jogador
+            player.w = newPlayerSize;
+            player.h = newPlayerSize;
+
+            // Reposiciona o jogador com segurança
+            if (player.onGround || player.y + player.h > chaoY) {
+                player.y = chaoY - player.h;
+                player.onGround = true;
+            } else {
+                // Se estiver no ar, desloca na mesma proporção
+                player.y += deltaY;
+            }
+
+            // Atualiza spawn e checkpoint
+            player.spawnY = chaoY - player.h;
+            checkpointY = player.spawnY;
+
+            // Garante que o jogador não fique sobre um buraco (empurra para a borda)
+            ajustarPosicaoBuraco();
 
             setTimeout(() => {
                 isResizing = false;
