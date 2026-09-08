@@ -45,6 +45,7 @@
 
         const WORLD_WIDTH = 50000;
         let vidas = 5;
+        const MAX_VIDAS = 9;
         let nivelAtual = 1;
         let nivelConcluido = false;
         let mostrarTitulo = true;
@@ -64,6 +65,13 @@
         let ataqueTimer = 0;
         const ALCANCE_ATAQUE = 120;
         const DURACAO_ATAQUE = 15;
+
+        // ============================================
+        // MOEDAS E PARTÍCULAS
+        // ============================================
+        let moedas = 0; // moedas coletadas
+        let moedasArray = []; // objetos {x, y, raio, coletada}
+        let particulas = [];
 
         // ============================================
         // BACKGROUND
@@ -287,6 +295,70 @@
         ];
 
         // ============================================
+        // GERAR MOEDAS
+        // ============================================
+        function gerarMoedas() {
+            moedasArray = [];
+            const raioMoeda = 12;
+            const espacamentoChao = 150;
+
+            // Moedas no chão (evitando buracos e espinhos)
+            for (let x = 100; x < WORLD_WIDTH - 100; x += espacamentoChao) {
+                // Verifica se está sobre um buraco
+                let sobreBuraco = false;
+                for (let buraco of BURACOS) {
+                    if (x > buraco.inicio && x < buraco.fim) {
+                        sobreBuraco = true;
+                        break;
+                    }
+                }
+                if (sobreBuraco) continue;
+
+                // Verifica se está sobre um espinho
+                let sobreEspinho = false;
+                for (let espinho of ESPINHOS) {
+                    if (x > espinho.x && x < espinho.x + espinho.w) {
+                        sobreEspinho = true;
+                        break;
+                    }
+                }
+                if (sobreEspinho) continue;
+
+                // Verifica se o chão existe (não está em um buraco)
+                // Já verificamos, mas também podemos checar se está em uma plataforma de chão
+                // Apenas adiciona se x está dentro de alguma plataforma de chão
+                let noChao = false;
+                for (let plat of platforms) {
+                    if (plat.y === chaoY && x > plat.x && x < plat.x + plat.width) {
+                        noChao = true;
+                        break;
+                    }
+                }
+                if (noChao) {
+                    moedasArray.push({
+                        x: x,
+                        y: chaoY - 15,
+                        raio: raioMoeda,
+                        coletada: false
+                    });
+                }
+            }
+
+            // Moedas em plataformas elevadas (uma por plataforma)
+            for (let plat of platforms) {
+                if (plat.y !== chaoY) { // é plataforma elevada
+                    const xCentro = plat.x + plat.width / 2;
+                    moedasArray.push({
+                        x: xCentro,
+                        y: plat.y - 15,
+                        raio: raioMoeda,
+                        coletada: false
+                    });
+                }
+            }
+        }
+
+        // ============================================
         // JOGADOR
         // ============================================
         const player = {
@@ -304,8 +376,7 @@
             spawnY: chaoY - PLAYER_SIZE,
         };
 
-        // Última direção do jogador (para knockback dos voadores)
-        let ultimaDirecao = 1; // 1 = direita, -1 = esquerda
+        let ultimaDirecao = 1;
 
         // ============================================
         // MOBS (terrestres e voadores)
@@ -348,13 +419,9 @@
         // CHECKPOINTS (todos como bandeiras)
         // ============================================
         const checkpoints = [
-            // Bandeira original (também ativa o sábio)
             { x: 5700, y: chaoY - 60, w: 10, h: 60, ativado: false, tipo: 'bandeira' },
-            // Final do Nível 2 (bandeira menor)
             { x: 9300, y: chaoY - 40, w: 10, h: 40, ativado: false, tipo: 'bandeira' },
-            // Meio do Nível 3 (bandeira menor)
             { x: 25000, y: chaoY - 40, w: 10, h: 40, ativado: false, tipo: 'bandeira' },
-            // Final do Nível 3 (bandeira menor)
             { x: 47000, y: chaoY - 40, w: 10, h: 40, ativado: false, tipo: 'bandeira' }
         ];
 
@@ -442,7 +509,7 @@
         }
 
         // ============================================
-        // CHECKPOINTS (bandeiras)
+        // CHECKPOINTS (bandeiras) com vida extra
         // ============================================
         function checkCheckpoints() {
             for (let cp of checkpoints) {
@@ -452,7 +519,63 @@
                     cp.ativado = true;
                     checkpointX = player.x;
                     checkpointY = player.y;
+                    // Ganha vida extra ao ativar checkpoint (até o máximo)
+                    if (vidas < MAX_VIDAS) {
+                        vidas++;
+                        // Efeito de partículas de vida extra
+                        criarParticulas(player.x + player.w/2, player.y + player.h/2, 20, '#ff6b6b', 4, 30);
+                    }
                 }
+            }
+        }
+
+        // ============================================
+        // PARTÍCULAS
+        // ============================================
+        function criarParticulas(x, y, quantidade, cor, velocidade, vida) {
+            for (let i = 0; i < quantidade; i++) {
+                const angulo = Math.random() * Math.PI * 2;
+                const vel = Math.random() * velocidade + 1;
+                particulas.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angulo) * vel,
+                    vy: Math.sin(angulo) * vel - 1,
+                    vida: vida || 30,
+                    vidaMax: vida || 30,
+                    cor: cor,
+                    tamanho: Math.random() * 6 + 3
+                });
+            }
+        }
+
+        function atualizarParticulas() {
+            for (let i = particulas.length - 1; i >= 0; i--) {
+                const p = particulas[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.05; // gravidade leve
+                p.vx *= 0.98;
+                p.vy *= 0.98;
+                p.vida--;
+                if (p.vida <= 0) {
+                    particulas.splice(i, 1);
+                }
+            }
+        }
+
+        function desenharParticulas() {
+            for (let p of particulas) {
+                const opacidade = p.vida / p.vidaMax;
+                ctx.globalAlpha = opacidade;
+                ctx.fillStyle = p.cor;
+                ctx.shadowColor = p.cor;
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(p.x - cameraX, p.y, p.tamanho * opacidade, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1;
             }
         }
 
@@ -499,13 +622,18 @@
         }
 
         // ============================================
-        // ATAQUE COM KNOCKBACK CORRIGIDO PARA VOADORES
+        // ATAQUE COM KNOCKBACK E EXPLOSÃO
         // ============================================
         function executarAtaque() {
             if (!temEspada) return;
             if (atacando) return;
             atacando = true;
             ataqueTimer = 0;
+
+            // Partículas de ataque (slash)
+            const px = player.x - cameraX + player.w/2;
+            const py = player.y + player.h/2;
+            criarParticulas(player.x + player.w/2, player.y + player.h/2, 15, '#ffffff', 5, 10);
 
             for (let mob of mobs) {
                 if (mob.morto) continue;
@@ -516,18 +644,17 @@
                     mob.hp--;
                     if (mob.hp <= 0) {
                         mob.morto = true;
+                        // EXPLOSÃO DO MOB
+                        criarParticulas(mob.x, mob.y, 30, mob.color, 6, 40);
+                        criarParticulas(mob.x, mob.y, 15, '#ffffff', 3, 20);
                     } else {
                         const forca = 20;
                         if (mob.tipo === 'voador') {
-                            // ============================================
-                            // KNOCKBACK: LANÇADO NA FRENTE DO JOGADOR (DIREÇÃO DO ÚLTIMO MOVIMENTO)
-                            // ============================================
                             const forcaVoador = 25;
                             mob.knockbackX = ultimaDirecao * forcaVoador;
-                            mob.knockbackY = 0; // apenas horizontal
+                            mob.knockbackY = 0;
                             mob.emKnockback = true;
                         } else {
-                            // Terrestre: recua na direção oposta ao movimento
                             const direcaoMob = mob.direction;
                             mob.knockbackX = -direcaoMob * forca;
                             mob.knockbackY = 0;
@@ -546,6 +673,7 @@
             nivelConcluido = false;
             nivelAtual = 1;
             vidas = 5;
+            moedas = 0;
             temEspada = false;
             atacando = false;
             sabio.conversaAtiva = false;
@@ -561,9 +689,15 @@
             contadorTitulo = 0;
             contadorTituloNivel2 = 0;
             contadorTituloNivel3 = 0;
+            particulas = [];
 
             for (let cp of checkpoints) {
                 cp.ativado = false;
+            }
+
+            // Resetar moedas
+            for (let m of moedasArray) {
+                m.coletada = false;
             }
 
             player.x = player.spawnX;
@@ -619,7 +753,6 @@
                 ultimaDirecao = 1;
             } else {
                 player.vx = 0;
-                // mantém a última direção
             }
 
             player.x += player.vx;
@@ -725,6 +858,26 @@
                 }
             }
 
+            // ============================================
+            // COLETA DE MOEDAS
+            // ============================================
+            for (let m of moedasArray) {
+                if (m.coletada) continue;
+                const dx = (player.x + player.w/2) - m.x;
+                const dy = (player.y + player.h/2) - m.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < m.raio + 20) {
+                    m.coletada = true;
+                    moedas++;
+                    criarParticulas(m.x, m.y, 12, '#ffd700', 3, 20);
+                    // Verifica se ganhou vida extra
+                    if (moedas % 100 === 0 && vidas < MAX_VIDAS) {
+                        vidas++;
+                        criarParticulas(player.x + player.w/2, player.y, 25, '#ff6b6b', 5, 30);
+                    }
+                }
+            }
+
             checkCollisions();
             checkEspinhos();
             checkCheckpoints();
@@ -742,13 +895,16 @@
 
             updateConversa();
 
-            // Atualiza o nível baseado na posição
+            // Atualiza o nível
             atualizarNivel();
 
             // Conclusão do jogo
             if (nivelAtual === 3 && player.x > 48000) {
                 nivelConcluido = true;
             }
+
+            // Atualiza partículas
+            atualizarParticulas();
 
             cameraX = player.x - W / 2;
             cameraX = Math.max(0, Math.min(cameraX, WORLD_WIDTH - W));
@@ -833,7 +989,7 @@
             }
 
             // ============================================
-            // MARCAS DOS BURACOS
+            // BURACOS
             // ============================================
             for (let buraco of BURACOS) {
                 const bx = buraco.inicio - cameraX;
@@ -842,6 +998,28 @@
                 ctx.fillStyle = 'rgba(255,255,255,0.3)';
                 ctx.font = '16px "Pixelify Sans", monospace';
                 ctx.fillText('💀', bx + 10, chaoY - 10);
+            }
+
+            // ============================================
+            // MOEDAS
+            // ============================================
+            for (let m of moedasArray) {
+                if (m.coletada) continue;
+                const mx = m.x - cameraX;
+                const my = m.y;
+                // Brilho
+                ctx.shadowColor = '#ffd700';
+                ctx.shadowBlur = 15;
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                ctx.arc(mx, my, m.raio, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                // Detalhe interno
+                ctx.fillStyle = '#ffaa00';
+                ctx.beginPath();
+                ctx.arc(mx - 2, my - 2, m.raio * 0.4, 0, Math.PI * 2);
+                ctx.fill();
             }
 
             // ============================================
@@ -1030,6 +1208,11 @@
             }
 
             // ============================================
+            // PARTÍCULAS (desenhadas sobre tudo)
+            // ============================================
+            desenharParticulas();
+
+            // ============================================
             // UI
             // ============================================
             if (!gameOver) {
@@ -1039,9 +1222,10 @@
                 ctx.shadowBlur = 8;
                 ctx.fillText('❤️ ' + vidas, 20, 40);
                 ctx.fillText('Nível ' + nivelAtual, 20, 70);
+                ctx.fillText('🪙 ' + moedas, 20, 100);
                 if (temEspada) {
                     ctx.fillStyle = 'rgba(241,196,15,0.8)';
-                    ctx.fillText('🗡️ Espada Mágica', 20, 100);
+                    ctx.fillText('🗡️ Espada Mágica', 20, 130);
                 }
                 ctx.shadowBlur = 0;
 
@@ -1159,7 +1343,7 @@
         }
 
         // ============================================
-        // REDIMENSIONAMENTO (CORRIGIDO DEFINITIVAMENTE)
+        // REDIMENSIONAMENTO
         // ============================================
         function resize() {
             isResizing = true;
@@ -1180,7 +1364,7 @@
 
             // Atualiza plataformas
             for (let plat of platforms) {
-                if (plat.y === chaoY - deltaY) { // era chão
+                if (plat.y === chaoY - deltaY) {
                     plat.y = chaoY;
                     plat.height = newChaoAltura;
                 } else {
@@ -1208,6 +1392,11 @@
 
             // Sábio
             sabio.y += deltaY;
+
+            // Moedas (reposicionar verticalmente)
+            for (let m of moedasArray) {
+                m.y += deltaY;
+            }
 
             // Jogador
             player.w = newPlayerSize;
@@ -1261,6 +1450,7 @@
         // ============================================
         // INICIALIZAÇÃO
         // ============================================
+        gerarMoedas();
         resize();
         checkpointY = player.spawnY;
         gameLoop();
