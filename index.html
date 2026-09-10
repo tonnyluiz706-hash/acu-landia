@@ -57,7 +57,7 @@
         let atacando = false;
         let ataqueTimer = 0;
         const ALCANCE_ATAQUE = 120;
-        const DURACAO_ATAQUE = 15;
+        const DURACAO_ATAQUE = 22;
 
         // ============================================
         // ÁUDIO DE FUNDO
@@ -77,9 +77,6 @@
         const bgImage = new Image();
         bgImage.src = 'Bacground.jpg';
 
-        // ============================================
-        // IMAGEM DAS PLATAFORMAS
-        // ============================================
         const imgPlataforma = new Image();
         imgPlataforma.src = 'plataforma.png';
 
@@ -115,9 +112,6 @@
         ];
         const BURACOS = [...BURACOS_NIVEL1, ...BURACOS_NIVEL2, ...BURACOS_NIVEL3];
 
-        // ============================================
-        // ESPINHOS
-        // ============================================
         const ESPINHOS = [
             { x: 10500, y: chaoY - 20, w: 30, h: 20 },
             { x: 11500, y: chaoY - 20, w: 30, h: 20 },
@@ -163,9 +157,6 @@
             }
         }
 
-        // ============================================
-        // PLATAFORMAS
-        // ============================================
         const platforms = [
             { x: 0, y: chaoY, width: BURACOS_NIVEL1[0].inicio, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL1[0].fim, y: chaoY, width: BURACOS_NIVEL1[1].inicio - BURACOS_NIVEL1[0].fim, height: CHAO_ALTURA },
@@ -244,9 +235,6 @@
             { x: 46600, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 }
         ];
 
-        // ============================================
-        // MOEDAS
-        // ============================================
         let moedas = 0;
         let moedasArray = [];
 
@@ -285,9 +273,6 @@
             }
         }
 
-        // ============================================
-        // JOGADOR
-        // ============================================
         const player = {
             x: 100, y: chaoY - PLAYER_SIZE,
             w: PLAYER_SIZE, h: PLAYER_SIZE,
@@ -299,17 +284,14 @@
 
         let ultimaDirecao = 1;
 
-        // ============================================
-        // MOBS
-        // ============================================
         const mobs = [
-            { x: 900, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.0, minX: 700, maxX: 1200, direction: 1, color: '#f1c40f', stroke: '#d4ac0d', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            { x: 2000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.8, minX: 1800, maxX: 2300, direction: 1, color: '#2ecc71', stroke: '#27ae60', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            { x: 3300, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.2, minX: 3100, maxX: 3600, direction: 1, color: '#9b59b6', stroke: '#8e44ad', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            { x: 5000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.5, minX: 4800, maxX: 5300, direction: 1, color: '#e67e22', stroke: '#d35400', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            { x: 6400, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.0, minX: 6200, maxX: 6600, direction: 1, color: '#e74c3c', stroke: '#c0392b', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            { x: 7100, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.8, minX: 6900, maxX: 7300, direction: 1, color: '#3498db', stroke: '#2980b9', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            { x: 7900, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.2, minX: 7700, maxX: 8100, direction: 1, color: '#1abc9c', stroke: '#16a085', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            { x: 900, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.0, minX: 700, maxX: 1200, direction: 1, color: '#6a9c3a', stroke: '#4a6c25', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 0 },
+            { x: 2000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.8, minX: 1800, maxX: 2300, direction: 1, color: '#7a8c4a', stroke: '#5a6c2a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 1 },
+            { x: 3300, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.2, minX: 3100, maxX: 3600, direction: 1, color: '#8a6c3a', stroke: '#6a4c1a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 2 },
+            { x: 5000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.5, minX: 4800, maxX: 5300, direction: 1, color: '#5a8a5a', stroke: '#3a6a3a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 0.5 },
+            { x: 6400, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.0, minX: 6200, maxX: 6600, direction: 1, color: '#7a9c3a', stroke: '#5a7c1a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 1.3 },
+            { x: 7100, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.8, minX: 6900, maxX: 7300, direction: 1, color: '#6a8c4a', stroke: '#4a6c2a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 0.8 },
+            { x: 7900, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.2, minX: 7700, maxX: 8100, direction: 1, color: '#8a9c5a', stroke: '#6a7c3a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 1.7 },
             { x: 10500, y: chaoY - 120, radius: MOB_RADIUS, speed: 4.0, minX: 10300, maxX: 10800, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 40, fase: 0 },
             { x: 11500, y: chaoY - 80, radius: MOB_RADIUS, speed: 4.5, minX: 11300, maxX: 11800, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 1.2 },
             { x: 12500, y: chaoY - 140, radius: MOB_RADIUS, speed: 5.0, minX: 12300, maxX: 12800, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 2.5 },
@@ -320,32 +302,29 @@
             { x: 20000, y: chaoY - 130, radius: MOB_RADIUS, speed: 4.7, minX: 19800, maxX: 20300, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 1.5 },
             { x: 21500, y: chaoY - 95, radius: MOB_RADIUS, speed: 5.5, minX: 21300, maxX: 21800, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 2.2 },
             { x: 23000, y: chaoY - 80, radius: MOB_RADIUS, speed: 4.3, minX: 22800, maxX: 23300, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 45, fase: 0.6 },
-            { x: 26000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.0, minX: 25500, maxX: 26500, direction: 1, color: '#e67e22', stroke: '#d35400', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            { x: 26000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.0, minX: 25500, maxX: 26500, direction: 1, color: '#6a9c3a', stroke: '#4a6c25', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 0.2 },
             { x: 27000, y: chaoY - 110, radius: MOB_RADIUS, speed: 4.5, minX: 26500, maxX: 27500, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 0.7 },
-            { x: 28000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.5, minX: 27500, maxX: 28500, direction: 1, color: '#3498db', stroke: '#2980b9', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            { x: 28000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.5, minX: 27500, maxX: 28500, direction: 1, color: '#7a8c4a', stroke: '#5a6c2a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 1.5 },
             { x: 29000, y: chaoY - 90, radius: MOB_RADIUS, speed: 4.8, minX: 28500, maxX: 29500, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 55, fase: 1.3 },
-            { x: 30000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.8, minX: 29500, maxX: 30500, direction: 1, color: '#e74c3c', stroke: '#c0392b', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            { x: 30000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.8, minX: 29500, maxX: 30500, direction: 1, color: '#8a6c3a', stroke: '#6a4c1a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 2.4 },
             { x: 31000, y: chaoY - 120, radius: MOB_RADIUS, speed: 5.0, minX: 30500, maxX: 31500, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 2.0 },
-            { x: 32000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.0, minX: 31500, maxX: 32500, direction: 1, color: '#f39c12', stroke: '#d68910', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            { x: 32000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.0, minX: 31500, maxX: 32500, direction: 1, color: '#5a8a5a', stroke: '#3a6a3a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 0.7 },
             { x: 33000, y: chaoY - 100, radius: MOB_RADIUS, speed: 4.6, minX: 32500, maxX: 33500, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 45, fase: 0.4 },
-            { x: 34000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.2, minX: 33500, maxX: 34500, direction: 1, color: '#1abc9c', stroke: '#16a085', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            { x: 34000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.2, minX: 33500, maxX: 34500, direction: 1, color: '#7a9c3a', stroke: '#5a7c1a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 1.9 },
             { x: 35000, y: chaoY - 80, radius: MOB_RADIUS, speed: 5.2, minX: 34500, maxX: 35500, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 1.8 },
-            { x: 36000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.5, minX: 35500, maxX: 36500, direction: 1, color: '#e67e22', stroke: '#d35400', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            { x: 36000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.5, minX: 35500, maxX: 36500, direction: 1, color: '#6a8c4a', stroke: '#4a6c2a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 0.3 },
             { x: 37000, y: chaoY - 110, radius: MOB_RADIUS, speed: 5.0, minX: 36500, maxX: 37500, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 55, fase: 2.5 },
-            { x: 38000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.8, minX: 37500, maxX: 38500, direction: 1, color: '#3498db', stroke: '#2980b9', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            { x: 38000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.8, minX: 37500, maxX: 38500, direction: 1, color: '#8a9c5a', stroke: '#6a7c3a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 1.1 },
             { x: 39000, y: chaoY - 90, radius: MOB_RADIUS, speed: 5.3, minX: 38500, maxX: 39500, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 1.0 },
-            { x: 40000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 5.0, minX: 39500, maxX: 40500, direction: 1, color: '#e74c3c', stroke: '#c0392b', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            { x: 40000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 5.0, minX: 39500, maxX: 40500, direction: 1, color: '#6a9c3a', stroke: '#4a6c25', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 2.1 },
             { x: 41000, y: chaoY - 120, radius: MOB_RADIUS, speed: 5.5, minX: 40500, maxX: 41500, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 0.9 },
-            { x: 42000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 5.2, minX: 41500, maxX: 42500, direction: 1, color: '#f39c12', stroke: '#d68910', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            { x: 42000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 5.2, minX: 41500, maxX: 42500, direction: 1, color: '#7a8c4a', stroke: '#5a6c2a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 0.6 },
             { x: 43000, y: chaoY - 100, radius: MOB_RADIUS, speed: 5.6, minX: 42500, maxX: 43500, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 55, fase: 1.4 },
-            { x: 44000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 5.4, minX: 43500, maxX: 44500, direction: 1, color: '#1abc9c', stroke: '#16a085', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
+            { x: 44000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 5.4, minX: 43500, maxX: 44500, direction: 1, color: '#8a6c3a', stroke: '#6a4c1a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 2.8 },
             { x: 45000, y: chaoY - 80, radius: MOB_RADIUS, speed: 5.8, minX: 44500, maxX: 45500, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 2.2 },
-            { x: 46000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 5.6, minX: 45500, maxX: 46500, direction: 1, color: '#e67e22', stroke: '#d35400', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' }
+            { x: 46000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 5.6, minX: 45500, maxX: 46500, direction: 1, color: '#5a8a5a', stroke: '#3a6a3a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 1.6 }
         ];
 
-        // ============================================
-        // CHECKPOINTS
-        // ============================================
         const checkpoints = [
             { x: 5700, y: chaoY - 60, w: 10, h: 60, ativado: false, tipo: 'bandeira' },
             { x: 9300, y: chaoY - 40, w: 10, h: 40, ativado: false, tipo: 'bandeira' },
@@ -353,9 +332,6 @@
             { x: 47000, y: chaoY - 40, w: 10, h: 40, ativado: false, tipo: 'bandeira' }
         ];
 
-        // ============================================
-        // SÁBIO
-        // ============================================
         const sabio = {
             x: 5950, y: chaoY - 50, largura: 40, altura: 40, cor: '#3498db',
             conversaAtiva: false, timer: 0,
@@ -363,15 +339,9 @@
             falaIndex: 0, conversaTerminada: false, esperandoProxima: false
         };
 
-        // ============================================
-        // CÂMERA E CONTROLES
-        // ============================================
         let cameraX = 0;
         const keys = { a: false, d: false, w: false, space: false };
 
-        // ============================================
-        // CENÁRIO DINÂMICO
-        // ============================================
         let matinhos = [];
         let nuvens = [];
         let particulasAmbiente = [];
@@ -382,14 +352,11 @@
                 if (estaSobreBuraco(x)) continue;
                 let noChao = false;
                 for (let plat of platforms) {
-                    if (plat.y === chaoY && x > plat.x && x < plat.x + plat.width) {
-                        noChao = true; break;
-                    }
+                    if (plat.y === chaoY && x > plat.x && x < plat.x + plat.width) { noChao = true; break; }
                 }
                 if (noChao) {
                     matinhos.push({
-                        x: x,
-                        altura: 8 + Math.random() * 8,
+                        x: x, altura: 8 + Math.random() * 8,
                         fase: Math.random() * Math.PI * 2,
                         cor: Math.random() > 0.5 ? '#5d9c6b' : '#4a7c59'
                     });
@@ -410,10 +377,8 @@
             particulasAmbiente = [];
             for (let i = 0; i < 60; i++) {
                 particulasAmbiente.push({
-                    x: Math.random() * W,
-                    y: Math.random() * H * 0.8,
-                    vx: (Math.random() - 0.5) * 0.4,
-                    vy: (Math.random() - 0.5) * 0.2,
+                    x: Math.random() * W, y: Math.random() * H * 0.8,
+                    vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.2,
                     tamanho: 1 + Math.random() * 2,
                     brilho: Math.random() * Math.PI * 2,
                     cor: Math.random() > 0.5 ? '#fff8c4' : '#c4e8ff'
@@ -429,11 +394,8 @@
                     n.y = 40 + Math.random() * (H * 0.35);
                 }
             }
-
             for (let p of particulasAmbiente) {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.brilho += 0.05;
+                p.x += p.vx; p.y += p.vy; p.brilho += 0.05;
                 if (p.x < -20) p.x = W + 20;
                 if (p.x > W + 20) p.x = -20;
                 if (p.y < -20) p.y = H * 0.85;
@@ -441,19 +403,14 @@
             }
         }
 
-        // ============================================
-        // FUNÇÕES DE COLISÃO E RESPAWN
-        // ============================================
         function resetPlayer() {
             if (vidas <= 0) { gameOver = true; return; }
             let checkpointEncontrado = null;
             for (let cp of checkpoints) if (cp.ativado) checkpointEncontrado = cp;
             if (checkpointEncontrado) {
-                player.x = checkpointX;
-                player.y = checkpointY;
+                player.x = checkpointX; player.y = checkpointY;
             } else {
-                player.x = player.spawnX;
-                player.y = player.spawnY;
+                player.x = player.spawnX; player.y = player.spawnY;
             }
             player.vx = 0; player.vy = 0; player.onGround = false;
             vidas--;
@@ -480,9 +437,6 @@
             }
         }
 
-        // ============================================
-        // PARTÍCULAS
-        // ============================================
         let particulas = [];
 
         function criarParticulas(x, y, quantidade, cor, velocidade, vida) {
@@ -491,8 +445,7 @@
                 const vel = Math.random() * velocidade + 1;
                 particulas.push({
                     x: x, y: y,
-                    vx: Math.cos(angulo) * vel,
-                    vy: Math.sin(angulo) * vel - 1,
+                    vx: Math.cos(angulo) * vel, vy: Math.sin(angulo) * vel - 1,
                     vida: vida || 30, vidaMax: vida || 30,
                     cor: cor,
                     tamanho: Math.random() * 6 + 3
@@ -531,8 +484,7 @@
                 if (player.x + player.w > cp.x && player.x < cp.x + cp.w + 30 &&
                     player.y + player.h > cp.y && player.y < cp.y + cp.h) {
                     cp.ativado = true;
-                    checkpointX = player.x;
-                    checkpointY = player.y;
+                    checkpointX = player.x; checkpointY = player.y;
                     if (vidas < MAX_VIDAS) {
                         vidas++;
                         criarParticulas(player.x + player.w/2, player.y + player.h/2, 20, '#ff6b6b', 4, 30);
@@ -541,15 +493,10 @@
             }
         }
 
-        // ============================================
-        // CONVERSA COM O SÁBIO
-        // ============================================
         function iniciarConversa() {
             if (sabio.conversaTerminada || !checkpoints[0].ativado || sabio.conversaAtiva) return;
             sabio.conversaAtiva = true;
-            sabio.falaIndex = 0;
-            sabio.timer = 0;
-            sabio.esperandoProxima = false;
+            sabio.falaIndex = 0; sabio.timer = 0; sabio.esperandoProxima = false;
         }
 
         function avancarConversa() {
@@ -560,8 +507,7 @@
                 temEspada = true;
                 return;
             }
-            sabio.timer = 0;
-            sabio.esperandoProxima = false;
+            sabio.timer = 0; sabio.esperandoProxima = false;
         }
 
         function updateConversa() {
@@ -575,9 +521,6 @@
             }
         }
 
-        // ============================================
-        // ATAQUE
-        // ============================================
         function executarAtaque() {
             if (!temEspada || atacando) return;
             atacando = true;
@@ -610,9 +553,6 @@
             }
         }
 
-        // ============================================
-        // REINICIAR JOGO
-        // ============================================
         function restartGame() {
             gameOver = false; nivelConcluido = false; nivelAtual = 1;
             vidas = 5; moedas = 0; temEspada = false; atacando = false;
@@ -639,7 +579,8 @@
                 if (i < posicoesIniciais.length) mobs[i].x = posicoesIniciais[i];
                 mobs[i].morto = false; mobs[i].direction = 1; mobs[i].hp = 2;
                 mobs[i].knockbackX = 0; mobs[i].knockbackY = 0;
-                mobs[i].emKnockback = false; mobs[i].fase = 0;
+                mobs[i].emKnockback = false;
+                mobs[i].fase = Math.random() * Math.PI * 2;
             }
 
             cameraX = player.x - W / 2;
@@ -655,9 +596,6 @@
             }
         }
 
-        // ============================================
-        // ATUALIZAÇÃO
-        // ============================================
         function update() {
             tempoGlobal++;
             atualizarCenario();
@@ -775,11 +713,254 @@
         }
 
         // ============================================
-        // DESENHAR MORCEGO (criatura de verdade!)
+        // DESENHAR ORC
+        // ============================================
+        function desenharOrc(mx, my, mob) {
+            const r = mob.radius;
+            const walkCycle = tempoGlobal * 0.18 + mob.fase;
+            const legSwing = Math.sin(walkCycle);
+            const armSwing = -legSwing;
+            const bodyBob = Math.abs(Math.cos(walkCycle)) * r * 0.06;
+            const pele = mob.color;
+            const peleEsc = mob.stroke;
+
+            ctx.save();
+            ctx.translate(mx, my + bodyBob);
+
+            ctx.fillStyle = 'rgba(0,0,0,0.35)';
+            ctx.beginPath();
+            ctx.ellipse(0, r * 0.95 - bodyBob, r * 0.85, r * 0.14, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            const legBaseY = r * 0.15;
+            const legLen = r * 0.65;
+            const legLeftY = legSwing * r * 0.12;
+            const legRightY = -legSwing * r * 0.12;
+
+            ctx.fillStyle = pele;
+            ctx.strokeStyle = peleEsc;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(-r * 0.32, legBaseY + legLen / 2 + legLeftY, r * 0.19, legLen / 2, 0, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+            ctx.beginPath();
+            ctx.ellipse(r * 0.32, legBaseY + legLen / 2 + legRightY, r * 0.19, legLen / 2, 0, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+
+            ctx.fillStyle = '#3a2010';
+            ctx.strokeStyle = '#1a0800';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(-r * 0.32, legBaseY + legLen + legLeftY, r * 0.27, r * 0.15, 0, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+            ctx.beginPath();
+            ctx.ellipse(r * 0.32, legBaseY + legLen + legRightY, r * 0.27, r * 0.15, 0, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+
+            ctx.fillStyle = '#6b3a1a';
+            ctx.strokeStyle = '#3a1a00';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-r * 0.75, r * 0.2);
+            ctx.lineTo(r * 0.75, r * 0.2);
+            ctx.lineTo(r * 0.6, r * 0.55);
+            ctx.lineTo(-r * 0.6, r * 0.55);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+
+            ctx.fillStyle = '#2a1200';
+            ctx.fillRect(-r * 0.78, r * 0.15, r * 1.56, r * 0.12);
+
+            ctx.fillStyle = '#c9a961';
+            ctx.beginPath();
+            ctx.arc(0, r * 0.21, r * 0.1, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#2a1200';
+            ctx.beginPath();
+            ctx.arc(0, r * 0.21, r * 0.045, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.save();
+            ctx.translate(-r * 0.72, -r * 0.35);
+            ctx.rotate(armSwing * 0.35);
+            ctx.fillStyle = pele;
+            ctx.strokeStyle = peleEsc;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(0, r * 0.35, r * 0.17, r * 0.4, 0, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+            ctx.fillStyle = peleEsc;
+            ctx.beginPath();
+            ctx.arc(0, r * 0.75, r * 0.21, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#1a0800';
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(r * 0.72, -r * 0.35);
+            ctx.rotate(-armSwing * 0.35);
+            ctx.fillStyle = pele;
+            ctx.strokeStyle = peleEsc;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(0, r * 0.35, r * 0.17, r * 0.4, 0, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+            ctx.fillStyle = peleEsc;
+            ctx.beginPath();
+            ctx.arc(0, r * 0.75, r * 0.21, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#1a0800';
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.fillStyle = pele;
+            ctx.strokeStyle = peleEsc;
+            ctx.lineWidth = 2.5;
+            ctx.shadowColor = 'rgba(0,0,0,0.4)';
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.ellipse(0, -r * 0.15, r * 0.8, r * 0.68, 0, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            ctx.strokeStyle = peleEsc;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(0, -r * 0.4);
+            ctx.lineTo(0, r * 0.05);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.ellipse(-r * 0.28, -r * 0.28, r * 0.22, r * 0.14, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.ellipse(r * 0.28, -r * 0.28, r * 0.22, r * 0.14, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.fillStyle = '#3a2010';
+            ctx.strokeStyle = '#1a0800';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(-r * 0.78, -r * 0.55, r * 0.28, r * 0.2, -0.25, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#909090';
+            ctx.beginPath();
+            ctx.moveTo(-r * 0.95, -r * 0.65);
+            ctx.lineTo(-r * 1.05, -r * 1.0);
+            ctx.lineTo(-r * 0.78, -r * 0.68);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#404040';
+            ctx.stroke();
+
+            ctx.fillStyle = '#3a2010';
+            ctx.strokeStyle = '#1a0800';
+            ctx.beginPath();
+            ctx.ellipse(r * 0.78, -r * 0.55, r * 0.28, r * 0.2, 0.25, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#909090';
+            ctx.beginPath();
+            ctx.moveTo(r * 0.95, -r * 0.65);
+            ctx.lineTo(r * 1.05, -r * 1.0);
+            ctx.lineTo(r * 0.78, -r * 0.68);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#404040';
+            ctx.stroke();
+
+            ctx.fillStyle = pele;
+            ctx.strokeStyle = peleEsc;
+            ctx.lineWidth = 2.5;
+            ctx.shadowColor = 'rgba(0,0,0,0.4)';
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.ellipse(0, -r * 1.0, r * 0.58, r * 0.55, 0, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            ctx.fillStyle = pele;
+            ctx.strokeStyle = peleEsc;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(0, -r * 0.78, r * 0.42, r * 0.24, 0, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+
+            ctx.fillStyle = pele;
+            ctx.strokeStyle = peleEsc;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-r * 0.5, -r * 1.2);
+            ctx.lineTo(-r * 0.85, -r * 1.6);
+            ctx.lineTo(-r * 0.32, -r * 1.35);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(r * 0.5, -r * 1.2);
+            ctx.lineTo(r * 0.85, -r * 1.6);
+            ctx.lineTo(r * 0.32, -r * 1.35);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+
+            ctx.strokeStyle = '#1a0800';
+            ctx.lineWidth = 3.5;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(-r * 0.42, -r * 1.2);
+            ctx.lineTo(-r * 0.08, -r * 1.02);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(r * 0.42, -r * 1.2);
+            ctx.lineTo(r * 0.08, -r * 1.02);
+            ctx.stroke();
+            ctx.lineCap = 'butt';
+
+            ctx.fillStyle = '#fff8e0';
+            ctx.beginPath();
+            ctx.ellipse(-r * 0.22, -r * 1.0, r * 0.15, r * 0.13, 0, 0, Math.PI * 2);
+            ctx.ellipse(r * 0.22, -r * 1.0, r * 0.15, r * 0.13, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#ff2200';
+            ctx.shadowColor = '#ff2200';
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.arc(-r * 0.22, -r * 1.0, r * 0.075, 0, Math.PI * 2);
+            ctx.arc(r * 0.22, -r * 1.0, r * 0.075, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(-r * 0.24, -r * 1.03, r * 0.03, 0, Math.PI * 2);
+            ctx.arc(r * 0.2, -r * 1.03, r * 0.03, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#3a5a1a';
+            ctx.beginPath();
+            ctx.ellipse(0, -r * 0.88, r * 0.1, r * 0.075, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = '#1a0800';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(-r * 0.26, -r * 0.72);
+            ctx.quadraticCurveTo(0, -r * 0.6, r * 0.26, -r * 0.72);
+            ctx.stroke();
+
+            ctx.fillStyle = 'rgba(180, 40, 30, 0.75)';
+            ctx.fillRect(-r * 0.45, -r * 0.92, r * 0.14, r * 0.05);
+            ctx.fillRect(-r * 0.45, -r * 0.82, r * 0.14, r * 0.05);
+            ctx.fillRect(r * 0.31, -r * 0.92, r * 0.14, r * 0.05);
+            ctx.fillRect(r * 0.31, -r * 0.82, r * 0.14, r * 0.05);
+
+            ctx.restore();
+        }
+
+        // ============================================
+        // DESENHAR MORCEGO
         // ============================================
         function desenharMorcego(mx, my, mob) {
             const r = mob.radius;
-            // Bater de asa: -1 a 1
             const asaBat = Math.sin(tempoGlobal * 0.5 + mob.fase);
             const dir = mob.direction >= 0 ? 1 : -1;
 
@@ -793,15 +974,9 @@
             ctx.shadowColor = 'rgba(0,0,0,0.5)';
             ctx.shadowBlur = 12;
 
-            // ============ ASA ESQUERDA ============
             ctx.beginPath();
             ctx.moveTo(-r * 0.4, -r * 0.2);
-            // topo da asa (sobe conforme bate)
-            ctx.quadraticCurveTo(
-                -r * 1.3, -r * (0.9 + asaBat * 0.5),
-                -r * 2.1, -r * (0.3 + asaBat * 1.0)
-            );
-            // ponta dos "dedos" (recortes característicos dos morcegos)
+            ctx.quadraticCurveTo(-r * 1.3, -r * (0.9 + asaBat * 0.5), -r * 2.1, -r * (0.3 + asaBat * 1.0));
             ctx.lineTo(-r * 1.7, -r * 0.05);
             ctx.quadraticCurveTo(-r * 1.55, r * 0.15, -r * 1.45, r * 0.05);
             ctx.quadraticCurveTo(-r * 1.25, r * 0.25, -r * 1.1, r * 0.1);
@@ -809,16 +984,11 @@
             ctx.quadraticCurveTo(-r * 0.6, r * 0.35, -r * 0.45, r * 0.1);
             ctx.lineTo(-r * 0.4, 0);
             ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
+            ctx.fill(); ctx.stroke();
 
-            // ============ ASA DIREITA ============
             ctx.beginPath();
             ctx.moveTo(r * 0.4, -r * 0.2);
-            ctx.quadraticCurveTo(
-                r * 1.3, -r * (0.9 + asaBat * 0.5),
-                r * 2.1, -r * (0.3 + asaBat * 1.0)
-            );
+            ctx.quadraticCurveTo(r * 1.3, -r * (0.9 + asaBat * 0.5), r * 2.1, -r * (0.3 + asaBat * 1.0));
             ctx.lineTo(r * 1.7, -r * 0.05);
             ctx.quadraticCurveTo(r * 1.55, r * 0.15, r * 1.45, r * 0.05);
             ctx.quadraticCurveTo(r * 1.25, r * 0.25, r * 1.1, r * 0.1);
@@ -826,39 +996,29 @@
             ctx.quadraticCurveTo(r * 0.6, r * 0.35, r * 0.45, r * 0.1);
             ctx.lineTo(r * 0.4, 0);
             ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
+            ctx.fill(); ctx.stroke();
 
-            // ============ CORPO (oval peludo) ============
             ctx.beginPath();
             ctx.ellipse(0, 0, r * 0.55, r * 0.75, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
+            ctx.fill(); ctx.stroke();
 
-            // ============ CABEÇA ============
             ctx.beginPath();
             ctx.arc(0, -r * 0.7, r * 0.45, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
+            ctx.fill(); ctx.stroke();
 
-            // ============ ORELHAS PONTUDAS ============
             ctx.beginPath();
             ctx.moveTo(-r * 0.35, -r * 0.95);
             ctx.lineTo(-r * 0.55, -r * 1.5);
             ctx.lineTo(-r * 0.1, -r * 1.0);
             ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
+            ctx.fill(); ctx.stroke();
             ctx.beginPath();
             ctx.moveTo(r * 0.35, -r * 0.95);
             ctx.lineTo(r * 0.55, -r * 1.5);
             ctx.lineTo(r * 0.1, -r * 1.0);
             ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
+            ctx.fill(); ctx.stroke();
 
-            // ============ OLHOS BRILHANTES ============
             ctx.fillStyle = '#ffeb3b';
             ctx.shadowColor = '#ffeb3b';
             ctx.shadowBlur = 8;
@@ -868,7 +1028,6 @@
             ctx.fill();
             ctx.shadowBlur = 0;
 
-            // ============ PUPILAS ============
             ctx.fillStyle = '#000';
             ctx.beginPath();
             ctx.arc(-r * 0.18, -r * 0.7, r * 0.06, 0, Math.PI * 2);
@@ -876,6 +1035,257 @@
             ctx.fill();
 
             ctx.restore();
+        }
+
+        // ============================================
+        // DESENHAR ESPADA MÁGICA (GIRO 360°)
+        // ============================================
+        function desenharEspadaMagica(px, py, w, h, estaAtacando, progresso) {
+            const escala = w / 40;
+
+            const maoX = px + w * 0.9;
+            const maoY = py + h * 0.5;
+
+            // Giro de 360°: de -140° até +220°
+            const rotInicial = -Math.PI * 0.78;
+
+            let rotacao;
+            if (estaAtacando) {
+                const t = progresso;
+                // Easing suave mas com 360° completo
+                const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+                rotacao = rotInicial + eased * Math.PI * 2;
+            } else {
+                rotacao = -0.15;
+            }
+
+            const pulso = 0.75 + Math.sin(tempoGlobal * 0.12) * 0.25;
+            const intensidadeAtaque = estaAtacando ? 1.6 : 1;
+            const flutuacao = estaAtacando ? 0 : Math.sin(tempoGlobal * 0.08) * 1.5;
+
+            // Aura
+            const raioAura = 45 * (estaAtacando ? 1.4 : 1);
+            const gradAura = ctx.createRadialGradient(maoX, maoY + flutuacao, 0, maoX, maoY + flutuacao, raioAura);
+            gradAura.addColorStop(0, `rgba(120, 220, 255, ${0.55 * pulso * intensidadeAtaque})`);
+            gradAura.addColorStop(0.5, `rgba(80, 180, 255, ${0.25 * pulso * intensidadeAtaque})`);
+            gradAura.addColorStop(1, 'rgba(80, 180, 255, 0)');
+            ctx.fillStyle = gradAura;
+            ctx.beginPath();
+            ctx.arc(maoX, maoY + flutuacao, raioAura, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Rastro (arco de 360° completo)
+            if (estaAtacando && progresso > 0.05) {
+                const distPonta = 46 * escala;
+                const rotAtual = rotacao;
+                const numSegmentos = 24;
+                for (let i = 0; i < numSegmentos; i++) {
+                    const tIni = i / numSegmentos;
+                    const tFim = (i + 1) / numSegmentos;
+                    const rot1 = rotInicial + (rotAtual - rotInicial) * tIni;
+                    const rot2 = rotInicial + (rotAtual - rotInicial) * tFim;
+                    const x1 = maoX + Math.sin(rot1) * distPonta;
+                    const y1 = maoY + flutuacao - Math.cos(rot1) * distPonta;
+                    const x2 = maoX + Math.sin(rot2) * distPonta;
+                    const y2 = maoY + flutuacao - Math.cos(rot2) * distPonta;
+                    const alpha = (i / numSegmentos) * 0.75 * (1 - progresso * 0.4);
+                    const larguraSeg = (2 + i * 0.3) * escala;
+
+                    ctx.strokeStyle = `rgba(150, 230, 255, ${alpha})`;
+                    ctx.lineWidth = larguraSeg;
+                    ctx.lineCap = 'round';
+                    ctx.shadowColor = '#66ccff';
+                    ctx.shadowBlur = 14;
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+                }
+                ctx.shadowBlur = 0;
+                ctx.lineCap = 'butt';
+            }
+
+            // Espada
+            ctx.save();
+            ctx.translate(maoX, maoY + flutuacao);
+            ctx.rotate(rotacao);
+
+            // Pomo
+            ctx.fillStyle = '#8a6a2a';
+            ctx.strokeStyle = '#4a3000';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(0, 22 * escala, 4 * escala, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+
+            ctx.fillStyle = '#ff2244';
+            ctx.shadowColor = '#ff2244';
+            ctx.shadowBlur = 8 * pulso;
+            ctx.beginPath();
+            ctx.arc(0, 22 * escala, 2.2 * escala, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Cabo
+            ctx.fillStyle = '#5a3a1a';
+            ctx.strokeStyle = '#3a1a00';
+            ctx.lineWidth = 1;
+            ctx.fillRect(-3 * escala, 8 * escala, 6 * escala, 12 * escala);
+            ctx.strokeRect(-3 * escala, 8 * escala, 6 * escala, 12 * escala);
+
+            ctx.strokeStyle = '#3a1a00';
+            ctx.lineWidth = 1.2;
+            for (let i = 0; i < 4; i++) {
+                const yy = 9 * escala + i * 3 * escala;
+                ctx.beginPath();
+                ctx.moveTo(-3 * escala, yy);
+                ctx.lineTo(3 * escala, yy + 1.5 * escala);
+                ctx.stroke();
+            }
+
+            // Guarda
+            ctx.fillStyle = '#d4a44a';
+            ctx.strokeStyle = '#8a5a10';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(-10 * escala, 6 * escala);
+            ctx.lineTo(10 * escala, 6 * escala);
+            ctx.lineTo(8 * escala, 9 * escala);
+            ctx.lineTo(-8 * escala, 9 * escala);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(-10 * escala, 6 * escala);
+            ctx.lineTo(-13 * escala, 4 * escala);
+            ctx.lineTo(-11 * escala, 8 * escala);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(10 * escala, 6 * escala);
+            ctx.lineTo(13 * escala, 4 * escala);
+            ctx.lineTo(11 * escala, 8 * escala);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+
+            // Gema
+            ctx.fillStyle = '#ff2244';
+            ctx.shadowColor = '#ff2244';
+            ctx.shadowBlur = 10 * pulso;
+            ctx.beginPath();
+            ctx.moveTo(0, 4 * escala);
+            ctx.lineTo(3 * escala, 7 * escala);
+            ctx.lineTo(0, 10 * escala);
+            ctx.lineTo(-3 * escala, 7 * escala);
+            ctx.closePath();
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#8a0010';
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+
+            // Lâmina
+            ctx.shadowColor = '#66ccff';
+            ctx.shadowBlur = 14 * pulso * intensidadeAtaque;
+
+            const gradLamina = ctx.createLinearGradient(0, 0, 0, -45 * escala);
+            gradLamina.addColorStop(0, '#e8f4ff');
+            gradLamina.addColorStop(0.4, '#b8d8ee');
+            gradLamina.addColorStop(0.7, '#88aacc');
+            gradLamina.addColorStop(1, '#aaddff');
+            ctx.fillStyle = gradLamina;
+            ctx.strokeStyle = '#4a7a9a';
+            ctx.lineWidth = 1.2;
+
+            ctx.beginPath();
+            ctx.moveTo(-3.5 * escala, 5 * escala);
+            ctx.lineTo(-3 * escala, -38 * escala);
+            ctx.lineTo(0, -46 * escala);
+            ctx.lineTo(3 * escala, -38 * escala);
+            ctx.lineTo(3.5 * escala, 5 * escala);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(0, 3 * escala);
+            ctx.lineTo(0, -42 * escala);
+            ctx.stroke();
+
+            // Runa
+            const runaPulso = 0.5 + Math.sin(tempoGlobal * 0.15) * 0.5;
+            ctx.strokeStyle = `rgba(120, 220, 255, ${runaPulso * intensidadeAtaque})`;
+            ctx.shadowColor = '#66ccff';
+            ctx.shadowBlur = 8 * pulso;
+            ctx.lineWidth = 1.5;
+
+            ctx.beginPath();
+            ctx.moveTo(0, -20 * escala);
+            ctx.lineTo(2.5 * escala, -17 * escala);
+            ctx.lineTo(0, -14 * escala);
+            ctx.lineTo(-2.5 * escala, -17 * escala);
+            ctx.closePath();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, -26 * escala);
+            ctx.lineTo(0, -22 * escala);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, -12 * escala);
+            ctx.lineTo(0, -8 * escala);
+            ctx.stroke();
+
+            ctx.shadowBlur = 0;
+            ctx.restore();
+
+            // Faíscas
+            const numFaiscas = estaAtacando ? 9 : 4;
+            for (let i = 0; i < numFaiscas; i++) {
+                const faseFaisca = tempoGlobal * 0.08 + i * 1.5;
+                const angulo = faseFaisca;
+                const raio = 18 + Math.sin(faseFaisca * 1.3) * 6;
+                const fx = maoX + Math.cos(angulo) * raio;
+                const fy = maoY + flutuacao + Math.sin(angulo * 0.8) * raio - 5;
+                const tamanhoFaisca = 1.5 + Math.sin(faseFaisca * 2) * 1;
+
+                ctx.fillStyle = `rgba(150, 230, 255, ${0.6 + Math.sin(faseFaisca * 3) * 0.3})`;
+                ctx.shadowColor = '#66ccff';
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(fx, fy, tamanhoFaisca, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+
+            // Flash de impacto (aparece duas vezes: no meio e no fim)
+            if (estaAtacando) {
+                let intensidade = 0;
+                if (progresso > 0.45 && progresso < 0.6) {
+                    intensidade = 1 - Math.abs(progresso - 0.525) / 0.075;
+                } else if (progresso > 0.85) {
+                    intensidade = 1 - Math.abs(progresso - 0.925) / 0.075;
+                }
+
+                if (intensidade > 0) {
+                    const distPonta = 46 * escala;
+                    const pontaX = maoX + Math.sin(rotacao) * distPonta;
+                    const pontaY = maoY + flutuacao - Math.cos(rotacao) * distPonta;
+
+                    const gradFlash = ctx.createRadialGradient(pontaX, pontaY, 0, pontaX, pontaY, 35 * intensidade);
+                    gradFlash.addColorStop(0, `rgba(255, 255, 255, ${0.9 * intensidade})`);
+                    gradFlash.addColorStop(0.4, `rgba(150, 230, 255, ${0.6 * intensidade})`);
+                    gradFlash.addColorStop(1, 'rgba(150, 230, 255, 0)');
+                    ctx.fillStyle = gradFlash;
+                    ctx.beginPath();
+                    ctx.arc(pontaX, pontaY, 35 * intensidade, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
         }
 
         // ============================================
@@ -893,7 +1303,6 @@
                 ctx.fillRect(0, 0, W, H);
             }
 
-            // Sol com brilho pulsante
             const raioSol = 60 + Math.sin(tempoGlobal * 0.02) * 5;
             const solX = W * 0.8 - cameraX * 0.02;
             const solY = H * 0.2;
@@ -906,7 +1315,6 @@
             ctx.arc(solX, solY, raioSol * 3, 0, Math.PI * 2);
             ctx.fill();
 
-            // Nuvens
             for (let n of nuvens) {
                 ctx.globalAlpha = n.opacidade;
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
@@ -920,9 +1328,6 @@
             }
         }
 
-        // ============================================
-        // DESENHAR GRAMA
-        // ============================================
         function desenharMatinhos() {
             for (let m of matinhos) {
                 const mx = m.x - cameraX;
@@ -943,9 +1348,6 @@
             ctx.lineCap = 'butt';
         }
 
-        // ============================================
-        // DESENHAR PARTÍCULAS AMBIENTE
-        // ============================================
         function desenharParticulasAmbiente() {
             for (let p of particulasAmbiente) {
                 const brilho = 0.4 + Math.sin(p.brilho) * 0.3;
@@ -969,7 +1371,6 @@
 
             desenharCenarioFundo();
 
-            // PLATAFORMAS
             for (let plat of platforms) {
                 const sx = plat.x - cameraX;
                 const sy = plat.y;
@@ -995,10 +1396,8 @@
                 }
             }
 
-            // GRAMA
             desenharMatinhos();
 
-            // ESPINHOS
             for (let espinho of ESPINHOS) {
                 const ex = espinho.x - cameraX;
                 const ey = espinho.y;
@@ -1018,7 +1417,6 @@
                 ctx.stroke();
             }
 
-            // BURACOS
             for (let buraco of BURACOS) {
                 const bx = buraco.inicio - cameraX;
                 ctx.fillStyle = 'rgba(255,0,0,0.15)';
@@ -1028,7 +1426,6 @@
                 ctx.fillText('💀', bx + 10, chaoY - 10);
             }
 
-            // MOEDAS
             for (let m of moedasArray) {
                 if (m.coletada) continue;
                 const mx = m.x - cameraX;
@@ -1053,7 +1450,6 @@
                 ctx.fill();
             }
 
-            // CHECKPOINTS
             for (let cp of checkpoints) {
                 const cx = cp.x - cameraX;
                 const cy = cp.y;
@@ -1075,7 +1471,6 @@
                 ctx.stroke();
             }
 
-            // SÁBIO
             const sxSabio = sabio.x - cameraX;
             const sySabio = sabio.y + Math.sin(tempoGlobal * 0.04) * 2;
             ctx.shadowColor = 'rgba(0,0,0,0.4)';
@@ -1144,50 +1539,24 @@
                 ctx.textBaseline = 'alphabetic';
             }
 
-            // MOBS
             for (let mob of mobs) {
                 if (mob.morto) continue;
                 const mx = mob.x - cameraX;
                 const my = mob.y;
 
                 if (mob.tipo === 'voador') {
-                    // MORCEGO DE VERDADE
                     desenharMorcego(mx, my, mob);
                 } else {
-                    // Terrestre continua bola com olhos
-                    ctx.beginPath();
-                    ctx.arc(mx, my, mob.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = mob.color;
-                    ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                    ctx.shadowBlur = 15;
-                    ctx.fill();
-                    ctx.shadowBlur = 0;
-                    ctx.strokeStyle = mob.stroke;
-                    ctx.lineWidth = 3;
-                    ctx.stroke();
-
-                    const olhoT = mob.radius * 0.3;
-                    ctx.fillStyle = '#fff';
-                    ctx.beginPath();
-                    ctx.arc(mx - olhoT, my - 2, mob.radius * 0.2, 0, Math.PI * 2);
-                    ctx.arc(mx + olhoT, my - 2, mob.radius * 0.2, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = '#000';
-                    ctx.beginPath();
-                    ctx.arc(mx - olhoT + (mob.direction * 1), my - 2, mob.radius * 0.1, 0, Math.PI * 2);
-                    ctx.arc(mx + olhoT + (mob.direction * 1), my - 2, mob.radius * 0.1, 0, Math.PI * 2);
-                    ctx.fill();
+                    desenharOrc(mx, my, mob);
                 }
 
-                // Barrinha de vida (offset diferente para morcego por causa das orelhas)
-                const offsetBarra = mob.tipo === 'voador' ? mob.radius * 1.9 : mob.radius + 10;
+                const offsetBarra = mob.tipo === 'voador' ? mob.radius * 1.9 : mob.radius * 1.75;
                 ctx.fillStyle = 'rgba(255,0,0,0.7)';
                 ctx.fillRect(mx - mob.radius, my - offsetBarra, mob.radius * 2, 4);
                 ctx.fillStyle = 'rgba(0,255,0,0.7)';
                 ctx.fillRect(mx - mob.radius, my - offsetBarra, mob.radius * 2 * (mob.hp / 2), 4);
             }
 
-            // JOGADOR
             if (!gameOver) {
                 const px = player.x - cameraX;
                 const py = player.y;
@@ -1216,37 +1585,14 @@
                 ctx.fillRect(px + player.w - eyeOffset - eyeSize + pupil * 0.5, py + eyeOffset + pupil * 0.5, pupil, pupil);
 
                 if (temEspada) {
-                    ctx.fillStyle = '#f1c40f';
-                    ctx.shadowColor = 'rgba(241,196,15,0.6)';
-                    ctx.shadowBlur = 15;
-                    ctx.fillRect(px + player.w + 2, py + 4, 4, player.h - 8);
-                    ctx.fillRect(px + player.w - 2, py + 2, 12, 6);
-                    ctx.shadowBlur = 0;
-                    ctx.fillStyle = 'rgba(241,196,15,0.3)';
-                    ctx.beginPath();
-                    ctx.arc(px + player.w + 4, py + player.h/2, 12, 0, Math.PI*2);
-                    ctx.fill();
-                }
-
-                if (atacando) {
-                    const progresso = ataqueTimer / DURACAO_ATAQUE;
-                    const angulo = progresso * Math.PI * 1.5 - Math.PI/2;
-                    ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-                    ctx.lineWidth = 6;
-                    ctx.shadowColor = 'rgba(255,255,255,0.5)';
-                    ctx.shadowBlur = 20;
-                    ctx.beginPath();
-                    ctx.arc(px + player.w/2, py + player.h/2, 50, -Math.PI/2, -Math.PI/2 + angulo);
-                    ctx.stroke();
-                    ctx.shadowBlur = 0;
+                    const progressoAtaque = atacando ? (ataqueTimer / DURACAO_ATAQUE) : 0;
+                    desenharEspadaMagica(px, py, player.w, player.h, atacando, progressoAtaque);
                 }
             }
 
-            // PARTÍCULAS
             desenharParticulas();
             desenharParticulasAmbiente();
 
-            // UI
             if (!gameOver) {
                 ctx.fillStyle = 'rgba(255,255,255,0.8)';
                 ctx.font = '20px "Pixelify Sans", monospace';
@@ -1256,7 +1602,7 @@
                 ctx.fillText('Nível ' + nivelAtual, 20, 70);
                 ctx.fillText('🪙 ' + moedas, 20, 100);
                 if (temEspada) {
-                    ctx.fillStyle = 'rgba(241,196,15,0.8)';
+                    ctx.fillStyle = 'rgba(120, 220, 255, 0.9)';
                     ctx.fillText('🗡️ Espada Mágica', 20, 130);
                 }
                 ctx.shadowBlur = 0;
@@ -1271,7 +1617,6 @@
                 ctx.strokeRect(W/2 - 100, 20, 200, 8);
             }
 
-            // TÍTULOS
             if (mostrarTitulo && !gameOver) {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -1343,9 +1688,6 @@
             }
         }
 
-        // ============================================
-        // POLYFILL roundRect
-        // ============================================
         if (!CanvasRenderingContext2D.prototype.roundRect) {
             CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
                 if (r > w/2) r = w/2;
@@ -1363,18 +1705,12 @@
             };
         }
 
-        // ============================================
-        // LOOP PRINCIPAL
-        // ============================================
         function gameLoop() {
             update();
             draw();
             requestAnimationFrame(gameLoop);
         }
 
-        // ============================================
-        // REDIMENSIONAMENTO
-        // ============================================
         function resize() {
             isResizing = true;
             W = window.innerWidth;
@@ -1427,9 +1763,6 @@
 
         window.addEventListener('resize', resize);
 
-        // ============================================
-        // EVENTOS DE TECLADO
-        // ============================================
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (key === 'a' || key === 'd' || key === 'w') {
@@ -1445,9 +1778,6 @@
             }
         });
 
-        // ============================================
-        // INICIALIZAÇÃO
-        // ============================================
         gerarMoedas();
         resize();
         checkpointY = player.spawnY;
