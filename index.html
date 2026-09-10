@@ -80,6 +80,10 @@
         const imgPlataforma = new Image();
         imgPlataforma.src = 'plataforma.png';
 
+        // Imagem do mago
+        const imgMago = new Image();
+        imgMago.src = 'mago.png';
+
         // ============================================
         // CHÃO, PLATAFORMAS E BURACOS
         // ============================================
@@ -1046,13 +1050,11 @@
             const maoX = px + w * 0.9;
             const maoY = py + h * 0.5;
 
-            // Giro de 360°: de -140° até +220°
             const rotInicial = -Math.PI * 0.78;
 
             let rotacao;
             if (estaAtacando) {
                 const t = progresso;
-                // Easing suave mas com 360° completo
                 const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
                 rotacao = rotInicial + eased * Math.PI * 2;
             } else {
@@ -1063,7 +1065,6 @@
             const intensidadeAtaque = estaAtacando ? 1.6 : 1;
             const flutuacao = estaAtacando ? 0 : Math.sin(tempoGlobal * 0.08) * 1.5;
 
-            // Aura
             const raioAura = 45 * (estaAtacando ? 1.4 : 1);
             const gradAura = ctx.createRadialGradient(maoX, maoY + flutuacao, 0, maoX, maoY + flutuacao, raioAura);
             gradAura.addColorStop(0, `rgba(120, 220, 255, ${0.55 * pulso * intensidadeAtaque})`);
@@ -1074,7 +1075,6 @@
             ctx.arc(maoX, maoY + flutuacao, raioAura, 0, Math.PI * 2);
             ctx.fill();
 
-            // Rastro (arco de 360° completo)
             if (estaAtacando && progresso > 0.05) {
                 const distPonta = 46 * escala;
                 const rotAtual = rotacao;
@@ -1105,12 +1105,10 @@
                 ctx.lineCap = 'butt';
             }
 
-            // Espada
             ctx.save();
             ctx.translate(maoX, maoY + flutuacao);
             ctx.rotate(rotacao);
 
-            // Pomo
             ctx.fillStyle = '#8a6a2a';
             ctx.strokeStyle = '#4a3000';
             ctx.lineWidth = 1.5;
@@ -1126,7 +1124,6 @@
             ctx.fill();
             ctx.shadowBlur = 0;
 
-            // Cabo
             ctx.fillStyle = '#5a3a1a';
             ctx.strokeStyle = '#3a1a00';
             ctx.lineWidth = 1;
@@ -1143,7 +1140,6 @@
                 ctx.stroke();
             }
 
-            // Guarda
             ctx.fillStyle = '#d4a44a';
             ctx.strokeStyle = '#8a5a10';
             ctx.lineWidth = 1.5;
@@ -1169,7 +1165,6 @@
             ctx.closePath();
             ctx.fill(); ctx.stroke();
 
-            // Gema
             ctx.fillStyle = '#ff2244';
             ctx.shadowColor = '#ff2244';
             ctx.shadowBlur = 10 * pulso;
@@ -1185,7 +1180,6 @@
             ctx.lineWidth = 0.8;
             ctx.stroke();
 
-            // Lâmina
             ctx.shadowColor = '#66ccff';
             ctx.shadowBlur = 14 * pulso * intensidadeAtaque;
 
@@ -1215,7 +1209,6 @@
             ctx.lineTo(0, -42 * escala);
             ctx.stroke();
 
-            // Runa
             const runaPulso = 0.5 + Math.sin(tempoGlobal * 0.15) * 0.5;
             ctx.strokeStyle = `rgba(120, 220, 255, ${runaPulso * intensidadeAtaque})`;
             ctx.shadowColor = '#66ccff';
@@ -1243,7 +1236,6 @@
             ctx.shadowBlur = 0;
             ctx.restore();
 
-            // Faíscas
             const numFaiscas = estaAtacando ? 9 : 4;
             for (let i = 0; i < numFaiscas; i++) {
                 const faseFaisca = tempoGlobal * 0.08 + i * 1.5;
@@ -1262,7 +1254,6 @@
                 ctx.shadowBlur = 0;
             }
 
-            // Flash de impacto (aparece duas vezes: no meio e no fim)
             if (estaAtacando) {
                 let intensidade = 0;
                 if (progresso > 0.45 && progresso < 0.6) {
@@ -1285,6 +1276,95 @@
                     ctx.arc(pontaX, pontaY, 35 * intensidade, 0, Math.PI * 2);
                     ctx.fill();
                 }
+            }
+        }
+
+        // ============================================
+        // DESENHAR SÁBIO (MAGO) COM FLUTUAÇÃO
+        // ============================================
+        function desenharSabio(sx, sy) {
+            const r = sabio.largura / 2;
+
+            // Animação de flutuação: sobe e desce 8px + leve balanço horizontal
+            const flutuacao = Math.sin(tempoGlobal * 0.04) * 8;
+            const balancoX = Math.cos(tempoGlobal * 0.03) * 2;
+            const rotacaoLeve = Math.sin(tempoGlobal * 0.025) * 0.04;
+
+            const centroX = sx + r + balancoX;
+            const centroY = sy + r + flutuacao;
+
+            // Sombra no chão (que muda de tamanho conforme ele flutua)
+            const sombraEscala = 1 - (flutuacao + 8) / 40;
+            ctx.fillStyle = `rgba(0,0,0,${0.25 + 0.1 * (1 - sombraEscala)})`;
+            ctx.beginPath();
+            ctx.ellipse(centroX, sy + sabio.altura + 4, r * 0.7 * sombraEscala, 5 * sombraEscala, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Aura mágica pulsante ao redor do mago
+            const pulsoAura = 0.7 + Math.sin(tempoGlobal * 0.08) * 0.3;
+            const raioAura = r * 1.8;
+            const gradAura = ctx.createRadialGradient(centroX, centroY, 0, centroX, centroY, raioAura);
+            gradAura.addColorStop(0, `rgba(120, 200, 255, ${0.35 * pulsoAura})`);
+            gradAura.addColorStop(0.6, `rgba(80, 160, 255, ${0.15 * pulsoAura})`);
+            gradAura.addColorStop(1, 'rgba(80, 160, 255, 0)');
+            ctx.fillStyle = gradAura;
+            ctx.beginPath();
+            ctx.arc(centroX, centroY, raioAura, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Desenhar o mago com rotação leve
+            ctx.save();
+            ctx.translate(centroX, centroY);
+            ctx.rotate(rotacaoLeve);
+
+            if (imgMago.complete && imgMago.naturalWidth !== 0) {
+                // Imagem do mago
+                const larguraMago = r * 2.4;
+                const alturaMago = r * 2.8;
+                ctx.shadowColor = 'rgba(120, 200, 255, 0.6)';
+                ctx.shadowBlur = 15 * pulsoAura;
+                ctx.drawImage(
+                    imgMago,
+                    -larguraMago / 2,
+                    -alturaMago / 2,
+                    larguraMago,
+                    alturaMago
+                );
+                ctx.shadowBlur = 0;
+            } else {
+                // Fallback: triângulo azul caso a imagem não carregue
+                ctx.shadowColor = 'rgba(0,0,0,0.4)';
+                ctx.shadowBlur = 12;
+                ctx.fillStyle = sabio.cor;
+                ctx.beginPath();
+                ctx.moveTo(0, -r);
+                ctx.lineTo(r, r);
+                ctx.lineTo(-r, r);
+                ctx.closePath();
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#2980b9';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            ctx.restore();
+
+            // Partículas mágicas flutuando ao redor do mago
+            for (let i = 0; i < 5; i++) {
+                const fase = tempoGlobal * 0.05 + i * 1.3;
+                const raioOrbita = r * 1.4;
+                const orbX = centroX + Math.cos(fase) * raioOrbita;
+                const orbY = centroY + Math.sin(fase * 1.5) * raioOrbita * 0.6;
+                const tamanhoOrb = 2 + Math.sin(fase * 2) * 1;
+
+                ctx.fillStyle = `rgba(150, 220, 255, ${0.6 + Math.sin(fase * 3) * 0.3})`;
+                ctx.shadowColor = '#88ddff';
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(orbX, orbY, tamanhoOrb, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
             }
         }
 
@@ -1471,28 +1551,14 @@
                 ctx.stroke();
             }
 
+            // ============================================
+            // SÁBIO (MAGO) - substitui o triângulo
+            // ============================================
             const sxSabio = sabio.x - cameraX;
-            const sySabio = sabio.y + Math.sin(tempoGlobal * 0.04) * 2;
-            ctx.shadowColor = 'rgba(0,0,0,0.4)';
-            ctx.shadowBlur = 12;
-            ctx.fillStyle = sabio.cor;
-            ctx.beginPath();
-            ctx.moveTo(sxSabio + sabio.largura/2, sySabio);
-            ctx.lineTo(sxSabio + sabio.largura, sySabio + sabio.altura);
-            ctx.lineTo(sxSabio, sySabio + sabio.altura);
-            ctx.closePath();
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = '#2980b9';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(sxSabio + 8, sySabio + 12, 6, 6);
-            ctx.fillRect(sxSabio + sabio.largura - 14, sySabio + 12, 6, 6);
-            ctx.fillStyle = '#2c3e50';
-            ctx.fillRect(sxSabio + 10, sySabio + 14, 3, 3);
-            ctx.fillRect(sxSabio + sabio.largura - 12, sySabio + 14, 3, 3);
+            const sySabio = sabio.y;
+            desenharSabio(sxSabio, sySabio);
 
+            // Balão de fala do mago (posicionado acima dele)
             if (sabio.conversaAtiva && !sabio.conversaTerminada) {
                 const falaAtual = sabio.falas[sabio.falaIndex] || '';
                 ctx.font = '16px "Pixelify Sans", monospace';
@@ -1500,8 +1566,12 @@
                 const padding = 20;
                 const bw = Math.max(larguraTexto + padding * 2, 60);
                 const bh = 24 + padding;
-                const bx = sxSabio + sabio.largura/2 - bw/2;
-                const by = sySabio - bh - 16;
+
+                // Posição do balão acompanha a flutuação
+                const flutuacao = Math.sin(tempoGlobal * 0.04) * 8;
+                const balancoX = Math.cos(tempoGlobal * 0.03) * 2;
+                const bx = sxSabio + sabio.largura/2 - bw/2 + balancoX;
+                const by = sySabio - bh - 16 + flutuacao;
 
                 ctx.shadowColor = 'rgba(0,0,0,0.5)';
                 ctx.shadowBlur = 12;
@@ -1517,17 +1587,17 @@
                 ctx.stroke();
                 ctx.fillStyle = 'rgba(255,255,255,0.95)';
                 ctx.beginPath();
-                ctx.moveTo(sxSabio + sabio.largura/2 - 8, by + bh);
-                ctx.lineTo(sxSabio + sabio.largura/2, by + bh + 12);
-                ctx.lineTo(sxSabio + sabio.largura/2 + 8, by + bh);
+                ctx.moveTo(sxSabio + sabio.largura/2 - 8 + balancoX, by + bh);
+                ctx.lineTo(sxSabio + sabio.largura/2 + balancoX, by + bh + 12);
+                ctx.lineTo(sxSabio + sabio.largura/2 + 8 + balancoX, by + bh);
                 ctx.closePath();
                 ctx.fill();
                 ctx.strokeStyle = '#333';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.moveTo(sxSabio + sabio.largura/2 - 8, by + bh);
-                ctx.lineTo(sxSabio + sabio.largura/2, by + bh + 12);
-                ctx.lineTo(sxSabio + sabio.largura/2 + 8, by + bh);
+                ctx.moveTo(sxSabio + sabio.largura/2 - 8 + balancoX, by + bh);
+                ctx.lineTo(sxSabio + sabio.largura/2 + balancoX, by + bh + 12);
+                ctx.lineTo(sxSabio + sabio.largura/2 + 8 + balancoX, by + bh);
                 ctx.stroke();
 
                 ctx.textAlign = 'center';
