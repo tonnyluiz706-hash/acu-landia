@@ -6,11 +6,7 @@
     <title>Acuílândia</title>
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet" />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: #000;
             overflow: hidden;
@@ -20,12 +16,7 @@
             width: 100vw;
             height: 100vh;
         }
-        canvas {
-            display: block;
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-        }
+        canvas { display: block; width: 100vw; height: 100vh; background: #000; }
     </style>
 </head>
 <body>
@@ -57,6 +48,9 @@
         let isResizing = false;
         let gameOver = false;
 
+        // Tempo global para animações
+        let tempoGlobal = 0;
+
         let checkpointX = 100;
         let checkpointY = 0;
 
@@ -67,30 +61,18 @@
         const DURACAO_ATAQUE = 15;
 
         // ============================================
-        // ÁUDIO DE FUNDO (toca automaticamente, sem aviso)
+        // ÁUDIO DE FUNDO
         // ============================================
         const audioFundo = new Audio('fundo.mp3');
         audioFundo.loop = true;
         audioFundo.volume = 0.3;
 
         function tentarTocarAudio() {
-            audioFundo.play().catch(() => {
-                // Falha silenciosa, tentará novamente na próxima interação
-            });
+            audioFundo.play().catch(() => {});
         }
-
-        // Tenta tocar assim que a página carregar
-        window.addEventListener('load', () => {
-            tentarTocarAudio();
-        });
-
-        // Se o usuário clicar ou teclar, tenta tocar novamente (caso tenha falhado antes)
-        document.addEventListener('keydown', () => {
-            tentarTocarAudio();
-        });
-        document.addEventListener('click', () => {
-            tentarTocarAudio();
-        });
+        window.addEventListener('load', tentarTocarAudio);
+        document.addEventListener('keydown', tentarTocarAudio);
+        document.addEventListener('click', tentarTocarAudio);
 
         // ============================================
         // BACKGROUND
@@ -98,21 +80,8 @@
         const bgImage = new Image();
         bgImage.src = 'Bacground.jpg';
 
-        function drawBackground() {
-            if (bgImage.complete && bgImage.naturalWidth !== 0) {
-                ctx.drawImage(bgImage, 0, 0, W, H);
-            } else {
-                const grad = ctx.createLinearGradient(0, 0, 0, H);
-                grad.addColorStop(0, '#1a2a6c');
-                grad.addColorStop(0.5, '#b21f1f');
-                grad.addColorStop(1, '#fdbb2d');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, W, H);
-            }
-        }
-
         // ============================================
-        // IMAGEM DAS PLATAFORMAS (apenas elevadas)
+        // IMAGEM DAS PLATAFORMAS
         // ============================================
         const imgPlataforma = new Image();
         imgPlataforma.src = 'plataforma.png';
@@ -150,7 +119,7 @@
         const BURACOS = [...BURACOS_NIVEL1, ...BURACOS_NIVEL2, ...BURACOS_NIVEL3];
 
         // ============================================
-        // ESPINHOS (Nível 3)
+        // ESPINHOS
         // ============================================
         const ESPINHOS = [
             { x: 10500, y: chaoY - 20, w: 30, h: 20 },
@@ -176,9 +145,7 @@
 
         function estaSobreBuraco(x) {
             for (let buraco of BURACOS) {
-                if (x + PLAYER_SIZE > buraco.inicio && x < buraco.fim) {
-                    return true;
-                }
+                if (x + PLAYER_SIZE > buraco.inicio && x < buraco.fim) return true;
             }
             return false;
         }
@@ -191,14 +158,8 @@
                     if (player.x + player.w > buraco.inicio && player.x < buraco.fim) {
                         const distEsquerda = player.x - buraco.inicio;
                         const distDireita = buraco.fim - (player.x + player.w);
-                        if (distEsquerda < menorDistancia) {
-                            menorDistancia = distEsquerda;
-                            novaX = buraco.inicio - player.w;
-                        }
-                        if (distDireita < menorDistancia) {
-                            menorDistancia = distDireita;
-                            novaX = buraco.fim;
-                        }
+                        if (distEsquerda < menorDistancia) { menorDistancia = distEsquerda; novaX = buraco.inicio - player.w; }
+                        if (distDireita < menorDistancia) { menorDistancia = distDireita; novaX = buraco.fim; }
                     }
                 }
                 player.x = Math.max(0, Math.min(novaX, WORLD_WIDTH - player.w));
@@ -206,10 +167,9 @@
         }
 
         // ============================================
-        // PLATAFORMAS (Níveis 1, 2 e 3)
+        // PLATAFORMAS
         // ============================================
         const platforms = [
-            // Chão (Nível 1 e 2)
             { x: 0, y: chaoY, width: BURACOS_NIVEL1[0].inicio, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL1[0].fim, y: chaoY, width: BURACOS_NIVEL1[1].inicio - BURACOS_NIVEL1[0].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL1[1].fim, y: chaoY, width: BURACOS_NIVEL1[2].inicio - BURACOS_NIVEL1[1].fim, height: CHAO_ALTURA },
@@ -217,7 +177,6 @@
             { x: BURACOS_NIVEL2[0].fim, y: chaoY, width: BURACOS_NIVEL2[1].inicio - BURACOS_NIVEL2[0].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL2[1].fim, y: chaoY, width: BURACOS_NIVEL2[2].inicio - BURACOS_NIVEL2[1].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL2[2].fim, y: chaoY, width: BURACOS_NIVEL3[0].inicio - BURACOS_NIVEL2[2].fim, height: CHAO_ALTURA },
-            // Chão (Nível 3)
             { x: BURACOS_NIVEL3[0].fim, y: chaoY, width: BURACOS_NIVEL3[1].inicio - BURACOS_NIVEL3[0].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL3[1].fim, y: chaoY, width: BURACOS_NIVEL3[2].inicio - BURACOS_NIVEL3[1].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL3[2].fim, y: chaoY, width: BURACOS_NIVEL3[3].inicio - BURACOS_NIVEL3[2].fim, height: CHAO_ALTURA },
@@ -228,7 +187,6 @@
             { x: BURACOS_NIVEL3[7].fim, y: chaoY, width: BURACOS_NIVEL3[8].inicio - BURACOS_NIVEL3[7].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL3[8].fim, y: chaoY, width: BURACOS_NIVEL3[9].inicio - BURACOS_NIVEL3[8].fim, height: CHAO_ALTURA },
             { x: BURACOS_NIVEL3[9].fim, y: chaoY, width: WORLD_WIDTH - BURACOS_NIVEL3[9].fim, height: CHAO_ALTURA },
-            // Plataformas elevadas (Nível 1 e 2)
             { x: 500, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 800, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 1900, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
@@ -242,70 +200,46 @@
             { x: 7300, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 7800, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 8100, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
-            // ============================================
-            // NOVAS PLATAFORMAS NÍVEL 3
-            // ============================================
-            // Antes do primeiro buraco (11000)
             { x: 10200, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 10700, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Sobre o buraco 11000-11300 (duas plataformas)
             { x: 11050, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 11250, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Depois do buraco, até o próximo
             { x: 11600, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 12100, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Sobre o buraco 13000-13300
             { x: 13050, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 13250, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Até o próximo buraco
             { x: 13600, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 14100, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Sobre o buraco 16000-16300
             { x: 16050, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 16250, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Até o próximo
             { x: 16600, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 17100, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Sobre o buraco 19000-19300
             { x: 19050, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 19250, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Até o próximo
             { x: 19600, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 20100, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Sobre o buraco 22000-22300
             { x: 22050, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 22250, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Até o próximo
             { x: 22600, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 23100, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Sobre o buraco 26000-26300
             { x: 26050, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 26250, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Até o próximo
             { x: 26600, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 27100, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Sobre o buraco 30000-30300
             { x: 30050, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 30250, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Até o próximo
             { x: 30600, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 31100, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Sobre o buraco 35000-35300
             { x: 35050, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 35250, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Até o próximo
             { x: 35600, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 36100, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Sobre o buraco 40000-40300
             { x: 40050, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 40250, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Até o próximo
             { x: 40600, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 41100, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Sobre o buraco 44000-44300
             { x: 44050, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 44250, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Últimas plataformas até o final
             { x: 44600, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 45100, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 45600, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
@@ -314,7 +248,7 @@
         ];
 
         // ============================================
-        // GERAR MOEDAS
+        // MOEDAS
         // ============================================
         let moedas = 0;
         let moedasArray = [];
@@ -327,48 +261,29 @@
             for (let x = 100; x < WORLD_WIDTH - 100; x += espacamentoChao) {
                 let sobreBuraco = false;
                 for (let buraco of BURACOS) {
-                    if (x > buraco.inicio && x < buraco.fim) {
-                        sobreBuraco = true;
-                        break;
-                    }
+                    if (x > buraco.inicio && x < buraco.fim) { sobreBuraco = true; break; }
                 }
                 if (sobreBuraco) continue;
 
                 let sobreEspinho = false;
                 for (let espinho of ESPINHOS) {
-                    if (x > espinho.x && x < espinho.x + espinho.w) {
-                        sobreEspinho = true;
-                        break;
-                    }
+                    if (x > espinho.x && x < espinho.x + espinho.w) { sobreEspinho = true; break; }
                 }
                 if (sobreEspinho) continue;
 
                 let noChao = false;
                 for (let plat of platforms) {
-                    if (plat.y === chaoY && x > plat.x && x < plat.x + plat.width) {
-                        noChao = true;
-                        break;
-                    }
+                    if (plat.y === chaoY && x > plat.x && x < plat.x + plat.width) { noChao = true; break; }
                 }
                 if (noChao) {
-                    moedasArray.push({
-                        x: x,
-                        y: chaoY - 15,
-                        raio: raioMoeda,
-                        coletada: false
-                    });
+                    moedasArray.push({ x: x, y: chaoY - 15, raio: raioMoeda, coletada: false, fase: Math.random() * Math.PI * 2 });
                 }
             }
 
             for (let plat of platforms) {
                 if (plat.y !== chaoY) {
                     const xCentro = plat.x + plat.width / 2;
-                    moedasArray.push({
-                        x: xCentro,
-                        y: plat.y - 15,
-                        raio: raioMoeda,
-                        coletada: false
-                    });
+                    moedasArray.push({ x: xCentro, y: plat.y - 15, raio: raioMoeda, coletada: false, fase: Math.random() * Math.PI * 2 });
                 }
             }
         }
@@ -377,18 +292,12 @@
         // JOGADOR
         // ============================================
         const player = {
-            x: 100,
-            y: chaoY - PLAYER_SIZE,
-            w: PLAYER_SIZE,
-            h: PLAYER_SIZE,
-            vx: 0,
-            vy: 0,
-            speed: 5,
-            jumpPower: -10.5,
-            gravity: 0.45,
+            x: 100, y: chaoY - PLAYER_SIZE,
+            w: PLAYER_SIZE, h: PLAYER_SIZE,
+            vx: 0, vy: 0,
+            speed: 5, jumpPower: -10.5, gravity: 0.45,
             onGround: false,
-            spawnX: 100,
-            spawnY: chaoY - PLAYER_SIZE,
+            spawnX: 100, spawnY: chaoY - PLAYER_SIZE,
         };
 
         let ultimaDirecao = 1;
@@ -397,16 +306,13 @@
         // MOBS
         // ============================================
         const mobs = [
-            // Nível 1 (terrestres)
             { x: 900, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.0, minX: 700, maxX: 1200, direction: 1, color: '#f1c40f', stroke: '#d4ac0d', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
             { x: 2000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.8, minX: 1800, maxX: 2300, direction: 1, color: '#2ecc71', stroke: '#27ae60', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
             { x: 3300, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.2, minX: 3100, maxX: 3600, direction: 1, color: '#9b59b6', stroke: '#8e44ad', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
             { x: 5000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.5, minX: 4800, maxX: 5300, direction: 1, color: '#e67e22', stroke: '#d35400', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            // Nível 2 (terrestres)
             { x: 6400, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.0, minX: 6200, maxX: 6600, direction: 1, color: '#e74c3c', stroke: '#c0392b', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
             { x: 7100, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.8, minX: 6900, maxX: 7300, direction: 1, color: '#3498db', stroke: '#2980b9', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
             { x: 7900, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 4.2, minX: 7700, maxX: 8100, direction: 1, color: '#1abc9c', stroke: '#16a085', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
-            // Nível 3 - Morcegos (voadores) - até x=25000
             { x: 10500, y: chaoY - 120, radius: MOB_RADIUS, speed: 4.0, minX: 10300, maxX: 10800, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 40, fase: 0 },
             { x: 11500, y: chaoY - 80, radius: MOB_RADIUS, speed: 4.5, minX: 11300, maxX: 11800, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 1.2 },
             { x: 12500, y: chaoY - 140, radius: MOB_RADIUS, speed: 5.0, minX: 12300, maxX: 12800, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 2.5 },
@@ -417,7 +323,6 @@
             { x: 20000, y: chaoY - 130, radius: MOB_RADIUS, speed: 4.7, minX: 19800, maxX: 20300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 1.5 },
             { x: 21500, y: chaoY - 95, radius: MOB_RADIUS, speed: 5.5, minX: 21300, maxX: 21800, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 2.2 },
             { x: 23000, y: chaoY - 80, radius: MOB_RADIUS, speed: 4.3, minX: 22800, maxX: 23300, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 45, fase: 0.6 },
-            // NOVOS MOBS (a partir de x=25000)
             { x: 26000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.0, minX: 25500, maxX: 26500, direction: 1, color: '#e67e22', stroke: '#d35400', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
             { x: 27000, y: chaoY - 110, radius: MOB_RADIUS, speed: 4.5, minX: 26500, maxX: 27500, direction: 1, color: '#8e44ad', stroke: '#6c3483', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 50, fase: 0.7 },
             { x: 28000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.5, minX: 27500, maxX: 28500, direction: 1, color: '#3498db', stroke: '#2980b9', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre' },
@@ -455,22 +360,10 @@
         // SÁBIO
         // ============================================
         const sabio = {
-            x: 5950,
-            y: chaoY - 50,
-            largura: 40,
-            altura: 40,
-            cor: '#3498db',
-            conversaAtiva: false,
-            timer: 0,
-            falas: [
-                "Olá meu jovem!",
-                "Soube que está indo atrás do rei orc",
-                "É um caminho perigoso e cheio de criaturas terríveis",
-                "Tome esse presente pra conseguir se virar"
-            ],
-            falaIndex: 0,
-            conversaTerminada: false,
-            esperandoProxima: false
+            x: 5950, y: chaoY - 50, largura: 40, altura: 40, cor: '#3498db',
+            conversaAtiva: false, timer: 0,
+            falas: ["Olá meu jovem!", "Soube que está indo atrás do rei orc", "É um caminho perigoso e cheio de criaturas terríveis", "Tome esse presente pra conseguir se virar"],
+            falaIndex: 0, conversaTerminada: false, esperandoProxima: false
         };
 
         // ============================================
@@ -480,18 +373,117 @@
         const keys = { a: false, d: false, w: false, space: false };
 
         // ============================================
+        // CENÁRIO DINÂMICO (NOVO)
+        // ============================================
+        let matinhos = [];        // grama
+        let nuvens = [];          // nuvens no céu
+        let montanhasFundo = [];  // montanhas distantes
+        let montanhasMeio = [];   // montanhas próximas
+        let particulasAmbiente = [];
+
+        function inicializarCenario() {
+            // Grama (matinhos) - gerar apenas onde tem chão
+            matinhos = [];
+            for (let x = 0; x < WORLD_WIDTH; x += 30) {
+                if (estaSobreBuraco(x)) continue;
+                // Verificar se está no chão
+                let noChao = false;
+                for (let plat of platforms) {
+                    if (plat.y === chaoY && x > plat.x && x < plat.x + plat.width) {
+                        noChao = true; break;
+                    }
+                }
+                if (noChao) {
+                    matinhos.push({
+                        x: x,
+                        altura: 8 + Math.random() * 8,
+                        fase: Math.random() * Math.PI * 2,
+                        cor: Math.random() > 0.5 ? '#5d9c6b' : '#4a7c59'
+                    });
+                }
+            }
+
+            // Nuvens
+            nuvens = [];
+            for (let i = 0; i < 30; i++) {
+                nuvens.push({
+                    x: Math.random() * W * 3,
+                    y: 40 + Math.random() * (H * 0.35),
+                    escala: 0.5 + Math.random() * 1.2,
+                    velocidade: 0.15 + Math.random() * 0.3,
+                    opacidade: 0.3 + Math.random() * 0.4
+                });
+            }
+
+            // Montanhas do fundo (parallax lento)
+            montanhasFundo = [];
+            for (let i = 0; i < 25; i++) {
+                montanhasFundo.push({
+                    x: i * 400 + Math.random() * 100,
+                    altura: 80 + Math.random() * 100,
+                    largura: 250 + Math.random() * 150,
+                    cor: 'rgba(80, 100, 140, 0.5)'
+                });
+            }
+
+            // Montanhas médias (parallax médio)
+            montanhasMeio = [];
+            for (let i = 0; i < 30; i++) {
+                montanhasMeio.push({
+                    x: i * 350 + Math.random() * 100,
+                    altura: 120 + Math.random() * 130,
+                    largura: 200 + Math.random() * 150,
+                    cor: 'rgba(60, 90, 120, 0.65)'
+                });
+            }
+
+            // Partículas ambientes (poeira/fireflies no ar)
+            particulasAmbiente = [];
+            for (let i = 0; i < 60; i++) {
+                particulasAmbiente.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H * 0.8,
+                    vx: (Math.random() - 0.5) * 0.4,
+                    vy: (Math.random() - 0.5) * 0.2,
+                    tamanho: 1 + Math.random() * 2,
+                    brilho: Math.random() * Math.PI * 2,
+                    cor: Math.random() > 0.5 ? '#fff8c4' : '#c4e8ff'
+                });
+            }
+        }
+
+        function atualizarCenario() {
+            // Mover nuvens
+            for (let n of nuvens) {
+                n.x -= n.velocidade;
+                if (n.x < -300) {
+                    n.x = W + 200 + Math.random() * 200;
+                    n.y = 40 + Math.random() * (H * 0.35);
+                }
+            }
+
+            // Mover partículas ambientes (relativas à câmera)
+            for (let p of particulasAmbiente) {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.brilho += 0.05;
+
+                // Wrap horizontal (relativo à tela)
+                if (p.x < -20) p.x = W + 20;
+                if (p.x > W + 20) p.x = -20;
+                if (p.y < -20) p.y = H * 0.85;
+                if (p.y > H * 0.9) p.y = -20;
+            }
+        }
+
+        // ============================================
         // FUNÇÕES DE COLISÃO E RESPAWN
         // ============================================
         function resetPlayer() {
-            if (vidas <= 0) {
-                gameOver = true;
-                return;
-            }
+            if (vidas <= 0) { gameOver = true; return; }
             let checkpointEncontrado = null;
             for (let cp of checkpoints) {
-                if (cp.ativado) {
-                    checkpointEncontrado = cp;
-                }
+                if (cp.ativado) checkpointEncontrado = cp;
             }
             if (checkpointEncontrado) {
                 player.x = checkpointX;
@@ -500,9 +492,7 @@
                 player.x = player.spawnX;
                 player.y = player.spawnY;
             }
-            player.vx = 0;
-            player.vy = 0;
-            player.onGround = false;
+            player.vx = 0; player.vy = 0; player.onGround = false;
             vidas--;
             if (vidas < 0) vidas = 0;
             mostrarTitulo = true;
@@ -511,16 +501,11 @@
 
         function checkCollisions() {
             for (let mob of mobs) {
-                if (mob.morto) continue;
-                if (mob.emKnockback) continue;
+                if (mob.morto || mob.emKnockback) continue;
                 const dx = (player.x + player.w/2) - mob.x;
                 const dy = (player.y + player.h/2) - mob.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
-                const threshold = player.w/2 + mob.radius;
-                if (dist < threshold) {
-                    resetPlayer();
-                    return;
-                }
+                if (dist < player.w/2 + mob.radius) { resetPlayer(); return; }
             }
         }
 
@@ -528,14 +513,13 @@
             for (let espinho of ESPINHOS) {
                 if (player.x + player.w > espinho.x && player.x < espinho.x + espinho.w &&
                     player.y + player.h > espinho.y && player.y < espinho.y + espinho.h) {
-                    resetPlayer();
-                    return;
+                    resetPlayer(); return;
                 }
             }
         }
 
         // ============================================
-        // CHECKPOINTS (bandeiras) com vida extra
+        // PARTÍCULAS
         // ============================================
         let particulas = [];
 
@@ -544,15 +528,38 @@
                 const angulo = Math.random() * Math.PI * 2;
                 const vel = Math.random() * velocidade + 1;
                 particulas.push({
-                    x: x,
-                    y: y,
+                    x: x, y: y,
                     vx: Math.cos(angulo) * vel,
                     vy: Math.sin(angulo) * vel - 1,
-                    vida: vida || 30,
-                    vidaMax: vida || 30,
+                    vida: vida || 30, vidaMax: vida || 30,
                     cor: cor,
                     tamanho: Math.random() * 6 + 3
                 });
+            }
+        }
+
+        function atualizarParticulas() {
+            for (let i = particulas.length - 1; i >= 0; i--) {
+                const p = particulas[i];
+                p.x += p.vx; p.y += p.vy;
+                p.vy += 0.05; p.vx *= 0.98; p.vy *= 0.98;
+                p.vida--;
+                if (p.vida <= 0) particulas.splice(i, 1);
+            }
+        }
+
+        function desenharParticulas() {
+            for (let p of particulas) {
+                const op = p.vida / p.vidaMax;
+                ctx.globalAlpha = op;
+                ctx.fillStyle = p.cor;
+                ctx.shadowColor = p.cor;
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(p.x - cameraX, p.y, p.tamanho * op, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1;
             }
         }
 
@@ -573,45 +580,10 @@
         }
 
         // ============================================
-        // PARTÍCULAS
-        // ============================================
-        function atualizarParticulas() {
-            for (let i = particulas.length - 1; i >= 0; i--) {
-                const p = particulas[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += 0.05;
-                p.vx *= 0.98;
-                p.vy *= 0.98;
-                p.vida--;
-                if (p.vida <= 0) {
-                    particulas.splice(i, 1);
-                }
-            }
-        }
-
-        function desenharParticulas() {
-            for (let p of particulas) {
-                const opacidade = p.vida / p.vidaMax;
-                ctx.globalAlpha = opacidade;
-                ctx.fillStyle = p.cor;
-                ctx.shadowColor = p.cor;
-                ctx.shadowBlur = 8;
-                ctx.beginPath();
-                ctx.arc(p.x - cameraX, p.y, p.tamanho * opacidade, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-                ctx.globalAlpha = 1;
-            }
-        }
-
-        // ============================================
         // CONVERSA COM O SÁBIO
         // ============================================
         function iniciarConversa() {
-            if (sabio.conversaTerminada) return;
-            if (!checkpoints[0].ativado) return;
-            if (sabio.conversaAtiva) return;
+            if (sabio.conversaTerminada || !checkpoints[0].ativado || sabio.conversaAtiva) return;
             sabio.conversaAtiva = true;
             sabio.falaIndex = 0;
             sabio.timer = 0;
@@ -631,28 +603,21 @@
         }
 
         function updateConversa() {
-            if (!sabio.conversaAtiva) return;
-            if (sabio.conversaTerminada) return;
-
+            if (!sabio.conversaAtiva || sabio.conversaTerminada) return;
             const dx = (player.x + player.w/2) - (sabio.x + sabio.largura/2);
             const dy = (player.y + player.h/2) - (sabio.y + sabio.altura/2);
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist > 150) return;
-
+            if (Math.sqrt(dx*dx + dy*dy) > 150) return;
             if (!sabio.esperandoProxima) {
                 sabio.timer++;
-                if (sabio.timer > 120) {
-                    avancarConversa();
-                }
+                if (sabio.timer > 120) avancarConversa();
             }
         }
 
         // ============================================
-        // ATAQUE COM KNOCKBACK E EXPLOSÃO
+        // ATAQUE
         // ============================================
         function executarAtaque() {
-            if (!temEspada) return;
-            if (atacando) return;
+            if (!temEspada || atacando) return;
             atacando = true;
             ataqueTimer = 0;
 
@@ -662,8 +627,7 @@
                 if (mob.morto) continue;
                 const dx = (player.x + player.w/2) - mob.x;
                 const dy = (player.y + player.h/2) - mob.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < ALCANCE_ATAQUE) {
+                if (Math.sqrt(dx*dx + dy*dy) < ALCANCE_ATAQUE) {
                     mob.hp--;
                     if (mob.hp <= 0) {
                         mob.morto = true;
@@ -672,16 +636,13 @@
                     } else {
                         const forca = 20;
                         if (mob.tipo === 'voador') {
-                            const forcaVoador = 25;
-                            mob.knockbackX = ultimaDirecao * forcaVoador;
+                            mob.knockbackX = ultimaDirecao * 25;
                             mob.knockbackY = 0;
-                            mob.emKnockback = true;
                         } else {
-                            const direcaoMob = mob.direction;
-                            mob.knockbackX = -direcaoMob * forca;
+                            mob.knockbackX = -mob.direction * forca;
                             mob.knockbackY = 0;
-                            mob.emKnockback = true;
                         }
+                        mob.emKnockback = true;
                     }
                 }
             }
@@ -691,40 +652,20 @@
         // REINICIAR JOGO
         // ============================================
         function restartGame() {
-            gameOver = false;
-            nivelConcluido = false;
-            nivelAtual = 1;
-            vidas = 5;
-            moedas = 0;
-            temEspada = false;
-            atacando = false;
-            sabio.conversaAtiva = false;
-            sabio.conversaTerminada = false;
-            sabio.falaIndex = 0;
-            sabio.timer = 0;
-            sabio.esperandoProxima = false;
-            checkpointX = player.spawnX;
-            checkpointY = player.spawnY;
-            mostrarTitulo = true;
-            mostrarTituloNivel2 = false;
-            mostrarTituloNivel3 = false;
-            contadorTitulo = 0;
-            contadorTituloNivel2 = 0;
-            contadorTituloNivel3 = 0;
+            gameOver = false; nivelConcluido = false; nivelAtual = 1;
+            vidas = 5; moedas = 0; temEspada = false; atacando = false;
+            sabio.conversaAtiva = false; sabio.conversaTerminada = false;
+            sabio.falaIndex = 0; sabio.timer = 0; sabio.esperandoProxima = false;
+            checkpointX = player.spawnX; checkpointY = player.spawnY;
+            mostrarTitulo = true; mostrarTituloNivel2 = false; mostrarTituloNivel3 = false;
+            contadorTitulo = 0; contadorTituloNivel2 = 0; contadorTituloNivel3 = 0;
             particulas = [];
 
-            for (let cp of checkpoints) {
-                cp.ativado = false;
-            }
-            for (let m of moedasArray) {
-                m.coletada = false;
-            }
+            for (let cp of checkpoints) cp.ativado = false;
+            for (let m of moedasArray) m.coletada = false;
 
-            player.x = player.spawnX;
-            player.y = player.spawnY;
-            player.vx = 0;
-            player.vy = 0;
-            player.onGround = false;
+            player.x = player.spawnX; player.y = player.spawnY;
+            player.vx = 0; player.vy = 0; player.onGround = false;
 
             const posicoesIniciais = [
                 900, 2000, 3300, 5000, 6400, 7100, 7900,
@@ -733,35 +674,22 @@
                 36000, 37000, 38000, 39000, 40000, 41000, 42000, 43000, 44000, 45000, 46000
             ];
             for (let i = 0; i < mobs.length; i++) {
-                if (i < posicoesIniciais.length) {
-                    mobs[i].x = posicoesIniciais[i];
-                }
-                mobs[i].morto = false;
-                mobs[i].direction = 1;
-                mobs[i].hp = 2;
-                mobs[i].knockbackX = 0;
-                mobs[i].knockbackY = 0;
-                mobs[i].emKnockback = false;
-                mobs[i].fase = 0;
+                if (i < posicoesIniciais.length) mobs[i].x = posicoesIniciais[i];
+                mobs[i].morto = false; mobs[i].direction = 1; mobs[i].hp = 2;
+                mobs[i].knockbackX = 0; mobs[i].knockbackY = 0;
+                mobs[i].emKnockback = false; mobs[i].fase = 0;
             }
 
             cameraX = player.x - W / 2;
             cameraX = Math.max(0, Math.min(cameraX, WORLD_WIDTH - W));
         }
 
-        // ============================================
-        // SISTEMA DE PROGRESSÃO
-        // ============================================
         function atualizarNivel() {
             if (nivelAtual === 1 && player.x > 6200) {
-                nivelAtual = 2;
-                mostrarTituloNivel2 = true;
-                contadorTituloNivel2 = 0;
+                nivelAtual = 2; mostrarTituloNivel2 = true; contadorTituloNivel2 = 0;
             }
             if (nivelAtual === 2 && player.x > 9500) {
-                nivelAtual = 3;
-                mostrarTituloNivel3 = true;
-                contadorTituloNivel3 = 0;
+                nivelAtual = 3; mostrarTituloNivel3 = true; contadorTituloNivel3 = 0;
             }
         }
 
@@ -769,86 +697,53 @@
         // ATUALIZAÇÃO
         // ============================================
         function update() {
+            tempoGlobal++;
+            atualizarCenario();
+
             if (nivelConcluido || isResizing || gameOver) return;
 
-            if (keys.a) {
-                player.vx = -player.speed;
-                ultimaDirecao = -1;
-            } else if (keys.d) {
-                player.vx = player.speed;
-                ultimaDirecao = 1;
-            } else {
-                player.vx = 0;
-            }
+            if (keys.a) { player.vx = -player.speed; ultimaDirecao = -1; }
+            else if (keys.d) { player.vx = player.speed; ultimaDirecao = 1; }
+            else player.vx = 0;
 
             player.x += player.vx;
             if (player.x < 0) player.x = 0;
             if (player.x + player.w > WORLD_WIDTH) player.x = WORLD_WIDTH - player.w;
 
-            if (keys.w && player.onGround) {
-                player.vy = player.jumpPower;
-                player.onGround = false;
-            }
-
+            if (keys.w && player.onGround) { player.vy = player.jumpPower; player.onGround = false; }
             player.vy += player.gravity;
             player.y += player.vy;
 
             player.onGround = false;
             for (let plat of platforms) {
                 if (player.x + player.w > plat.x && player.x < plat.x + plat.width) {
-                    if (player.vy >= 0 &&
-                        player.y + player.h >= plat.y &&
+                    if (player.vy >= 0 && player.y + player.h >= plat.y &&
                         player.y + player.h <= plat.y + plat.height + player.vy + 2) {
                         player.y = plat.y - player.h;
-                        player.vy = 0;
-                        player.onGround = true;
+                        player.vy = 0; player.onGround = true;
                     }
                 }
             }
 
             if (!player.onGround && player.vy > 0 && player.y > chaoY + 30) {
-                let caiuNoBuraco = false;
                 for (let buraco of BURACOS) {
                     if (player.x + player.w > buraco.inicio && player.x < buraco.fim) {
-                        caiuNoBuraco = true;
-                        break;
+                        resetPlayer(); return;
                     }
-                }
-                if (caiuNoBuraco) {
-                    resetPlayer();
-                    return;
                 }
             }
 
             for (let mob of mobs) {
                 if (mob.morto) continue;
-
                 if (mob.knockbackX !== 0 || mob.knockbackY !== 0) {
-                    mob.x += mob.knockbackX;
-                    mob.y += mob.knockbackY;
-                    mob.knockbackX *= 0.85;
-                    mob.knockbackY *= 0.85;
+                    mob.x += mob.knockbackX; mob.y += mob.knockbackY;
+                    mob.knockbackX *= 0.85; mob.knockbackY *= 0.85;
                     if (Math.abs(mob.knockbackX) < 0.1) mob.knockbackX = 0;
                     if (Math.abs(mob.knockbackY) < 0.1) mob.knockbackY = 0;
-                    if (mob.y > chaoY - mob.radius) {
-                        mob.y = chaoY - mob.radius;
-                        mob.knockbackY = 0;
-                    }
-                    if (mob.knockbackX === 0 && mob.knockbackY === 0) {
-                        mob.emKnockback = false;
-                    }
-                    if (mob.x < mob.minX) {
-                        mob.x = mob.minX;
-                        mob.direction = 1;
-                        mob.knockbackX = 0;
-                        mob.emKnockback = false;
-                    }
-                    if (mob.x > mob.maxX) {
-                        mob.x = mob.maxX;
-                        mob.direction = -1;
-                        mob.knockbackX = 0;
-                        mob.emKnockback = false;
-                    }
+                    if (mob.y > chaoY - mob.radius) { mob.y = chaoY - mob.radius; mob.knockbackY = 0; }
+                    if (mob.knockbackX === 0 && mob.knockbackY === 0) mob.emKnockback = false;
+                    if (mob.x < mob.minX) { mob.x = mob.minX; mob.direction = 1; mob.knockbackX = 0; mob.emKnockback = false; }
+                    if (mob.x > mob.maxX) { mob.x = mob.maxX; mob.direction = -1; mob.knockbackX = 0; mob.emKnockback = false; }
                     continue;
                 }
 
@@ -860,8 +755,7 @@
                         if (mob.x > mob.maxX) mob.x = mob.maxX;
                     }
                     mob.fase += 0.03;
-                    const oscilacao = Math.sin(mob.fase) * mob.amplitude;
-                    mob.y = (chaoY - 100) + oscilacao;
+                    mob.y = (chaoY - 100) + Math.sin(mob.fase) * mob.amplitude;
                 } else {
                     mob.x += mob.speed * mob.direction;
                     if (mob.x > mob.maxX || mob.x < mob.minX) {
@@ -874,17 +768,14 @@
 
             if (atacando) {
                 ataqueTimer++;
-                if (ataqueTimer > DURACAO_ATAQUE) {
-                    atacando = false;
-                }
+                if (ataqueTimer > DURACAO_ATAQUE) atacando = false;
             }
 
             for (let m of moedasArray) {
                 if (m.coletada) continue;
                 const dx = (player.x + player.w/2) - m.x;
                 const dy = (player.y + player.h/2) - m.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < m.raio + 20) {
+                if (Math.sqrt(dx*dx + dy*dy) < m.raio + 20) {
                     m.coletada = true;
                     moedas++;
                     criarParticulas(m.x, m.y, 12, '#ffd700', 3, 20);
@@ -901,43 +792,131 @@
 
             const dxSabio = (player.x + player.w/2) - (sabio.x + sabio.largura/2);
             const dySabio = (player.y + player.h/2) - (sabio.y + sabio.altura/2);
-            const distSabio = Math.sqrt(dxSabio*dxSabio + dySabio*dySabio);
-
-            if (distSabio < 120 && checkpoints[0].ativado && !sabio.conversaTerminada) {
-                if (!sabio.conversaAtiva) {
-                    iniciarConversa();
-                }
+            if (Math.sqrt(dxSabio*dxSabio + dySabio*dySabio) < 120 &&
+                checkpoints[0].ativado && !sabio.conversaTerminada) {
+                if (!sabio.conversaAtiva) iniciarConversa();
             }
 
             updateConversa();
             atualizarNivel();
 
-            if (nivelAtual === 3 && player.x > 48000) {
-                nivelConcluido = true;
-            }
+            if (nivelAtual === 3 && player.x > 48000) nivelConcluido = true;
 
             atualizarParticulas();
 
             cameraX = player.x - W / 2;
             cameraX = Math.max(0, Math.min(cameraX, WORLD_WIDTH - W));
 
-            if (mostrarTitulo) {
-                contadorTitulo++;
-                if (contadorTitulo > 120) {
-                    mostrarTitulo = false;
-                }
+            if (mostrarTitulo) { contadorTitulo++; if (contadorTitulo > 120) mostrarTitulo = false; }
+            if (mostrarTituloNivel2) { contadorTituloNivel2++; if (contadorTituloNivel2 > 120) mostrarTituloNivel2 = false; }
+            if (mostrarTituloNivel3) { contadorTituloNivel3++; if (contadorTituloNivel3 > 120) mostrarTituloNivel3 = false; }
+        }
+
+        // ============================================
+        // DESENHAR CENÁRIO DE FUNDO (PARALLAX)
+        // ============================================
+        function desenharCenarioFundo() {
+            // Céu gradiente
+            const grad = ctx.createLinearGradient(0, 0, 0, H);
+            grad.addColorStop(0, '#1a2a6c');
+            grad.addColorStop(0.5, '#b21f1f');
+            grad.addColorStop(1, '#fdbb2d');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, H);
+
+            // Sol com brilho pulsante
+            const raioSol = 60 + Math.sin(tempoGlobal * 0.02) * 5;
+            const solX = W * 0.8 - cameraX * 0.02;
+            const solY = H * 0.2;
+            const gradSol = ctx.createRadialGradient(solX, solY, 0, solX, solY, raioSol * 3);
+            gradSol.addColorStop(0, 'rgba(255, 240, 150, 0.9)');
+            gradSol.addColorStop(0.3, 'rgba(255, 200, 80, 0.5)');
+            gradSol.addColorStop(1, 'rgba(255, 200, 80, 0)');
+            ctx.fillStyle = gradSol;
+            ctx.beginPath();
+            ctx.arc(solX, solY, raioSol * 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Montanhas distantes (parallax 0.1)
+            for (let m of montanhasFundo) {
+                const mx = m.x - cameraX * 0.1;
+                if (mx + m.largura < -100 || mx > W + 100) continue;
+                ctx.fillStyle = m.cor;
+                ctx.beginPath();
+                ctx.moveTo(mx, chaoY);
+                ctx.lineTo(mx + m.largura / 2, chaoY - m.altura);
+                ctx.lineTo(mx + m.largura, chaoY);
+                ctx.closePath();
+                ctx.fill();
             }
-            if (mostrarTituloNivel2) {
-                contadorTituloNivel2++;
-                if (contadorTituloNivel2 > 120) {
-                    mostrarTituloNivel2 = false;
-                }
+
+            // Montanhas médias (parallax 0.25)
+            for (let m of montanhasMeio) {
+                const mx = m.x - cameraX * 0.25;
+                if (mx + m.largura < -100 || mx > W + 100) continue;
+                ctx.fillStyle = m.cor;
+                ctx.beginPath();
+                ctx.moveTo(mx, chaoY);
+                ctx.lineTo(mx + m.largura / 2, chaoY - m.altura);
+                ctx.lineTo(mx + m.largura, chaoY);
+                ctx.closePath();
+                ctx.fill();
             }
-            if (mostrarTituloNivel3) {
-                contadorTituloNivel3++;
-                if (contadorTituloNivel3 > 120) {
-                    mostrarTituloNivel3 = false;
-                }
+
+            // Nuvens (parallax 0.05 - quase fixas)
+            for (let n of nuvens) {
+                ctx.globalAlpha = n.opacidade;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, 25 * n.escala, 0, Math.PI * 2);
+                ctx.arc(n.x + 25 * n.escala, n.y + 5, 20 * n.escala, 0, Math.PI * 2);
+                ctx.arc(n.x - 25 * n.escala, n.y + 5, 18 * n.escala, 0, Math.PI * 2);
+                ctx.arc(n.x + 10 * n.escala, n.y - 12 * n.escala, 18 * n.escala, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // ============================================
+        // DESENHAR GRAMA (MATINHOS)
+        // ============================================
+        function desenharMatinhos() {
+            for (let m of matinhos) {
+                const mx = m.x - cameraX;
+                if (mx < -20 || mx > W + 20) continue;
+                // Balanço com o tempo
+                const balanco = Math.sin(tempoGlobal * 0.05 + m.fase) * 2;
+                ctx.strokeStyle = m.cor;
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(mx, chaoY);
+                ctx.quadraticCurveTo(mx + balanco * 0.5, chaoY - m.altura * 0.6, mx + balanco, chaoY - m.altura);
+                ctx.stroke();
+                // Segunda folhinha
+                ctx.beginPath();
+                ctx.moveTo(mx, chaoY);
+                ctx.quadraticCurveTo(mx - balanco * 0.5, chaoY - m.altura * 0.5, mx - balanco, chaoY - m.altura * 0.8);
+                ctx.stroke();
+            }
+            ctx.lineCap = 'butt';
+        }
+
+        // ============================================
+        // DESENHAR PARTÍCULAS AMBIENTE
+        // ============================================
+        function desenharParticulasAmbiente() {
+            for (let p of particulasAmbiente) {
+                const brilho = 0.4 + Math.sin(p.brilho) * 0.3;
+                ctx.globalAlpha = brilho;
+                ctx.fillStyle = p.cor;
+                ctx.shadowColor = p.cor;
+                ctx.shadowBlur = 6;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.tamanho, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1;
             }
         }
 
@@ -946,45 +925,50 @@
         // ============================================
         function draw() {
             ctx.clearRect(0, 0, W, H);
-            drawBackground();
+
+            // Fundo dinâmico (parallax)
+            desenharCenarioFundo();
 
             // PLATAFORMAS
             for (let plat of platforms) {
                 const sx = plat.x - cameraX;
                 const sy = plat.y;
-                const largura = plat.width;
-                const altura = plat.height;
-
                 if (plat.y === chaoY) {
                     ctx.fillStyle = '#4a7c59';
-                    ctx.fillRect(sx, sy, largura, altura);
-                    ctx.fillStyle = '#3b6e4a';
-                    ctx.fillRect(sx, sy, largura, 4);
+                    ctx.fillRect(sx, sy, plat.width, plat.height);
+                    // Linha superior com brilho animado
+                    const brilho = 0.8 + Math.sin(tempoGlobal * 0.03) * 0.2;
+                    ctx.fillStyle = `rgba(90, 160, 110, ${brilho})`;
+                    ctx.fillRect(sx, sy, plat.width, 4);
                 } else {
                     if (imgPlataforma.complete && imgPlataforma.naturalWidth !== 0) {
-                        ctx.drawImage(imgPlataforma, sx, sy, largura, altura);
+                        ctx.drawImage(imgPlataforma, sx, sy, plat.width, plat.height);
                     } else {
                         ctx.fillStyle = '#8e44ad';
                         ctx.shadowColor = 'rgba(0,0,0,0.4)';
                         ctx.shadowBlur = 12;
-                        ctx.fillRect(sx, sy, largura, altura);
+                        ctx.fillRect(sx, sy, plat.width, plat.height);
                         ctx.shadowBlur = 0;
                         ctx.strokeStyle = '#6c3483';
                         ctx.lineWidth = 2;
-                        ctx.strokeRect(sx, sy, largura, altura);
+                        ctx.strokeRect(sx, sy, plat.width, plat.height);
                     }
                 }
             }
 
-            // ESPINHOS
+            // GRAMA (matinhos balançando)
+            desenharMatinhos();
+
+            // ESPINHOS (com pulso)
             for (let espinho of ESPINHOS) {
                 const ex = espinho.x - cameraX;
                 const ey = espinho.y;
+                const pulso = 0.8 + Math.sin(tempoGlobal * 0.08 + espinho.x) * 0.2;
                 ctx.fillStyle = '#e74c3c';
-                ctx.shadowColor = 'rgba(231,76,60,0.5)';
-                ctx.shadowBlur = 12;
+                ctx.shadowColor = `rgba(231,76,60,${0.4 + pulso * 0.2})`;
+                ctx.shadowBlur = 12 * pulso + 6;
                 ctx.beginPath();
-                ctx.moveTo(ex + espinho.w/2, ey);
+                ctx.moveTo(ex + espinho.w/2, ey - 3 * pulso);
                 ctx.lineTo(ex + espinho.w, ey + espinho.h);
                 ctx.lineTo(ex, ey + espinho.h);
                 ctx.closePath();
@@ -1005,36 +989,46 @@
                 ctx.fillText('💀', bx + 10, chaoY - 10);
             }
 
-            // MOEDAS
+            // MOEDAS (com flutuação)
             for (let m of moedasArray) {
                 if (m.coletada) continue;
                 const mx = m.x - cameraX;
-                const my = m.y;
+                const flutuacao = Math.sin(tempoGlobal * 0.06 + m.fase) * 3;
+                const my = m.y + flutuacao;
+                const escala = 0.9 + Math.sin(tempoGlobal * 0.1 + m.fase) * 0.1;
+
                 ctx.shadowColor = '#ffd700';
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = 15 + Math.sin(tempoGlobal * 0.1 + m.fase) * 5;
                 ctx.fillStyle = '#ffd700';
                 ctx.beginPath();
-                ctx.arc(mx, my, m.raio, 0, Math.PI * 2);
+                ctx.arc(mx, my, m.raio * escala, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.shadowBlur = 0;
                 ctx.fillStyle = '#ffaa00';
                 ctx.beginPath();
-                ctx.arc(mx - 2, my - 2, m.raio * 0.4, 0, Math.PI * 2);
+                ctx.arc(mx - 2, my - 2, m.raio * escala * 0.4, 0, Math.PI * 2);
+                ctx.fill();
+                // Brilho da moeda
+                ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                ctx.beginPath();
+                ctx.arc(mx - 3, my - 3, m.raio * escala * 0.2, 0, Math.PI * 2);
                 ctx.fill();
             }
 
-            // CHECKPOINTS
+            // CHECKPOINTS (bandeiras tremulando)
             for (let cp of checkpoints) {
                 const cx = cp.x - cameraX;
                 const cy = cp.y;
                 ctx.fillStyle = '#888';
                 ctx.fillRect(cx + 4, cy, 3, cp.h);
+                // Bandeira tremulando
+                const onda = Math.sin(tempoGlobal * 0.1 + cp.x * 0.01) * 3;
                 ctx.fillStyle = cp.ativado ? '#2ecc71' : 'rgba(255,255,255,0.9)';
-                ctx.shadowColor = 'rgba(0,0,0,0.3)';
-                ctx.shadowBlur = 8;
+                ctx.shadowColor = cp.ativado ? '#2ecc71' : 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = cp.ativado ? 15 : 8;
                 ctx.beginPath();
                 ctx.moveTo(cx + 7, cy + 5);
-                ctx.lineTo(cx + 30, cy + 15);
+                ctx.quadraticCurveTo(cx + 20, cy + 12 + onda, cx + 30, cy + 15);
                 ctx.lineTo(cx + 7, cy + 30);
                 ctx.closePath();
                 ctx.fill();
@@ -1046,7 +1040,7 @@
 
             // SÁBIO
             const sxSabio = sabio.x - cameraX;
-            const sySabio = sabio.y;
+            const sySabio = sabio.y + Math.sin(tempoGlobal * 0.04) * 2;
             ctx.shadowColor = 'rgba(0,0,0,0.4)';
             ctx.shadowBlur = 12;
             ctx.fillStyle = sabio.cor;
@@ -1070,12 +1064,10 @@
             if (sabio.conversaAtiva && !sabio.conversaTerminada) {
                 const falaAtual = sabio.falas[sabio.falaIndex] || '';
                 ctx.font = '16px "Pixelify Sans", monospace';
-                const metrics = ctx.measureText(falaAtual);
-                const larguraTexto = metrics.width;
-                const alturaTexto = 24;
+                const larguraTexto = ctx.measureText(falaAtual).width;
                 const padding = 20;
                 const bw = Math.max(larguraTexto + padding * 2, 60);
-                const bh = alturaTexto + padding;
+                const bh = 24 + padding;
                 const bx = sxSabio + sabio.largura/2 - bw/2;
                 const by = sySabio - bh - 16;
 
@@ -1109,18 +1101,18 @@
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = '#222';
-                ctx.font = '16px "Pixelify Sans", monospace';
                 ctx.shadowBlur = 0;
                 ctx.fillText(falaAtual, bx + bw/2, by + bh/2);
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'alphabetic';
             }
 
-            // MOBS
+            // MOBS (com efeitos)
             for (let mob of mobs) {
                 if (mob.morto) continue;
                 const mx = mob.x - cameraX;
                 const my = mob.y;
+                // Corpo do mob com brilho
                 ctx.beginPath();
                 ctx.arc(mx, my, mob.radius, 0, Math.PI * 2);
                 ctx.fillStyle = mob.color;
@@ -1131,18 +1123,35 @@
                 ctx.strokeStyle = mob.stroke;
                 ctx.lineWidth = 3;
                 ctx.stroke();
+
+                // Olhos do mob (dá vida!)
+                const olhoT = mob.radius * 0.3;
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(mx - olhoT, my - 2, mob.radius * 0.2, 0, Math.PI * 2);
+                ctx.arc(mx + olhoT, my - 2, mob.radius * 0.2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(mx - olhoT + (mob.direction * 1), my - 2, mob.radius * 0.1, 0, Math.PI * 2);
+                ctx.arc(mx + olhoT + (mob.direction * 1), my - 2, mob.radius * 0.1, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Barrinha de vida
                 ctx.fillStyle = 'rgba(255,0,0,0.7)';
                 ctx.fillRect(mx - mob.radius, my - mob.radius - 10, mob.radius * 2, 4);
                 ctx.fillStyle = 'rgba(0,255,0,0.7)';
-                const lifePercent = mob.hp / 2;
-                ctx.fillRect(mx - mob.radius, my - mob.radius - 10, mob.radius * 2 * lifePercent, 4);
+                ctx.fillRect(mx - mob.radius, my - mob.radius - 10, mob.radius * 2 * (mob.hp / 2), 4);
+
+                // Asas para voadores (batendo)
                 if (mob.tipo === 'voador') {
-                    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                    const asaBat = Math.sin(tempoGlobal * 0.4 + mob.fase) * 0.4;
+                    ctx.fillStyle = 'rgba(255,255,255,0.4)';
                     ctx.beginPath();
-                    ctx.ellipse(mx - mob.radius - 6, my - 4, 8, 4, 0, 0, Math.PI * 2);
+                    ctx.ellipse(mx - mob.radius - 6, my - 4 + asaBat * 5, 8, 4 + asaBat * 2, -0.3, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.beginPath();
-                    ctx.ellipse(mx + mob.radius + 6, my - 4, 8, 4, 0, 0, Math.PI * 2);
+                    ctx.ellipse(mx + mob.radius + 6, my - 4 + asaBat * 5, 8, 4 + asaBat * 2, 0.3, 0, Math.PI * 2);
                     ctx.fill();
                 }
             }
@@ -1151,6 +1160,12 @@
             if (!gameOver) {
                 const px = player.x - cameraX;
                 const py = player.y;
+                // Sombra no chão
+                ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                ctx.beginPath();
+                ctx.ellipse(px + player.w/2, chaoY + 3, player.w * 0.5, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+
                 ctx.shadowColor = 'rgba(0,0,0,0.3)';
                 ctx.shadowBlur = 12;
                 ctx.fillStyle = '#e74c3c';
@@ -1186,20 +1201,22 @@
                 if (atacando) {
                     const progresso = ataqueTimer / DURACAO_ATAQUE;
                     const angulo = progresso * Math.PI * 1.5 - Math.PI/2;
-                    const raio = 50;
                     ctx.strokeStyle = 'rgba(255,255,255,0.8)';
                     ctx.lineWidth = 6;
                     ctx.shadowColor = 'rgba(255,255,255,0.5)';
                     ctx.shadowBlur = 20;
                     ctx.beginPath();
-                    ctx.arc(px + player.w/2, py + player.h/2, raio, -Math.PI/2, -Math.PI/2 + angulo);
+                    ctx.arc(px + player.w/2, py + player.h/2, 50, -Math.PI/2, -Math.PI/2 + angulo);
                     ctx.stroke();
                     ctx.shadowBlur = 0;
                 }
             }
 
-            // PARTÍCULAS
+            // PARTÍCULAS (ataque, moedas, explosões)
             desenharParticulas();
+
+            // PARTÍCULAS AMBIENTE (flutuando no ar)
+            desenharParticulasAmbiente();
 
             // UI
             if (!gameOver) {
@@ -1226,7 +1243,7 @@
                 ctx.strokeRect(W/2 - 100, 20, 200, 8);
             }
 
-            // TÍTULOS E GAME OVER
+            // TÍTULOS
             if (mostrarTitulo && !gameOver) {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -1332,7 +1349,6 @@
         // ============================================
         function resize() {
             isResizing = true;
-
             W = window.innerWidth;
             H = window.innerHeight;
             canvas.width = W;
@@ -1358,24 +1374,11 @@
                 }
             }
 
-            for (let espinho of ESPINHOS) {
-                espinho.y += deltaY;
-            }
-
-            for (let mob of mobs) {
-                mob.radius = newMobRadius;
-                mob.y += deltaY;
-            }
-
-            for (let cp of checkpoints) {
-                cp.y += deltaY;
-            }
-
+            for (let espinho of ESPINHOS) espinho.y += deltaY;
+            for (let mob of mobs) { mob.radius = newMobRadius; mob.y += deltaY; }
+            for (let cp of checkpoints) cp.y += deltaY;
             sabio.y += deltaY;
-
-            for (let m of moedasArray) {
-                m.y += deltaY;
-            }
+            for (let m of moedasArray) m.y += deltaY;
 
             player.w = newPlayerSize;
             player.h = newPlayerSize;
@@ -1390,9 +1393,10 @@
 
             ajustarPosicaoBuraco();
 
-            setTimeout(() => {
-                isResizing = false;
-            }, 50);
+            // Re-inicializar cenário para novas dimensões
+            inicializarCenario();
+
+            setTimeout(() => { isResizing = false; }, 50);
         }
 
         window.addEventListener('resize', resize);
@@ -1403,25 +1407,15 @@
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (key === 'a' || key === 'd' || key === 'w') {
-                e.preventDefault();
-                keys[key] = true;
+                e.preventDefault(); keys[key] = true;
             }
-            if (key === ' ') {
-                e.preventDefault();
-                executarAtaque();
-            }
-            if (key === 'r') {
-                e.preventDefault();
-                if (gameOver) {
-                    restartGame();
-                }
-            }
+            if (key === ' ') { e.preventDefault(); executarAtaque(); }
+            if (key === 'r') { e.preventDefault(); if (gameOver) restartGame(); }
         });
         document.addEventListener('keyup', (e) => {
             const key = e.key.toLowerCase();
             if (key === 'a' || key === 'd' || key === 'w') {
-                e.preventDefault();
-                keys[key] = false;
+                e.preventDefault(); keys[key] = false;
             }
         });
 
