@@ -23,8 +23,10 @@
     <canvas id="gameCanvas"></canvas>
     <script>
         // ============================================
-        // CANVAS E CONFIGURAÇÕES INICIAIS
+        // PARTE 1/3 - CONFIGURAÇÕES E DADOS DO MUNDO
         // ============================================
+
+        // ---------- CANVAS ----------
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -48,9 +50,7 @@
         let contadorTituloNivel4 = 0;
         let isResizing = false;
         let gameOver = false;
-
         let tempoGlobal = 0;
-
         let checkpointX = 100;
         let checkpointY = 0;
 
@@ -62,13 +62,10 @@
 
         let barreiraAtiva = false;
         let barreiraX = 0;
+        let jogadorAgravado = null;
+        let cooldownCipo = 0;
 
-        // Cipó atual agarrado
-        let jogadorAgarrado = null;
-
-        // ============================================
-        // ÁUDIO DE FUNDO
-        // ============================================
+        // ---------- ÁUDIO ----------
         const audioFundo = new Audio('fundo.mp3');
         audioFundo.loop = true;
         audioFundo.volume = 0.3;
@@ -77,9 +74,7 @@
         document.addEventListener('keydown', tentarTocarAudio);
         document.addEventListener('click', tentarTocarAudio);
 
-        // ============================================
-        // IMAGENS
-        // ============================================
+        // ---------- IMAGENS ----------
         const bgImage = new Image();
         bgImage.src = 'Bacground.jpg';
         const imgPlataforma = new Image();
@@ -87,25 +82,20 @@
         const imgMago = new Image();
         imgMago.src = 'mago.png';
 
-        // ============================================
-        // CHÃO, PLATAFORMAS E BURACOS
-        // ============================================
+        // ---------- CHÃO ----------
         const CHAO_ALTURA = Math.floor(H * 0.15);
         let chaoY = H - CHAO_ALTURA;
         const PLAYER_SIZE = Math.min(W, H) * 0.045;
         const MOB_RADIUS = Math.min(W, H) * 0.025;
 
-        const BURACOS_NIVEL1 = [
+        // ---------- BURACOS (níveis 1-4) ----------
+        const BURACOS = [
             { inicio: 1400, fim: 1600 },
             { inicio: 2800, fim: 3000 },
-            { inicio: 4500, fim: 4700 }
-        ];
-        const BURACOS_NIVEL2 = [
+            { inicio: 4500, fim: 4700 },
             { inicio: 6500, fim: 6700 },
             { inicio: 7400, fim: 7600 },
-            { inicio: 8200, fim: 8400 }
-        ];
-        const BURACOS_NIVEL3 = [
+            { inicio: 8200, fim: 8400 },
             { inicio: 11000, fim: 11300 },
             { inicio: 13000, fim: 13300 },
             { inicio: 16000, fim: 16300 },
@@ -115,37 +105,12 @@
             { inicio: 30000, fim: 30300 },
             { inicio: 35000, fim: 35300 },
             { inicio: 40000, fim: 40300 },
-            { inicio: 44000, fim: 44300 }
-        ];
-        const BURACOS_NIVEL4 = [
+            { inicio: 44000, fim: 44300 },
             { inicio: 52000, fim: 54000 },
             { inicio: 59000, fim: 61500 },
             { inicio: 67000, fim: 69500 },
             { inicio: 75000, fim: 77500 },
             { inicio: 81000, fim: 82500 }
-        ];
-        const BURACOS = [...BURACOS_NIVEL1, ...BURACOS_NIVEL2, ...BURACOS_NIVEL3, ...BURACOS_NIVEL4];
-
-        const ESPINHOS = [
-            { x: 10500, y: chaoY - 20, w: 30, h: 20 },
-            { x: 11500, y: chaoY - 20, w: 30, h: 20 },
-            { x: 12000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 13500, y: chaoY - 20, w: 30, h: 20 },
-            { x: 14500, y: chaoY - 20, w: 30, h: 20 },
-            { x: 17000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 18500, y: chaoY - 20, w: 30, h: 20 },
-            { x: 20000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 22500, y: chaoY - 20, w: 30, h: 20 },
-            { x: 24000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 27000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 29000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 31000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 34000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 36000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 39000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 41000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 43000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 45000, y: chaoY - 20, w: 30, h: 20 }
         ];
 
         function estaSobreBuraco(x) {
@@ -171,8 +136,9 @@
             }
         }
 
-        // Plataformas do chão (divididas por todos os buracos)
+        // ---------- PLATAFORMAS (chão + elevadas) ----------
         const platforms = [
+            // Chão níveis 1-3
             { x: 0, y: chaoY, width: 1400, height: CHAO_ALTURA },
             { x: 1600, y: chaoY, width: 1200, height: CHAO_ALTURA },
             { x: 3000, y: chaoY, width: 1500, height: CHAO_ALTURA },
@@ -190,13 +156,13 @@
             { x: 35300, y: chaoY, width: 4700, height: CHAO_ALTURA },
             { x: 40300, y: chaoY, width: 3700, height: CHAO_ALTURA },
             { x: 44300, y: chaoY, width: 7700, height: CHAO_ALTURA },
-            // NÍVEL 4 - chão após buracos gigantes
+            // Chão nível 4
             { x: 54000, y: chaoY, width: 5000, height: CHAO_ALTURA },
             { x: 61500, y: chaoY, width: 5500, height: CHAO_ALTURA },
             { x: 69500, y: chaoY, width: 5500, height: CHAO_ALTURA },
             { x: 77500, y: chaoY, width: 3500, height: CHAO_ALTURA },
             { x: 82500, y: chaoY, width: 2500, height: CHAO_ALTURA },
-            // Plataformas elevadas (níveis 1-3)
+            // Plataformas elevadas níveis 1-3
             { x: 500, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 800, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 1900, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
@@ -255,9 +221,7 @@
             { x: 45600, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 46100, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 46600, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // ============================================
-            // NÍVEL 4 - PLATAFORMAS ELEVADAS NORMAIS
-            // ============================================
+            // Plataformas elevadas nível 4
             { x: 48200, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 48700, y: chaoY - 140 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 55500, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
@@ -270,9 +234,30 @@
             { x: 83000, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 }
         ];
 
-        // ============================================
-        // NÍVEL 4 - CANHÕES DE BOLA DE FOGO
-        // ============================================
+        // ---------- ESPINHOS (níveis 1-3) ----------
+        const ESPINHOS = [
+            { x: 10500, y: chaoY - 20, w: 30, h: 20 },
+            { x: 11500, y: chaoY - 20, w: 30, h: 20 },
+            { x: 12000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 13500, y: chaoY - 20, w: 30, h: 20 },
+            { x: 14500, y: chaoY - 20, w: 30, h: 20 },
+            { x: 17000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 18500, y: chaoY - 20, w: 30, h: 20 },
+            { x: 20000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 22500, y: chaoY - 20, w: 30, h: 20 },
+            { x: 24000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 27000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 29000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 31000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 34000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 36000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 39000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 41000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 43000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 45000, y: chaoY - 20, w: 30, h: 20 }
+        ];
+
+        // ---------- ESTÁTUAS / CANHÕES (nível 4) ----------
         const CANHOES = [
             { x: 49000, y: chaoY - 25, direcao: -1, cooldown: 60, cooldownMax: 150 },
             { x: 50500, y: chaoY - 25, direcao: 1, cooldown: 0, cooldownMax: 150 },
@@ -288,24 +273,16 @@
 
         let bolasDeFogo = [];
 
-        // ============================================
-        // NÍVEL 4 - PLATAFORMAS MÓVEIS
-        // ============================================
+        // ---------- PLATAFORMAS MÓVEIS (nível 4) ----------
         const PLATAFORMAS_MOVEIS = [
-            // Buraco 2 (59000-61500) - horizontal
             { x: 60000, y: chaoY - 100, w: 110, h: 20, tipo: 'horizontal', minX: 59500, maxX: 61000, speed: 1.8, direction: 1 },
-            // Buraco 3 (67000-69500) - vertical
             { x: 68000, y: chaoY - 120, w: 110, h: 20, tipo: 'vertical', minY: chaoY - 200, maxY: chaoY - 60, speed: 1.5, direction: 1 },
             { x: 69000, y: chaoY - 100, w: 110, h: 20, tipo: 'vertical', minY: chaoY - 220, maxY: chaoY - 70, speed: 1.8, direction: -1 },
-            // Buraco 4 (75000-77500) - horizontal
             { x: 76000, y: chaoY - 100, w: 110, h: 20, tipo: 'horizontal', minX: 75200, maxX: 77000, speed: 2.2, direction: 1 },
-            // Buraco 5 (81000-82500) - horizontal
             { x: 81500, y: chaoY - 120, w: 110, h: 20, tipo: 'horizontal', minX: 81200, maxX: 82200, speed: 2.0, direction: 1 }
         ];
 
-        // ============================================
-        // NÍVEL 4 - PLATAFORMAS PODRES
-        // ============================================
+        // ---------- PLATAFORMAS PODRES (nível 4) ----------
         const PLATAFORMAS_PODRES = [
             { x: 48300, y: chaoY - 60, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
             { x: 51500, y: chaoY - 80, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
@@ -319,26 +296,41 @@
             { x: 80000, y: chaoY - 100, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 }
         ];
 
-        // ============================================
-        // NÍVEL 4 - CIPÓS PARA BALANÇAR
-        // ============================================
-        const CIPOS = [
-            { ancoraX: 52200, ancoraY: chaoY - 300, comprimento: 200, angulo: 0, anguloMax: 0.85, velocidade: 0.035, fase: 0, ocupado: false },
-            { ancoraX: 53300, ancoraY: chaoY - 320, comprimento: 210, angulo: 0, anguloMax: 0.85, velocidade: 0.035, fase: Math.PI / 2, ocupado: false },
-            // Buraco 2
-            { ancoraX: 59500, ancoraY: chaoY - 300, comprimento: 200, angulo: 0, anguloMax: 0.85, velocidade: 0.035, fase: 0, ocupado: false },
-            { ancoraX: 60800, ancoraY: chaoY - 320, comprimento: 210, angulo: 0, anguloMax: 0.85, velocidade: 0.035, fase: Math.PI, ocupado: false },
-            // Buraco 4
-            { ancoraX: 75400, ancoraY: chaoY - 300, comprimento: 200, angulo: 0, anguloMax: 0.85, velocidade: 0.04, fase: 0, ocupado: false },
-            { ancoraX: 76800, ancoraY: chaoY - 320, comprimento: 210, angulo: 0, anguloMax: 0.85, velocidade: 0.04, fase: Math.PI / 2, ocupado: false },
-            // Buraco 5
-            { ancoraX: 81400, ancoraY: chaoY - 300, comprimento: 200, angulo: 0, anguloMax: 0.85, velocidade: 0.04, fase: 0, ocupado: false },
-            { ancoraX: 82200, ancoraY: chaoY - 320, comprimento: 210, angulo: 0, anguloMax: 0.85, velocidade: 0.04, fase: Math.PI, ocupado: false }
-        ];
+        // ---------- CIPÓS ----------
+        function gerarCipos() {
+            const result = [];
+            const configuracao = [
+                { inicio: 52000, fim: 54000, count: 5 },
+                { inicio: 59000, fim: 61500, count: 5 },
+                { inicio: 75000, fim: 77500, count: 5 },
+                { inicio: 81000, fim: 82500, count: 4 }
+            ];
+            let idx = 0;
+            for (let cfg of configuracao) {
+                const largura = cfg.fim - cfg.inicio;
+                const passo = largura / (cfg.count + 1);
+                for (let i = 1; i <= cfg.count; i++) {
+                    result.push({
+                        ancoraX: cfg.inicio + passo * i,
+                        ancoraY: chaoY - 400,
+                        comprimento: 280,
+                        angulo: 0,
+                        anguloMax: 1.2,
+                        velocidade: 0.045,
+                        fase: (idx * 0.9) % (Math.PI * 2),
+                        pontaX: 0,
+                        pontaY: 0,
+                        ocupado: false
+                    });
+                    idx++;
+                }
+            }
+            return result;
+        }
 
-        // ============================================
-        // MOEDAS
-        // ============================================
+        const CIPOS = gerarCipos();
+
+        // ---------- MOEDAS ----------
         let moedas = 0;
         let moedasArray = [];
 
@@ -346,20 +338,8 @@
             moedasArray = [];
             const raioMoeda = 12;
             const espacamentoChao = 150;
-
             for (let x = 100; x < WORLD_WIDTH - 100; x += espacamentoChao) {
-                let sobreBuraco = false;
-                for (let buraco of BURACOS) {
-                    if (x > buraco.inicio && x < buraco.fim) { sobreBuraco = true; break; }
-                }
-                if (sobreBuraco) continue;
-
-                let sobreEspinho = false;
-                for (let espinho of ESPINHOS) {
-                    if (x > espinho.x && x < espinho.x + espinho.w) { sobreEspinho = true; break; }
-                }
-                if (sobreEspinho) continue;
-
+                if (estaSobreBuraco(x)) continue;
                 let noChao = false;
                 for (let plat of platforms) {
                     if (plat.y === chaoY && x > plat.x && x < plat.x + plat.width) { noChao = true; break; }
@@ -368,7 +348,6 @@
                     moedasArray.push({ x: x, y: chaoY - 15, raio: raioMoeda, coletada: false, fase: Math.random() * Math.PI * 2 });
                 }
             }
-
             for (let plat of platforms) {
                 if (plat.y !== chaoY) {
                     const xCentro = plat.x + plat.width / 2;
@@ -377,9 +356,7 @@
             }
         }
 
-        // ============================================
-        // JOGADOR
-        // ============================================
+        // ---------- JOGADOR ----------
         const player = {
             x: 100, y: chaoY - PLAYER_SIZE,
             w: PLAYER_SIZE, h: PLAYER_SIZE,
@@ -391,10 +368,9 @@
 
         let ultimaDirecao = 1;
 
-        // ============================================
-        // MOBS
-        // ============================================
+        // ---------- MOBS ----------
         const mobs = [
+            // Nível 1
             { x: 900, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.0, minX: 700, maxX: 1200, direction: 1, color: '#6a9c3a', stroke: '#4a6c25', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 0 },
             { x: 2000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.8, minX: 1800, maxX: 2300, direction: 1, color: '#7a8c4a', stroke: '#5a6c2a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 1 },
             { x: 3300, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.2, minX: 3100, maxX: 3600, direction: 1, color: '#8a6c3a', stroke: '#6a4c1a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 2 },
@@ -433,9 +409,7 @@
             { x: 44000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 5.4, minX: 43500, maxX: 44500, direction: 1, color: '#8a6c3a', stroke: '#6a4c1a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 2.8 },
             { x: 45000, y: chaoY - 80, radius: MOB_RADIUS, speed: 5.8, minX: 44500, maxX: 45500, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 2.2 },
             { x: 46000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 5.6, minX: 45500, maxX: 46500, direction: 1, color: '#5a8a5a', stroke: '#3a6a3a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 1.6 },
-            // ============================================
-            // NÍVEL 4 - MOBS MAIS RÁPIDOS E AGRESSIVOS
-            // ============================================
+            // Nível 4 - mobs agressivos
             { x: 48500, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 6.0, minX: 48000, maxX: 49000, direction: 1, color: '#8a3a1a', stroke: '#5a1a00', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 0 },
             { x: 54500, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 6.5, minX: 54000, maxX: 55200, direction: 1, color: '#9a4a2a', stroke: '#6a2a00', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 1 },
             { x: 56500, y: chaoY - 130, radius: MOB_RADIUS, speed: 6.8, minX: 55500, maxX: 57500, direction: 1, color: '#6a3a7a', stroke: '#3a1a52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 0 },
@@ -447,9 +421,20 @@
             { x: 83000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 8.5, minX: 82600, maxX: 84000, direction: 1, color: '#aa3a2a', stroke: '#7a1a00', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 0 }
         ];
 
-        // ============================================
-        // CHECKPOINTS
-        // ============================================
+        // ---------- VERIFICAÇÃO DE TERRENO PARA MOBS ----------
+        function mobPodeAvancar(mob) {
+            const proxX = mob.x + (mob.speed + 15) * mob.direction;
+            if (proxX < mob.minX || proxX > mob.maxX) return false;
+            for (let b of BURACOS) {
+                if (proxX > b.inicio && proxX < b.fim) return false;
+            }
+            for (let c of CANHOES) {
+                if (Math.abs(proxX - c.x) < 45) return false;
+            }
+            return true;
+        }
+
+        // ---------- CHECKPOINTS ----------
         const checkpoints = [
             { x: 5700, y: chaoY - 60, w: 10, h: 60, ativado: false, tipo: 'bandeira' },
             { x: 9300, y: chaoY - 40, w: 10, h: 40, ativado: false, tipo: 'bandeira' },
@@ -459,6 +444,7 @@
             { x: 79000, y: chaoY - 40, w: 10, h: 40, ativado: false, tipo: 'bandeira' }
         ];
 
+        // ---------- SÁBIO ----------
         const sabio = {
             x: 5950, y: chaoY - 50, largura: 40, altura: 40, cor: '#3498db',
             conversaAtiva: false, timer: 0,
@@ -467,13 +453,20 @@
             alpha: 1, desaparecendo: false
         };
 
+        // ---------- CÂMERA E CONTROLES ----------
         let cameraX = 0;
         const keys = { a: false, d: false, w: false, space: false };
 
         let matinhos = [];
         let nuvens = [];
         let particulasAmbiente = [];
+        let particulas = [];
 
+            // ============================================
+        // PARTE 2/3 - LÓGICA DO JOGO
+        // ============================================
+
+        // ---------- INICIALIZAR CENÁRIO ----------
         function inicializarCenario() {
             matinhos = [];
             for (let x = 0; x < WORLD_WIDTH; x += 30) {
@@ -492,7 +485,7 @@
             }
 
             nuvens = [];
-            for (let i = 0; i < 40; i++) {
+            for (let i = 0; i < 50; i++) {
                 nuvens.push({
                     x: Math.random() * W * 3,
                     y: 40 + Math.random() * (H * 0.35),
@@ -514,6 +507,7 @@
             }
         }
 
+        // ---------- ATUALIZAR CENÁRIO ----------
         function atualizarCenario() {
             for (let n of nuvens) {
                 n.x -= n.velocidade;
@@ -531,6 +525,7 @@
             }
         }
 
+        // ---------- RESET PLAYER ----------
         function resetPlayer() {
             if (vidas <= 0) { gameOver = true; return; }
             let checkpointEncontrado = null;
@@ -541,13 +536,15 @@
                 player.x = player.spawnX; player.y = player.spawnY;
             }
             player.vx = 0; player.vy = 0; player.onGround = false;
-            jogadorAgarrado = null;
+            jogadorAgravado = null;
+            cooldownCipo = 30;
             vidas--;
             if (vidas < 0) vidas = 0;
             mostrarTitulo = true;
             contadorTitulo = 0;
         }
 
+        // ---------- COLISÕES ----------
         function checkCollisions() {
             for (let mob of mobs) {
                 if (mob.morto || mob.emKnockback) continue;
@@ -574,8 +571,7 @@
             }
         }
 
-        let particulas = [];
-
+        // ---------- PARTÍCULAS ----------
         function criarParticulas(x, y, quantidade, cor, velocidade, vida) {
             for (let i = 0; i < quantidade; i++) {
                 const angulo = Math.random() * Math.PI * 2;
@@ -600,21 +596,7 @@
             }
         }
 
-        function desenharParticulas() {
-            for (let p of particulas) {
-                const op = p.vida / p.vidaMax;
-                ctx.globalAlpha = op;
-                ctx.fillStyle = p.cor;
-                ctx.shadowColor = p.cor;
-                ctx.shadowBlur = 8;
-                ctx.beginPath();
-                ctx.arc(p.x - cameraX, p.y, p.tamanho * op, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-                ctx.globalAlpha = 1;
-            }
-        }
-
+        // ---------- CHECKPOINTS ----------
         function checkCheckpoints() {
             for (let cp of checkpoints) {
                 if (cp.ativado) continue;
@@ -630,6 +612,7 @@
             }
         }
 
+        // ---------- CONVERSA COM O SÁBIO ----------
         function iniciarConversa() {
             if (sabio.conversaTerminada || !checkpoints[0].ativado || sabio.conversaAtiva) return;
             sabio.conversaAtiva = true;
@@ -662,6 +645,7 @@
             }
         }
 
+        // ---------- ATAQUE ----------
         function executarAtaque() {
             if (!temEspada || atacando) return;
             atacando = true;
@@ -692,6 +676,7 @@
             }
         }
 
+        // ---------- REINICIAR JOGO ----------
         function restartGame() {
             gameOver = false; nivelConcluido = false; nivelAtual = 1;
             vidas = 5; moedas = 0; temEspada = false; atacando = false;
@@ -699,7 +684,8 @@
             sabio.falaIndex = 0; sabio.timer = 0; sabio.esperandoProxima = false;
             sabio.alpha = 1; sabio.desaparecendo = false;
             barreiraAtiva = false; barreiraX = 0;
-            jogadorAgarrado = null;
+            jogadorAgravado = null;
+            cooldownCipo = 0;
             checkpointX = player.spawnX; checkpointY = player.spawnY;
             mostrarTitulo = true; mostrarTituloNivel2 = false; mostrarTituloNivel3 = false; mostrarTituloNivel4 = false;
             contadorTitulo = 0; contadorTituloNivel2 = 0; contadorTituloNivel3 = 0; contadorTituloNivel4 = 0;
@@ -715,7 +701,6 @@
             player.x = player.spawnX; player.y = player.spawnY;
             player.vx = 0; player.vy = 0; player.onGround = false;
 
-            const posicoesIniciais = mobs.map(m => m.x);
             for (let i = 0; i < mobs.length; i++) {
                 mobs[i].morto = false; mobs[i].direction = 1; mobs[i].hp = 2;
                 mobs[i].knockbackX = 0; mobs[i].knockbackY = 0;
@@ -727,6 +712,7 @@
             cameraX = Math.max(0, Math.min(cameraX, WORLD_WIDTH - W));
         }
 
+        // ---------- ATUALIZAR NÍVEL ----------
         function atualizarNivel() {
             if (nivelAtual === 1 && player.x > 6200) {
                 nivelAtual = 2; mostrarTituloNivel2 = true; contadorTituloNivel2 = 0;
@@ -739,22 +725,18 @@
             }
         }
 
-        // ============================================
-        // ATUALIZAÇÃO
-        // ============================================
+        // ---------- UPDATE PRINCIPAL ----------
         function update() {
             tempoGlobal++;
             atualizarCenario();
 
             if (nivelConcluido || isResizing || gameOver) return;
+            if (cooldownCipo > 0) cooldownCipo--;
 
-            // ============================================
-            // FÍSICA DO JOGADOR (OU AGARRADO NO CIPÓ)
-            // ============================================
-            if (jogadorAgarrado) {
-                // Fica preso na ponta do cipó
-                player.x = jogadorAgarrado.pontaX - player.w/2;
-                player.y = jogadorAgarrado.pontaY;
+            // Física do jogador
+            if (jogadorAgravado) {
+                player.x = jogadorAgravado.pontaX - player.w/2;
+                player.y = jogadorAgravado.pontaY;
                 player.vx = 0;
                 player.vy = 0;
                 player.onGround = false;
@@ -767,7 +749,6 @@
                 if (player.x < 0) player.x = 0;
                 if (player.x + player.w > WORLD_WIDTH) player.x = WORLD_WIDTH - player.w;
 
-                // Barreira
                 if (barreiraAtiva) {
                     if (player.x + player.w > barreiraX && player.x < barreiraX) {
                         player.x = barreiraX - player.w;
@@ -778,8 +759,9 @@
                 player.vy += player.gravity;
                 player.y += player.vy;
 
-                // Colisão com plataformas normais do chão/elevadas
                 player.onGround = false;
+
+                // Colisão com plataformas
                 for (let plat of platforms) {
                     if (player.x + player.w > plat.x && player.x < plat.x + plat.width) {
                         if (player.vy >= 0 && player.y + player.h >= plat.y &&
@@ -790,7 +772,7 @@
                     }
                 }
 
-                // Colisão com plataformas podres (não destruídas)
+                // Plataformas podres
                 for (let pp of PLATAFORMAS_PODRES) {
                     if (pp.destruida) continue;
                     if (player.x + player.w > pp.x && player.x < pp.x + pp.w) {
@@ -806,13 +788,41 @@
                     }
                 }
 
-                // Colisão com plataformas móveis
+                // Plataformas móveis
                 for (let pm of PLATAFORMAS_MOVEIS) {
                     if (player.x + player.w > pm.x && player.x < pm.x + pm.w) {
                         if (player.vy >= 0 && player.y + player.h >= pm.y &&
                             player.y + player.h <= pm.y + pm.h + player.vy + 2) {
                             player.y = pm.y - player.h;
                             player.vy = 0; player.onGround = true;
+                        }
+                    }
+                }
+
+                // Colisão com estátuas
+                for (let canhao of CANHOES) {
+                    const topoY = canhao.y - 55;
+                    const left = canhao.x - 25;
+                    const right = canhao.x + 25;
+
+                    if (player.x + player.w > left && player.x < right) {
+                        if (player.vy >= 0 && player.y + player.h >= topoY &&
+                            player.y + player.h <= topoY + 20 + player.vy) {
+                            player.y = topoY - player.h;
+                            player.vy = 0;
+                            player.onGround = true;
+                        }
+                    }
+
+                    if (player.y + player.h > topoY && player.y < chaoY) {
+                        if (player.x + player.w > left && player.x < right) {
+                            const distEsquerda = Math.abs(player.x + player.w - left);
+                            const distDireita = Math.abs(right - player.x);
+                            if (distEsquerda < distDireita) {
+                                player.x = left - player.w;
+                            } else {
+                                player.x = right;
+                            }
                         }
                     }
                 }
@@ -827,9 +837,7 @@
                 }
             }
 
-            // ============================================
-            // ATUALIZAR PLATAFORMAS PODRES
-            // ============================================
+            // Plataformas podres - atualização
             for (let pp of PLATAFORMAS_PODRES) {
                 if (pp.destruida) {
                     pp.respawn++;
@@ -844,19 +852,15 @@
                 }
                 if (pp.tremendo) {
                     pp.tempoPisada++;
-                    // Tremor crescente + alpha caindo
                     pp.alpha = 1 - (pp.tempoPisada / 120) * 0.5;
                     if (pp.tempoPisada > 120) {
                         pp.destruida = true;
-                        // Partículas de destruição
                         criarParticulas(pp.x + pp.w/2, pp.y + pp.h/2, 15, '#8a5a30', 4, 30);
                     }
                 }
             }
 
-            // ============================================
-            // ATUALIZAR PLATAFORMAS MÓVEIS
-            // ============================================
+            // Plataformas móveis - atualização
             for (let pm of PLATAFORMAS_MOVEIS) {
                 if (pm.tipo === 'horizontal') {
                     pm.x += pm.speed * pm.direction;
@@ -867,9 +871,7 @@
                 }
             }
 
-            // ============================================
-            // ATUALIZAR CIPÓS
-            // ============================================
+            // Cipós - atualização
             for (let cip of CIPOS) {
                 cip.fase += cip.velocidade;
                 cip.angulo = Math.sin(cip.fase) * cip.anguloMax;
@@ -877,9 +879,7 @@
                 cip.pontaY = cip.ancoraY + Math.cos(cip.angulo) * cip.comprimento;
             }
 
-            // ============================================
-            // ATUALIZAR CANHÕES E DISPARAR BOLAS
-            // ============================================
+            // Canhões disparam
             for (let canhao of CANHOES) {
                 canhao.cooldown--;
                 if (canhao.cooldown <= 0) {
@@ -894,14 +894,11 @@
                 }
             }
 
-            // ============================================
-            // ATUALIZAR BOLAS DE FOGO
-            // ============================================
+            // Bolas de fogo - atualização
             for (let i = bolasDeFogo.length - 1; i >= 0; i--) {
                 const bola = bolasDeFogo[i];
                 bola.x += bola.vx;
                 bola.vida--;
-                // Partículas de rastro
                 if (tempoGlobal % 3 === 0) {
                     particulas.push({
                         x: bola.x, y: bola.y,
@@ -916,9 +913,7 @@
                 }
             }
 
-            // ============================================
-            // MOBS
-            // ============================================
+            // Mobs
             for (let mob of mobs) {
                 if (mob.morto) continue;
                 if (mob.knockbackX !== 0 || mob.knockbackY !== 0) {
@@ -943,6 +938,10 @@
                     mob.fase += 0.03;
                     mob.y = (chaoY - 100) + Math.sin(mob.fase) * mob.amplitude;
                 } else {
+                    if (!mobPodeAvancar(mob)) {
+                        mob.direction *= -1;
+                        continue;
+                    }
                     mob.x += mob.speed * mob.direction;
                     if (mob.x > mob.maxX || mob.x < mob.minX) {
                         mob.direction *= -1;
@@ -957,7 +956,7 @@
                 if (ataqueTimer > DURACAO_ATAQUE) atacando = false;
             }
 
-            // Moedas
+            // Moedas (100 = 1 vida)
             for (let m of moedasArray) {
                 if (m.coletada) continue;
                 const dx = (player.x + player.w/2) - m.x;
@@ -981,7 +980,7 @@
             checkBolasDeFogo();
             checkCheckpoints();
 
-            // Trigger da conversa
+            // Conversa com o sábio
             const distanciaHorizontal = Math.abs((player.x + player.w/2) - (sabio.x + sabio.largura/2));
             if (distanciaHorizontal < 120 && checkpoints[0].ativado &&
                 !sabio.conversaTerminada && !sabio.conversaAtiva) {
@@ -1009,9 +1008,11 @@
             if (mostrarTituloNivel4) { contadorTituloNivel4++; if (contadorTituloNivel4 > 120) mostrarTituloNivel4 = false; }
         }
 
+                // ============================================
+        // PARTE 3/3 - RENDERIZAÇÃO E LOOP
         // ============================================
-        // DESENHAR ORC
-        // ============================================
+
+        // ---------- DESENHAR ORC ----------
         function desenharOrc(mx, my, mob) {
             const r = mob.radius;
             const walkCycle = tempoGlobal * 0.18 + mob.fase;
@@ -1228,9 +1229,7 @@
             ctx.restore();
         }
 
-        // ============================================
-        // DESENHAR MORCEGO
-        // ============================================
+        // ---------- DESENHAR MORCEGO ----------
         function desenharMorcego(mx, my, mob) {
             const r = mob.radius;
             const asaBat = Math.sin(tempoGlobal * 0.5 + mob.fase);
@@ -1299,9 +1298,7 @@
             ctx.restore();
         }
 
-        // ============================================
-        // DESENHAR ESPADA MÁGICA
-        // ============================================
+        // ---------- DESENHAR ESPADA MÁGICA ----------
         function desenharEspadaMagica(px, py, w, h, estaAtacando, progresso) {
             const escala = w / 40;
             const maoX = px + w * 0.9;
@@ -1484,9 +1481,227 @@
             }
         }
 
-        // ============================================
-        // DESENHAR SÁBIO
-        // ============================================
+        // ---------- DESENHAR ESTÁTUA DE PEDRA ----------
+        function desenharCanhao(canhao) {
+            const cx = canhao.x - cameraX;
+            const cy = canhao.y;
+            const dir = canhao.direcao;
+            ctx.save();
+            ctx.translate(cx, cy);
+            if (dir === -1) ctx.scale(-1, 1);
+            // Base
+            ctx.fillStyle = '#3a3a42';
+            ctx.strokeStyle = '#1a1a22';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-32, 60);
+            ctx.lineTo(32, 60);
+            ctx.lineTo(24, 35);
+            ctx.lineTo(-24, 35);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+            // Corpo
+            ctx.fillStyle = '#5a5a62';
+            ctx.strokeStyle = '#2a2a32';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(-22, 35);
+            ctx.lineTo(-26, -10);
+            ctx.lineTo(-20, -45);
+            ctx.lineTo(20, -45);
+            ctx.lineTo(26, -10);
+            ctx.lineTo(22, 35);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+            // Rachaduras
+            ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(-14, 25);
+            ctx.lineTo(-8, 10);
+            ctx.lineTo(-16, -5);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(12, 20);
+            ctx.lineTo(16, 5);
+            ctx.lineTo(10, -10);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(-4, -40);
+            ctx.lineTo(0, -30);
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(0,0,0,0.15)';
+            ctx.beginPath();
+            ctx.ellipse(-12, 15, 5, 3, 0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(14, 8, 4, 2.5, -0.2, 0, Math.PI * 2);
+            ctx.fill();
+            // Topo irregular
+            ctx.fillStyle = '#6a6a72';
+            ctx.strokeStyle = '#3a3a42';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-20, -45);
+            ctx.lineTo(-16, -60);
+            ctx.lineTo(-8, -55);
+            ctx.lineTo(0, -65);
+            ctx.lineTo(8, -57);
+            ctx.lineTo(16, -60);
+            ctx.lineTo(20, -45);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+            // Sobrancelhas
+            ctx.fillStyle = '#3a3a42';
+            ctx.beginPath();
+            ctx.moveTo(-16, -40);
+            ctx.lineTo(-6, -36);
+            ctx.lineTo(-6, -33);
+            ctx.lineTo(-16, -37);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(16, -40);
+            ctx.lineTo(6, -36);
+            ctx.lineTo(6, -33);
+            ctx.lineTo(16, -37);
+            ctx.closePath();
+            ctx.fill();
+            // Olhos brilhantes
+            const brilhoOlho = 0.85 + Math.sin(tempoGlobal * 0.2) * 0.15;
+            ctx.fillStyle = `rgba(255, 120, 0, ${brilhoOlho})`;
+            ctx.shadowColor = '#ff6600';
+            ctx.shadowBlur = 18;
+            ctx.beginPath();
+            ctx.arc(-11, -35, 3.5, 0, Math.PI * 2);
+            ctx.arc(11, -35, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#1a0800';
+            ctx.beginPath();
+            ctx.arc(-11, -35, 1.5, 0, Math.PI * 2);
+            ctx.arc(11, -35, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            // Boca escura
+            ctx.fillStyle = '#050505';
+            ctx.beginPath();
+            ctx.ellipse(0, 5, 22, 16, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Glow interno
+            const intensidadeFogo = 0.7 + Math.sin(tempoGlobal * 0.2) * 0.3;
+            const glowBoca = ctx.createRadialGradient(0, 5, 0, 0, 5, 24);
+            glowBoca.addColorStop(0, `rgba(255, 240, 150, ${intensidadeFogo})`);
+            glowBoca.addColorStop(0.4, `rgba(255, 140, 0, ${intensidadeFogo * 0.85})`);
+            glowBoca.addColorStop(1, 'rgba(255, 60, 0, 0)');
+            ctx.fillStyle = glowBoca;
+            ctx.beginPath();
+            ctx.ellipse(0, 5, 22, 16, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Dentes
+            ctx.fillStyle = '#8a8a92';
+            ctx.strokeStyle = '#4a4a52';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(-16, -8); ctx.lineTo(-13, 3); ctx.lineTo(-10, -8); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-6, -10); ctx.lineTo(-3, 4); ctx.lineTo(0, -10); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(4, -10); ctx.lineTo(7, 4); ctx.lineTo(10, -10); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(12, -8); ctx.lineTo(15, 3); ctx.lineTo(18, -8); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-16, 18); ctx.lineTo(-13, 7); ctx.lineTo(-10, 18); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-6, 20); ctx.lineTo(-3, 6); ctx.lineTo(0, 20); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(4, 20); ctx.lineTo(7, 6); ctx.lineTo(10, 20); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(12, 18); ctx.lineTo(15, 7); ctx.lineTo(18, 18); ctx.closePath(); ctx.fill(); ctx.stroke();
+            // Contorno da boca
+            ctx.strokeStyle = '#3a3a42';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.ellipse(0, 5, 23, 17, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // ---------- DESENHAR BOLA DE FOGO ----------
+        function desenharBolaDeFogo(bola) {
+            const bx = bola.x - cameraX;
+            const by = bola.y;
+            const grad = ctx.createRadialGradient(bx, by, 0, bx, by, bola.raio * 2);
+            grad.addColorStop(0, 'rgba(255, 255, 200, 0.95)');
+            grad.addColorStop(0.4, 'rgba(255, 140, 0, 0.85)');
+            grad.addColorStop(1, 'rgba(255, 60, 0, 0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(bx, by, bola.raio * 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffee88';
+            ctx.shadowColor = '#ff6600';
+            ctx.shadowBlur = 20;
+            ctx.beginPath();
+            ctx.arc(bx, by, bola.raio, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+
+        // ---------- DESENHAR CIPÓ ----------
+        function desenharCipo(cip) {
+            const ax = cip.ancoraX - cameraX;
+            const ay = cip.ancoraY;
+            const px = cip.pontaX - cameraX;
+            const py = cip.pontaY;
+            ctx.strokeStyle = '#5a3a1a';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(ax, ay);
+            ctx.lineTo(px, py);
+            ctx.stroke();
+            ctx.strokeStyle = '#6b8a3a';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(ax, ay);
+            ctx.lineTo(px, py);
+            ctx.stroke();
+            // Folhas
+            ctx.fillStyle = '#4a6a2a';
+            for (let i = 0.2; i < 0.9; i += 0.2) {
+                const fx = ax + (px - ax) * i;
+                const fy = ay + (py - ay) * i;
+                ctx.beginPath();
+                ctx.ellipse(fx + 6, fy, 6, 3, 0.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(fx - 6, fy, 6, 3, -0.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            // Nó superior
+            ctx.fillStyle = '#3a1a00';
+            ctx.beginPath();
+            ctx.arc(ax, ay, 7, 0, Math.PI * 2);
+            ctx.fill();
+            // Nó inferior
+            ctx.beginPath();
+            ctx.arc(px, py, 9, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#5a3a1a';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            // Indicador de ESPAÇO
+            if (!jogadorAgravado && cooldownCipo <= 0) {
+                const distX = Math.abs((player.x + player.w/2) - cip.pontaX);
+                const distY = Math.abs((player.y + player.h/2) - cip.pontaY);
+                if (distX < 90 && distY < 90) {
+                    const pulso = 0.6 + Math.sin(tempoGlobal * 0.25) * 0.4;
+                    ctx.strokeStyle = `rgba(255, 255, 100, ${pulso})`;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(px, py, 22 + Math.sin(tempoGlobal * 0.2) * 3, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.fillStyle = `rgba(255, 255, 100, ${pulso})`;
+                    ctx.font = 'bold 12px "Pixelify Sans", monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('ESPAÇO', px, py - 35);
+                    ctx.textAlign = 'left';
+                }
+            }
+        }
+
+        // ---------- DESENHAR SÁBIO (MAGO) ----------
         function desenharSabio(sx, sy) {
             const r = sabio.largura / 2;
             const flutuacao = Math.sin(tempoGlobal * 0.04) * 8;
@@ -1536,6 +1751,7 @@
                 ctx.stroke();
             }
             ctx.restore();
+            // Partículas mágicas ao redor
             for (let i = 0; i < 6; i++) {
                 const fase = tempoGlobal * 0.05 + i * 1.3;
                 const raioOrbita = tamanhoMago * 0.55;
@@ -1552,110 +1768,7 @@
             }
         }
 
-        // ============================================
-        // DESENHAR CANHÃO
-        // ============================================
-        function desenharCanhao(canhao) {
-            const cx = canhao.x - cameraX;
-            const cy = canhao.y;
-            ctx.save();
-            ctx.translate(cx, cy);
-            if (canhao.direcao === -1) ctx.scale(-1, 1);
-            // Base
-            ctx.fillStyle = '#3a3a3a';
-            ctx.strokeStyle = '#1a1a1a';
-            ctx.lineWidth = 2;
-            ctx.fillRect(-15, -15, 40, 30);
-            ctx.strokeRect(-15, -15, 40, 30);
-            // Cano
-            ctx.fillStyle = '#555';
-            ctx.fillRect(20, -8, 25, 16);
-            ctx.strokeRect(20, -8, 25, 16);
-            // Boca brilhando
-            ctx.fillStyle = `rgba(255, 100, 0, ${0.6 + Math.sin(tempoGlobal * 0.15) * 0.4})`;
-            ctx.shadowColor = '#ff6600';
-            ctx.shadowBlur = 15;
-            ctx.beginPath();
-            ctx.arc(45, 0, 7, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.restore();
-        }
-
-        // ============================================
-        // DESENHAR BOLA DE FOGO
-        // ============================================
-        function desenharBolaDeFogo(bola) {
-            const bx = bola.x - cameraX;
-            const by = bola.y;
-            // Aura externa
-            const grad = ctx.createRadialGradient(bx, by, 0, bx, by, bola.raio * 2);
-            grad.addColorStop(0, 'rgba(255, 255, 200, 0.95)');
-            grad.addColorStop(0.4, 'rgba(255, 140, 0, 0.85)');
-            grad.addColorStop(1, 'rgba(255, 60, 0, 0)');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(bx, by, bola.raio * 2, 0, Math.PI * 2);
-            ctx.fill();
-            // Núcleo
-            ctx.fillStyle = '#ffee88';
-            ctx.shadowColor = '#ff6600';
-            ctx.shadowBlur = 20;
-            ctx.beginPath();
-            ctx.arc(bx, by, bola.raio, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-        }
-
-        // ============================================
-        // DESENHAR CIPÓ
-        // ============================================
-        function desenharCipo(cip) {
-            const ax = cip.ancoraX - cameraX;
-            const ay = cip.ancoraY;
-            const px = cip.pontaX - cameraX;
-            const py = cip.pontaY;
-            // Corda
-            ctx.strokeStyle = '#5a3a1a';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(ax, ay);
-            ctx.lineTo(px, py);
-            ctx.stroke();
-            // Detalhe verde
-            ctx.strokeStyle = '#6b8a3a';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(ax, ay);
-            ctx.lineTo(px, py);
-            ctx.stroke();
-            // Ponto de ancoragem
-            ctx.fillStyle = '#3a1a00';
-            ctx.beginPath();
-            ctx.arc(ax, ay, 6, 0, Math.PI * 2);
-            ctx.fill();
-            // Nó na ponta
-            ctx.fillStyle = '#3a1a00';
-            ctx.beginPath();
-            ctx.arc(px, py, 8, 0, Math.PI * 2);
-            ctx.fill();
-            // Indicador se estiver perto (para agarrar)
-            if (!jogadorAgarrado) {
-                const distX = Math.abs((player.x + player.w/2) - cip.pontaX);
-                const distY = Math.abs(player.y - cip.pontaY);
-                if (distX < 60 && distY < 60) {
-                    ctx.strokeStyle = `rgba(255, 255, 100, ${0.6 + Math.sin(tempoGlobal * 0.2) * 0.4})`;
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.arc(px, py, 20, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-            }
-        }
-
-        // ============================================
-        // DESENHAR CENÁRIO DE FUNDO
-        // ============================================
+        // ---------- DESENHAR CENÁRIO DE FUNDO ----------
         function desenharCenarioFundo() {
             if (bgImage.complete && bgImage.naturalWidth !== 0) {
                 ctx.drawImage(bgImage, 0, 0, W, H);
@@ -1711,6 +1824,21 @@
             ctx.lineCap = 'butt';
         }
 
+        function desenharParticulas() {
+            for (let p of particulas) {
+                const op = p.vida / p.vidaMax;
+                ctx.globalAlpha = op;
+                ctx.fillStyle = p.cor;
+                ctx.shadowColor = p.cor;
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(p.x - cameraX, p.y, p.tamanho * op, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1;
+            }
+        }
+
         function desenharParticulasAmbiente() {
             for (let p of particulasAmbiente) {
                 const brilho = 0.4 + Math.sin(p.brilho) * 0.3;
@@ -1726,14 +1854,12 @@
             }
         }
 
-        // ============================================
-        // RENDERIZAÇÃO
-        // ============================================
+        // ---------- DRAW ----------
         function draw() {
             ctx.clearRect(0, 0, W, H);
             desenharCenarioFundo();
 
-            // Plataformas normais
+            // Plataformas
             for (let plat of platforms) {
                 const sx = plat.x - cameraX;
                 const sy = plat.y;
@@ -1770,7 +1896,6 @@
                 ctx.strokeStyle = '#3344aa';
                 ctx.lineWidth = 2;
                 ctx.strokeRect(sx, pm.y, pm.w, pm.h);
-                // Detalhe interno
                 ctx.fillStyle = 'rgba(200, 220, 255, 0.5)';
                 ctx.fillRect(sx + 5, pm.y + 3, pm.w - 10, 3);
             }
@@ -1782,14 +1907,12 @@
                 const tremorX = pp.tremendo ? (Math.random() - 0.5) * 4 : 0;
                 const tremorY = pp.tremendo ? (Math.random() - 0.5) * 2 : 0;
                 ctx.globalAlpha = pp.alpha;
-                // Cor: quanto mais tremendo, mais marrom escuro
                 const corBase = pp.tremendo ? '#6a3a1a' : '#8a5a3a';
                 ctx.fillStyle = corBase;
                 ctx.fillRect(sx + tremorX, pp.y + tremorY, pp.w, pp.h);
                 ctx.strokeStyle = '#3a1a00';
                 ctx.lineWidth = 2;
                 ctx.strokeRect(sx + tremorX, pp.y + tremorY, pp.w, pp.h);
-                // Rachaduras
                 ctx.strokeStyle = 'rgba(0,0,0,0.5)';
                 ctx.lineWidth = 1;
                 ctx.beginPath();
@@ -1840,7 +1963,7 @@
                 desenharCipo(cip);
             }
 
-            // Canhões
+            // Canhões/Estátuas
             for (let canhao of CANHOES) {
                 desenharCanhao(canhao);
             }
@@ -1905,7 +2028,7 @@
                 ctx.globalAlpha = 1;
             }
 
-            // Balão de fala
+            // Balão de fala do sábio
             if (sabio.conversaAtiva && !sabio.conversaTerminada) {
                 const falaAtual = sabio.falas[sabio.falaIndex] || '';
                 ctx.font = '16px "Pixelify Sans", monospace';
@@ -1974,7 +2097,7 @@
             if (!gameOver) {
                 const px = player.x - cameraX;
                 const py = player.y;
-                if (!jogadorAgarrado) {
+                if (!jogadorAgravado) {
                     ctx.fillStyle = 'rgba(0,0,0,0.3)';
                     ctx.beginPath();
                     ctx.ellipse(px + player.w/2, chaoY + 3, player.w * 0.5, 4, 0, 0, Math.PI * 2);
@@ -2015,9 +2138,9 @@
                 ctx.fillText('❤️ ' + vidas, 20, 40);
                 ctx.fillText('Nível ' + nivelAtual, 20, 70);
                 ctx.fillText('🪙 ' + moedas + ' / 100', 20, 100);
-                if (temEspada) {
-                    ctx.fillStyle = 'rgba(120, 220, 255, 0.9)';
-                    ctx.fillText('🗡️ Espada Mágica', 20, 130);
+                if (jogadorAgravado) {
+                    ctx.fillStyle = 'rgba(255, 255, 100, 0.9)';
+                    ctx.fillText('🌿 Agarrado! (ESPAÇO para soltar)', 20, 130);
                 }
                 ctx.shadowBlur = 0;
                 const progresso = Math.min(1, player.x / WORLD_WIDTH);
@@ -2084,6 +2207,7 @@
             }
         }
 
+        // ---------- POLYFILL roundRect ----------
         if (!CanvasRenderingContext2D.prototype.roundRect) {
             CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
                 if (r > w/2) r = w/2;
@@ -2101,12 +2225,14 @@
             };
         }
 
+        // ---------- LOOP PRINCIPAL ----------
         function gameLoop() {
             update();
             draw();
             requestAnimationFrame(gameLoop);
         }
 
+        // ---------- REDIMENSIONAMENTO ----------
         function resize() {
             isResizing = true;
             W = window.innerWidth;
@@ -2120,6 +2246,7 @@
             const novoChaoY = H - newChaoAltura;
             const deltaY = novoChaoY - chaoY;
             chaoY = novoChaoY;
+
             for (let plat of platforms) {
                 if (plat.y === chaoY - deltaY) {
                     plat.y = chaoY;
@@ -2144,6 +2271,7 @@
             for (let cip of CIPOS) cip.ancoraY += deltaY;
             for (let canhao of CANHOES) canhao.y += deltaY;
             for (let bola of bolasDeFogo) bola.y += deltaY;
+
             player.w = newPlayerSize;
             player.h = newPlayerSize;
             if (player.onGround || player.y + player.h > chaoY) {
@@ -2154,13 +2282,16 @@
             }
             player.spawnY = chaoY - player.h;
             checkpointY = player.spawnY;
+
             ajustarPosicaoBuraco();
             inicializarCenario();
+
             setTimeout(() => { isResizing = false; }, 50);
         }
 
         window.addEventListener('resize', resize);
 
+        // ---------- EVENTOS DE TECLADO ----------
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (key === 'a' || key === 'd' || key === 'w') {
@@ -2168,27 +2299,39 @@
             }
             if (key === ' ') {
                 e.preventDefault();
-                // Se está perto de um cipó, agarra
-                if (!jogadorAgarrado) {
+                if (!jogadorAgravado && cooldownCipo <= 0) {
+                    let maisProximo = null;
+                    let menorDist = Infinity;
                     for (let cip of CIPOS) {
                         const distX = Math.abs((player.x + player.w/2) - cip.pontaX);
                         const distY = Math.abs((player.y + player.h/2) - cip.pontaY);
-                        if (distX < 60 && distY < 60) {
-                            jogadorAgarrado = cip;
-                            cip.ocupado = true;
-                            break;
+                        const dist = Math.sqrt(distX*distX + distY*distY);
+                        if (distX < 90 && distY < 90 && dist < menorDist) {
+                            menorDist = dist;
+                            maisProximo = cip;
                         }
                     }
-                } else {
-                    // Solta com impulso
-                    const velocidadeAngular = Math.cos(jogadorAgarrado.fase) * jogadorAgarrado.anguloMax * jogadorAgarrado.velocidade;
-                    player.vx = Math.cos(jogadorAgarrado.angulo) * jogadorAgarrado.comprimento * velocidadeAngular * 0.4;
-                    player.vy = -Math.sin(jogadorAgarrado.angulo) * jogadorAgarrado.comprimento * velocidadeAngular * 0.4 - 10;
-                    jogadorAgarrado.ocupado = false;
-                    jogadorAgarrado = null;
-                    atacando = false;
+                    if (maisProximo) {
+                        jogadorAgravado = maisProximo;
+                        maisProximo.ocupado = true;
+                        player.x = maisProximo.pontaX - player.w/2;
+                        player.y = maisProximo.pontaY;
+                        player.vx = 0;
+                        player.vy = 0;
+                    } else {
+                        executarAtaque();
+                    }
+                } else if (jogadorAgravado) {
+                    const omega = Math.cos(jogadorAgravado.fase) * jogadorAgravado.anguloMax * jogadorAgravado.velocidade;
+                    const velLinear = jogadorAgravado.comprimento * omega;
+                    player.vx = velLinear * Math.cos(jogadorAgravado.angulo);
+                    player.vy = -velLinear * Math.sin(jogadorAgravado.angulo) - 6;
+                    if (omega > 0) player.vx += 3;
+                    else if (omega < 0) player.vx -= 3;
+                    jogadorAgravado.ocupado = false;
+                    jogadorAgravado = null;
+                    cooldownCipo = 15;
                 }
-                if (!jogadorAgarrado) executarAtaque();
             }
             if (key === 'r') { e.preventDefault(); if (gameOver) restartGame(); }
         });
@@ -2199,6 +2342,7 @@
             }
         });
 
+        // ---------- INICIALIZAÇÃO ----------
         gerarMoedas();
         resize();
         checkpointY = player.spawnY;
