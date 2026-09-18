@@ -135,6 +135,46 @@
             transition: opacity 0.5s ease-in-out;
             z-index: 10;
         }
+        /* Botão de SKIP */
+        #skipBtn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 20;
+            font-family: 'Pixelify Sans', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #ffffff;
+            padding: 10px 22px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.85);
+            border-radius: 8px;
+            cursor: pointer;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+            transition: background 0.15s, transform 0.1s, color 0.15s, border-color 0.15s;
+            user-select: none;
+        }
+        #skipBtn:hover {
+            background: rgba(241, 196, 15, 0.95);
+            color: #1a1a1a;
+            border-color: #f1c40f;
+            transform: scale(1.05);
+            text-shadow: none;
+        }
+        #skipBtn:active {
+            transform: scale(0.97);
+        }
+        #skipBtn .tecla {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 2px 8px;
+            border: 1px solid currentColor;
+            border-radius: 4px;
+            font-size: 14px;
+            opacity: 0.85;
+        }
     </style>
 </head>
 <body>
@@ -148,6 +188,7 @@
         <video id="cutsceneVideo" muted playsinline preload="auto"></video>
         <div id="cutsceneText"></div>
         <div id="boaSorte">BOA SORTE</div>
+        <button id="skipBtn">SKIP <span class="tecla">ENTER</span></button>
         <div id="cutsceneFade"></div>
     </div>
 
@@ -221,6 +262,7 @@
         let cutsceneIndex = 0;
         let cutsceneIniciada = false;
         let jogoIniciado = false;
+        let cutsceneEncerrada = false; // guarda contra avanços/skip duplo
 
         const startOverlay = document.getElementById('startOverlay');
         const cutsceneDiv = document.getElementById('cutscene');
@@ -228,6 +270,7 @@
         const cutsceneText = document.getElementById('cutsceneText');
         const boaSorteDiv = document.getElementById('boaSorte');
         const cutsceneFade = document.getElementById('cutsceneFade');
+        const skipBtn = document.getElementById('skipBtn');
 
         function iniciarCutscene() {
             if (cutsceneIniciada) return;
@@ -235,6 +278,7 @@
             startOverlay.style.display = 'none';
             cutsceneDiv.style.display = 'block';
             cutsceneIndex = 0;
+            cutsceneEncerrada = false;
 
             // Garante Home.mp3 tocando (destrava autoplay bloqueado)
             tocarHome();
@@ -243,6 +287,7 @@
         }
 
         function playCutscene() {
+            if (cutsceneEncerrada) return;
             if (cutsceneIndex >= cutsceneVideos.length) {
                 mostrarBoaSorte();
                 return;
@@ -255,13 +300,13 @@
             let caiuNoTexto = false;
 
             const fallbackTexto = () => {
-                if (caiuNoTexto) return;
+                if (caiuNoTexto || cutsceneEncerrada) return;
                 caiuNoTexto = true;
                 cutsceneVideo.style.opacity = '0';
                 cutsceneText.textContent = cutsceneTexts[cutsceneIndex];
                 cutsceneText.style.opacity = '1';
                 setTimeout(() => {
-                    if (!caiuNoTexto) return;
+                    if (!caiuNoTexto || cutsceneEncerrada) return;
                     avancarCutscene();
                 }, 3500);
             };
@@ -269,7 +314,7 @@
             cutsceneVideo.onerror = fallbackTexto;
 
             cutsceneVideo.oncanplay = () => {
-                if (caiuNoTexto) return;
+                if (caiuNoTexto || cutsceneEncerrada) return;
                 cutsceneVideo.style.opacity = '1';
             };
 
@@ -283,18 +328,20 @@
             });
 
             setTimeout(() => {
-                if (caiuNoTexto) return;
+                if (caiuNoTexto || cutsceneEncerrada) return;
                 cutsceneText.textContent = cutsceneTexts[cutsceneIndex];
                 cutsceneText.style.opacity = '1';
             }, 800);
         }
 
         function avancarCutscene() {
+            if (cutsceneEncerrada) return;
             cutsceneText.style.opacity = '0';
             cutsceneVideo.style.opacity = '0';
             cutsceneFade.style.opacity = '1';
 
             setTimeout(() => {
+                if (cutsceneEncerrada) return;
                 cutsceneIndex++;
                 if (cutsceneIndex >= cutsceneVideos.length) {
                     mostrarBoaSorte();
@@ -304,10 +351,21 @@
             }, 550);
         }
 
+        // ---------- PULAR CUTSCENE ----------
+        function pularCutscene() {
+            if (cutsceneEncerrada || !cutsceneIniciada || jogoIniciado) return;
+            if (cutsceneDiv.style.display === 'none') return;
+            cutsceneEncerrada = true;
+            try { cutsceneVideo.pause(); } catch (e) {}
+            mostrarBoaSorte();
+        }
+
         function mostrarBoaSorte() {
+            cutsceneEncerrada = true; // idempotente
             cutsceneVideo.style.opacity = '0';
             cutsceneText.style.opacity = '0';
             cutsceneFade.style.opacity = '1';
+            skipBtn.style.display = 'none'; // esconde o botão durante o "BOA SORTE"
 
             // Home.mp3 continua tocando — NÃO pausa aqui
 
@@ -326,18 +384,33 @@
         }
 
         cutsceneVideo.addEventListener('ended', () => {
+            if (cutsceneEncerrada) return;
             avancarCutscene();
         });
 
+        // ---------- BOTÕES E TECLAS DA CUTSCENE ----------
         const startBtn = document.getElementById('startBtn');
         startBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             iniciarCutscene();
         });
+
+        skipBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            pularCutscene();
+        });
+
         document.addEventListener('keydown', (e) => {
+            // Antes da cutscene começar: qualquer tecla inicia
             if (!cutsceneIniciada) {
                 e.preventDefault();
                 iniciarCutscene();
+                return;
+            }
+            // Durante a cutscene: Enter pula
+            if (e.key === 'Enter' && !cutsceneEncerrada && !jogoIniciado) {
+                e.preventDefault();
+                pularCutscene();
             }
         });
 
@@ -2523,6 +2596,7 @@
         window.addEventListener('resize', resize);
 
         document.addEventListener('keydown', (e) => {
+            if (!jogoIniciado) return;
             const key = e.key.toLowerCase();
             if (key === 'a' || key === 'd' || key === 'w') {
                 e.preventDefault(); keys[key] = true;
@@ -2566,6 +2640,7 @@
             if (key === 'r') { e.preventDefault(); if (gameOver) restartGame(); }
         });
         document.addEventListener('keyup', (e) => {
+            if (!jogoIniciado) return;
             const key = e.key.toLowerCase();
             if (key === 'a' || key === 'd' || key === 'w') {
                 e.preventDefault(); keys[key] = false;
