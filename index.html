@@ -24,30 +24,67 @@
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
-            color: #f1c40f;
-            font-family: 'Pixelify Sans', monospace;
-            font-size: 36px;
-            font-weight: bold;
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            padding-bottom: 8vh;
+            padding-bottom: 10vh;
             z-index: 2000;
-            cursor: pointer;
             user-select: none;
-            text-shadow: 0 0 20px #f1c40f, 0 0 40px #f39c12, 0 4px 12px #000;
-            animation: piscar 1.5s infinite;
             background-image:
-                linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 25%, rgba(0,0,0,0) 50%),
+                linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0) 60%),
                 url('Home.png');
             background-size: cover, cover;
             background-position: center, center;
             background-repeat: no-repeat, no-repeat;
             background-color: #000;
         }
-        @keyframes piscar {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
+        .startContent {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .startTitle {
+            color: #f1c40f;
+            font-family: 'Pixelify Sans', monospace;
+            font-size: clamp(40px, 8vw, 72px);
+            font-weight: 700;
+            letter-spacing: 8px;
+            margin-bottom: 40px;
+            text-shadow: 0 0 25px #f1c40f, 0 0 50px #f39c12, 0 6px 16px #000;
+        }
+        #startBtn {
+            font-family: 'Pixelify Sans', monospace;
+            font-size: clamp(22px, 4vw, 32px);
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: #1a1a1a;
+            padding: clamp(12px, 2vh, 18px) clamp(40px, 8vw, 70px);
+            background: linear-gradient(180deg, #ffe066 0%, #f1c40f 50%, #c9a20a 100%);
+            border: 4px solid #8a6a00;
+            border-radius: 10px;
+            cursor: pointer;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+            box-shadow:
+                0 0 25px rgba(241, 196, 15, 0.7),
+                0 6px 0 #6a4a00,
+                inset 0 2px 0 rgba(255, 255, 255, 0.5);
+            transition: transform 0.1s, box-shadow 0.1s, filter 0.15s;
+        }
+        #startBtn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+            box-shadow:
+                0 0 40px rgba(241, 196, 15, 1),
+                0 8px 0 #6a4a00,
+                inset 0 2px 0 rgba(255, 255, 255, 0.5);
+        }
+        #startBtn:active {
+            transform: translateY(4px);
+            box-shadow:
+                0 0 25px rgba(241, 196, 15, 0.7),
+                0 2px 0 #6a4a00,
+                inset 0 2px 0 rgba(255, 255, 255, 0.5);
         }
 
         /* === CUTSCENE === */
@@ -121,9 +158,9 @@
 <body>
     <!-- Tela inicial -->
     <div id="startOverlay">
-        <div style="text-align:center;">
-            <div style="font-size: 60px; letter-spacing: 6px; margin-bottom: 20px; text-shadow: 0 0 25px #f1c40f, 0 0 50px #f39c12, 0 4px 12px #000;">ACUÍLÂNDIA</div>
-            <div>CLIQUE PARA COMEÇAR</div>
+        <div class="startContent">
+            <div class="startTitle">ACUÍLÂNDIA</div>
+            <button id="startBtn">START</button>
         </div>
     </div>
 
@@ -138,6 +175,51 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
+        // ============================================
+        // ÁUDIO HOME — toca o jogo TODO, com ganho 2.0 (200%)
+        // ============================================
+        const GANHO_HOME = 2.0; // 2.0 = 200%
+        const audioHome = new Audio('Home.mp3');
+        audioHome.loop = true;
+        audioHome.volume = 1.0; // volume "base" do elemento (máx permitido)
+        audioHome.preload = 'auto';
+
+        // Web Audio API pra amplificar acima de 100%
+        let audioCtxHome = null;
+        let gainNodeHome = null;
+        let homeAudioSource = null;
+        let homeConectado = false;
+
+        function conectarHomeNoGain() {
+            if (homeConectado) return;
+            try {
+                const AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return; // navegador sem suporte: cai no volume 1.0 normal
+                audioCtxHome = new AC();
+                homeAudioSource = audioCtxHome.createMediaElementSource(audioHome);
+                gainNodeHome = audioCtxHome.createGain();
+                gainNodeHome.gain.value = GANHO_HOME;
+                homeAudioSource.connect(gainNodeHome);
+                gainNodeHome.connect(audioCtxHome.destination);
+                homeConectado = true;
+            } catch (e) {
+                // Se der erro (ex.: já foi conectado antes), ignora
+                homeConectado = true;
+            }
+        }
+
+        function tocarHome() {
+            conectarHomeNoGain();
+            if (audioCtxHome && audioCtxHome.state === 'suspended') {
+                audioCtxHome.resume().catch(() => {});
+            }
+            audioHome.play().catch(() => {});
+        }
+
+        // Tenta iniciar no load (browsers restritos vão bloquear; nesse caso
+        // o clique no START destrava)
+        window.addEventListener('load', tocarHome);
+
         // ============================================
         // CUTSCENE
         // ============================================
@@ -168,11 +250,6 @@
         const boaSorteDiv = document.getElementById('boaSorte');
         const cutsceneFade = document.getElementById('cutsceneFade');
 
-        // ---------- ÁUDIO DA CUTSCENE ----------
-        const audioCutscene = new Audio('Home.mp3');
-        audioCutscene.loop = true;
-        audioCutscene.volume = 0.5;
-
         function iniciarCutscene() {
             if (cutsceneIniciada) return;
             cutsceneIniciada = true;
@@ -180,9 +257,8 @@
             cutsceneDiv.style.display = 'block';
             cutsceneIndex = 0;
 
-            // Toca a música da cutscene
-            audioCutscene.currentTime = 0;
-            audioCutscene.play().catch(() => {});
+            // Garante Home.mp3 tocando (destrava autoplay bloqueado)
+            tocarHome();
 
             playCutscene();
         }
@@ -193,7 +269,6 @@
                 return;
             }
 
-            // Reseta tudo
             cutsceneFade.style.opacity = '0';
             cutsceneText.style.opacity = '0';
             cutsceneVideo.style.opacity = '0';
@@ -212,16 +287,13 @@
                 }, 3500);
             };
 
-            // Erro ao carregar/tocar o vídeo → mostra apenas texto
             cutsceneVideo.onerror = fallbackTexto;
 
-            // Quando o vídeo estiver pronto, mostra ele
             cutsceneVideo.oncanplay = () => {
                 if (caiuNoTexto) return;
                 cutsceneVideo.style.opacity = '1';
             };
 
-            // Configura e toca
             cutsceneVideo.src = cutsceneVideos[cutsceneIndex];
             cutsceneVideo.currentTime = 0;
             cutsceneVideo.muted = true;
@@ -231,7 +303,6 @@
                 fallbackTexto();
             });
 
-            // Mostra o texto 0.8s após começar
             setTimeout(() => {
                 if (caiuNoTexto) return;
                 cutsceneText.textContent = cutsceneTexts[cutsceneIndex];
@@ -240,7 +311,6 @@
         }
 
         function avancarCutscene() {
-            // Fade out rápido
             cutsceneText.style.opacity = '0';
             cutsceneVideo.style.opacity = '0';
             cutsceneFade.style.opacity = '1';
@@ -260,9 +330,7 @@
             cutsceneText.style.opacity = '0';
             cutsceneFade.style.opacity = '1';
 
-            // Para a música da cutscene
-            audioCutscene.pause();
-            audioCutscene.currentTime = 0;
+            // Home.mp3 continua tocando — NÃO pausa aqui
 
             setTimeout(() => {
                 cutsceneFade.style.opacity = '0';
@@ -282,7 +350,11 @@
             avancarCutscene();
         });
 
-        startOverlay.addEventListener('click', iniciarCutscene);
+        const startBtn = document.getElementById('startBtn');
+        startBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            iniciarCutscene();
+        });
         document.addEventListener('keydown', (e) => {
             if (!cutsceneIniciada) {
                 e.preventDefault();
@@ -330,19 +402,6 @@
         let barreiraX = 0;
         let jogadorAgravado = null;
         let cooldownCipo = 0;
-
-        // ---------- ÁUDIO DO JOGO ----------
-        const audioFundo = new Audio('fundo.mp3');
-        audioFundo.loop = true;
-        audioFundo.volume = 0.3;
-        let musicaPodeTocar = false;
-        function tentarTocarAudio() {
-            if (!musicaPodeTocar) return;
-            audioFundo.play().catch(() => {});
-        }
-        window.addEventListener('load', tentarTocarAudio);
-        document.addEventListener('keydown', tentarTocarAudio);
-        document.addEventListener('click', tentarTocarAudio);
 
         // ---------- IMAGENS ----------
         const bgImage = new Image();
@@ -2538,9 +2597,6 @@
         function iniciarJogo() {
             if (jogoIniciado) return;
             jogoIniciado = true;
-            // Libera a música do jogo só agora (depois da cutscene)
-            musicaPodeTocar = true;
-            tentarTocarAudio();
             gerarMoedas();
             resize();
             checkpointY = player.spawnY;
