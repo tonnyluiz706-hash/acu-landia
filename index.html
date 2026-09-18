@@ -26,32 +26,14 @@
             width: 100vw; height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: flex-end;
-            padding-bottom: 10vh;
+            align-items: center;
             z-index: 2000;
             user-select: none;
-            background-image:
-                linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0) 60%),
-                url('Home.png');
-            background-size: cover, cover;
-            background-position: center, center;
-            background-repeat: no-repeat, no-repeat;
+            background-image: url('Home.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             background-color: #000;
-        }
-        .startContent {
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .startTitle {
-            color: #f1c40f;
-            font-family: 'Pixelify Sans', monospace;
-            font-size: clamp(40px, 8vw, 72px);
-            font-weight: 700;
-            letter-spacing: 8px;
-            margin-bottom: 40px;
-            text-shadow: 0 0 25px #f1c40f, 0 0 50px #f39c12, 0 6px 16px #000;
         }
         #startBtn {
             font-family: 'Pixelify Sans', monospace;
@@ -158,10 +140,7 @@
 <body>
     <!-- Tela inicial -->
     <div id="startOverlay">
-        <div class="startContent">
-            <div class="startTitle">ACUÍLÂNDIA</div>
-            <button id="startBtn">START</button>
-        </div>
+        <button id="startBtn">START</button>
     </div>
 
     <!-- Cutscene com vídeos -->
