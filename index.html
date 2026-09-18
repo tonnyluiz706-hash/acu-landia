@@ -62,21 +62,24 @@
         }
         #cutsceneText {
             position: absolute;
-            bottom: 8%;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #000;
             color: #ffffff;
             font-family: 'Pixelify Sans', monospace;
             font-size: 34px;
             font-weight: 700;
             text-align: center;
-            text-shadow: 2px 2px 0 #000, 0 0 12px #000, 0 0 24px #000;
-            max-width: 85%;
-            line-height: 1.3;
+            line-height: 1.4;
             opacity: 0;
             transition: opacity 0.8s ease-in-out;
             z-index: 2;
-            padding: 20px;
+            padding: 40px 20px;
+            min-height: 20vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         #boaSorte {
             position: absolute;
@@ -172,7 +175,6 @@
             cutsceneVideo.muted = true;
 
             let videoOk = false;
-            let timeoutAvancar = null;
 
             const tentarTocar = () => {
                 cutsceneVideo.play()
@@ -301,7 +303,11 @@
         const audioFundo = new Audio('fundo.mp3');
         audioFundo.loop = true;
         audioFundo.volume = 0.3;
-        function tentarTocarAudio() { audioFundo.play().catch(() => {}); }
+        let musicaPodeTocar = false;
+        function tentarTocarAudio() {
+            if (!musicaPodeTocar) return;
+            audioFundo.play().catch(() => {});
+        }
         window.addEventListener('load', tentarTocarAudio);
         document.addEventListener('keydown', tentarTocarAudio);
         document.addEventListener('click', tentarTocarAudio);
@@ -485,7 +491,7 @@
             { x: 45000, y: chaoY - 20, w: 30, h: 20 }
         ];
 
-        // ---------- CANHÕES / ESTÁTUAS ----------
+        // ---------- CANHÕES ----------
         const CANHOES = [
             { x: 49000, y: chaoY - 25, direcao: -1, cooldown: 60, cooldownMax: 150 },
             { x: 50500, y: chaoY - 25, direcao: 1, cooldown: 0, cooldownMax: 150 },
@@ -2500,6 +2506,9 @@
         function iniciarJogo() {
             if (jogoIniciado) return;
             jogoIniciado = true;
+            // Libera a música só agora (depois da cutscene)
+            musicaPodeTocar = true;
+            tentarTocarAudio();
             gerarMoedas();
             resize();
             checkpointY = player.spawnY;
