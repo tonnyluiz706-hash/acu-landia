@@ -15,18 +15,250 @@
             align-items: center;
             width: 100vw;
             height: 100vh;
+            font-family: 'Pixelify Sans', monospace;
         }
         canvas { display: block; width: 100vw; height: 100vh; background: #000; }
+
+        /* === CUTSCENE === */
+        #startOverlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: #000;
+            color: #f1c40f;
+            font-family: 'Pixelify Sans', monospace;
+            font-size: 36px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            cursor: pointer;
+            text-shadow: 0 0 20px #f1c40f, 0 0 40px #f39c12;
+            user-select: none;
+            animation: piscar 1.5s infinite;
+        }
+        @keyframes piscar {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        #cutscene {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: #000;
+            z-index: 1500;
+            overflow: hidden;
+            display: none;
+        }
+        #cutsceneVideo {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            z-index: 1;
+        }
+        #cutsceneText {
+            position: absolute;
+            bottom: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffffff;
+            font-family: 'Pixelify Sans', monospace;
+            font-size: 34px;
+            font-weight: 700;
+            text-align: center;
+            text-shadow: 2px 2px 0 #000, 0 0 12px #000, 0 0 24px #000;
+            max-width: 85%;
+            line-height: 1.3;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            z-index: 2;
+            padding: 20px;
+        }
+        #boaSorte {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: #f1c40f;
+            font-family: 'Pixelify Sans', monospace;
+            font-size: 140px;
+            font-weight: 700;
+            letter-spacing: 8px;
+            text-align: center;
+            text-shadow: 0 0 30px #f1c40f, 0 0 60px #f39c12, 0 0 100px #e67e22;
+            opacity: 0;
+            transition: opacity 1.2s ease-in-out;
+            z-index: 3;
+            user-select: none;
+        }
+        #cutsceneFade {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease-in-out;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
+    <!-- Tela de "Clique para começar" -->
+    <div id="startOverlay">CLIQUE PARA COMEÇAR</div>
+
+    <!-- Cutscene com vídeos -->
+    <div id="cutscene">
+        <video id="cutsceneVideo" muted playsinline preload="auto"></video>
+        <div id="cutsceneText"></div>
+        <div id="boaSorte">BOA SORTE</div>
+        <div id="cutsceneFade"></div>
+    </div>
+
     <canvas id="gameCanvas"></canvas>
+
     <script>
         // ============================================
-        // PARTE 1/3 - CONFIGURAÇÕES E DADOS DO MUNDO
+        // CUTSCENE
         // ============================================
+        const cutsceneTexts = [
+            "Bem vindo ao reino de Acuílandia, um lugar pacífico e próspero. Até que...",
+            "O grande rei orc apareceu",
+            "Ele sequestrou a princesa",
+            "E falou que se ela não se casar com ele, seu exército atacaria Acuílandia",
+            "Sua missão será partir em uma jornada em busca da princesa e derrotar o rei orc"
+        ];
 
-        // ---------- CANVAS ----------
+        const cutsceneVideos = [
+            'intro1.mp4',
+            'intro2.mp4',
+            'intro3.mp4',
+            'intro4.mp4',
+            'intro5.mp4'
+        ];
+
+        let cutsceneIndex = 0;
+        let cutsceneIniciada = false;
+        let jogoIniciado = false;
+
+        const startOverlay = document.getElementById('startOverlay');
+        const cutsceneDiv = document.getElementById('cutscene');
+        const cutsceneVideo = document.getElementById('cutsceneVideo');
+        const cutsceneText = document.getElementById('cutsceneText');
+        const boaSorteDiv = document.getElementById('boaSorte');
+        const cutsceneFade = document.getElementById('cutsceneFade');
+
+        function iniciarCutscene() {
+            if (cutsceneIniciada) return;
+            cutsceneIniciada = true;
+            startOverlay.style.display = 'none';
+            cutsceneDiv.style.display = 'block';
+            cutsceneIndex = 0;
+            playCutscene();
+        }
+
+        function playCutscene() {
+            if (cutsceneIndex >= cutsceneVideos.length) {
+                mostrarBoaSorte();
+                return;
+            }
+
+            cutsceneFade.style.opacity = '0';
+            cutsceneVideo.src = cutsceneVideos[cutsceneIndex];
+            cutsceneVideo.currentTime = 0;
+            cutsceneVideo.muted = true;
+
+            let videoOk = false;
+            let timeoutAvancar = null;
+
+            const tentarTocar = () => {
+                cutsceneVideo.play()
+                    .then(() => { videoOk = true; })
+                    .catch(() => {
+                        videoOk = false;
+                        mostrarApenasTexto();
+                    });
+            };
+
+            cutsceneVideo.onerror = () => {
+                videoOk = false;
+                mostrarApenasTexto();
+            };
+
+            tentarTocar();
+
+            cutsceneVideo.style.opacity = '0';
+            setTimeout(() => {
+                if (videoOk) cutsceneVideo.style.opacity = '1';
+            }, 100);
+
+            setTimeout(() => {
+                cutsceneText.textContent = cutsceneTexts[cutsceneIndex];
+                cutsceneText.style.opacity = '1';
+            }, 800);
+        }
+
+        function mostrarApenasTexto() {
+            cutsceneVideo.style.opacity = '0';
+            cutsceneText.textContent = cutsceneTexts[cutsceneIndex];
+            cutsceneText.style.opacity = '1';
+            setTimeout(() => {
+                avancarCutscene();
+            }, 3000);
+        }
+
+        function avancarCutscene() {
+            cutsceneText.style.opacity = '0';
+            cutsceneVideo.style.opacity = '0';
+            cutsceneFade.style.opacity = '1';
+
+            setTimeout(() => {
+                cutsceneIndex++;
+                if (cutsceneIndex >= cutsceneVideos.length) {
+                    mostrarBoaSorte();
+                } else {
+                    playCutscene();
+                }
+            }, 900);
+        }
+
+        function mostrarBoaSorte() {
+            cutsceneVideo.style.opacity = '0';
+            cutsceneText.style.opacity = '0';
+            cutsceneFade.style.opacity = '1';
+
+            setTimeout(() => {
+                cutsceneFade.style.opacity = '0';
+                boaSorteDiv.style.opacity = '1';
+            }, 400);
+
+            setTimeout(() => {
+                cutsceneFade.style.opacity = '1';
+                setTimeout(() => {
+                    cutsceneDiv.style.display = 'none';
+                    iniciarJogo();
+                }, 900);
+            }, 2900);
+        }
+
+        cutsceneVideo.addEventListener('ended', () => {
+            avancarCutscene();
+        });
+
+        startOverlay.addEventListener('click', iniciarCutscene);
+        document.addEventListener('keydown', (e) => {
+            if (!cutsceneIniciada) {
+                e.preventDefault();
+                iniciarCutscene();
+            }
+        });
+
+        // ============================================
+        // CONFIGURAÇÕES INICIAIS
+        // ============================================
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -88,7 +320,7 @@
         const PLAYER_SIZE = Math.min(W, H) * 0.045;
         const MOB_RADIUS = Math.min(W, H) * 0.025;
 
-        // ---------- BURACOS (níveis 1-4) ----------
+        // ---------- BURACOS ----------
         const BURACOS = [
             { inicio: 1400, fim: 1600 },
             { inicio: 2800, fim: 3000 },
@@ -136,9 +368,8 @@
             }
         }
 
-        // ---------- PLATAFORMAS (chão + elevadas) ----------
+        // ---------- PLATAFORMAS ----------
         const platforms = [
-            // Chão níveis 1-3
             { x: 0, y: chaoY, width: 1400, height: CHAO_ALTURA },
             { x: 1600, y: chaoY, width: 1200, height: CHAO_ALTURA },
             { x: 3000, y: chaoY, width: 1500, height: CHAO_ALTURA },
@@ -156,13 +387,11 @@
             { x: 35300, y: chaoY, width: 4700, height: CHAO_ALTURA },
             { x: 40300, y: chaoY, width: 3700, height: CHAO_ALTURA },
             { x: 44300, y: chaoY, width: 7700, height: CHAO_ALTURA },
-            // Chão nível 4
             { x: 54000, y: chaoY, width: 5000, height: CHAO_ALTURA },
             { x: 61500, y: chaoY, width: 5500, height: CHAO_ALTURA },
             { x: 69500, y: chaoY, width: 5500, height: CHAO_ALTURA },
             { x: 77500, y: chaoY, width: 3500, height: CHAO_ALTURA },
             { x: 82500, y: chaoY, width: 2500, height: CHAO_ALTURA },
-            // Plataformas elevadas níveis 1-3
             { x: 500, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 800, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 1900, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
@@ -221,7 +450,6 @@
             { x: 45600, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 46100, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 46600, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
-            // Plataformas elevadas nível 4
             { x: 48200, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 48700, y: chaoY - 140 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 55500, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
@@ -234,7 +462,7 @@
             { x: 83000, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 }
         ];
 
-        // ---------- ESPINHOS (níveis 1-3) ----------
+        // ---------- ESPINHOS ----------
         const ESPINHOS = [
             { x: 10500, y: chaoY - 20, w: 30, h: 20 },
             { x: 11500, y: chaoY - 20, w: 30, h: 20 },
@@ -257,7 +485,7 @@
             { x: 45000, y: chaoY - 20, w: 30, h: 20 }
         ];
 
-        // ---------- ESTÁTUAS / CANHÕES (nível 4) ----------
+        // ---------- CANHÕES / ESTÁTUAS ----------
         const CANHOES = [
             { x: 49000, y: chaoY - 25, direcao: -1, cooldown: 60, cooldownMax: 150 },
             { x: 50500, y: chaoY - 25, direcao: 1, cooldown: 0, cooldownMax: 150 },
@@ -273,7 +501,7 @@
 
         let bolasDeFogo = [];
 
-        // ---------- PLATAFORMAS MÓVEIS (nível 4) ----------
+        // ---------- PLATAFORMAS MÓVEIS ----------
         const PLATAFORMAS_MOVEIS = [
             { x: 60000, y: chaoY - 100, w: 110, h: 20, tipo: 'horizontal', minX: 59500, maxX: 61000, speed: 1.8, direction: 1 },
             { x: 68000, y: chaoY - 120, w: 110, h: 20, tipo: 'vertical', minY: chaoY - 200, maxY: chaoY - 60, speed: 1.5, direction: 1 },
@@ -282,7 +510,7 @@
             { x: 81500, y: chaoY - 120, w: 110, h: 20, tipo: 'horizontal', minX: 81200, maxX: 82200, speed: 2.0, direction: 1 }
         ];
 
-        // ---------- PLATAFORMAS PODRES (nível 4) ----------
+        // ---------- PLATAFORMAS PODRES ----------
         const PLATAFORMAS_PODRES = [
             { x: 48300, y: chaoY - 60, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
             { x: 51500, y: chaoY - 80, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
@@ -370,7 +598,6 @@
 
         // ---------- MOBS ----------
         const mobs = [
-            // Nível 1
             { x: 900, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.0, minX: 700, maxX: 1200, direction: 1, color: '#6a9c3a', stroke: '#4a6c25', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 0 },
             { x: 2000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 2.8, minX: 1800, maxX: 2300, direction: 1, color: '#7a8c4a', stroke: '#5a6c2a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 1 },
             { x: 3300, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 3.2, minX: 3100, maxX: 3600, direction: 1, color: '#8a6c3a', stroke: '#6a4c1a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 2 },
@@ -409,7 +636,6 @@
             { x: 44000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 5.4, minX: 43500, maxX: 44500, direction: 1, color: '#8a6c3a', stroke: '#6a4c1a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 2.8 },
             { x: 45000, y: chaoY - 80, radius: MOB_RADIUS, speed: 5.8, minX: 44500, maxX: 45500, direction: 1, color: '#5d4a7a', stroke: '#3d2e52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 2.2 },
             { x: 46000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 5.6, minX: 45500, maxX: 46500, direction: 1, color: '#5a8a5a', stroke: '#3a6a3a', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 1.6 },
-            // Nível 4 - mobs agressivos
             { x: 48500, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 6.0, minX: 48000, maxX: 49000, direction: 1, color: '#8a3a1a', stroke: '#5a1a00', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 0 },
             { x: 54500, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 6.5, minX: 54000, maxX: 55200, direction: 1, color: '#9a4a2a', stroke: '#6a2a00', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 1 },
             { x: 56500, y: chaoY - 130, radius: MOB_RADIUS, speed: 6.8, minX: 55500, maxX: 57500, direction: 1, color: '#6a3a7a', stroke: '#3a1a52', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'voador', amplitude: 60, fase: 0 },
@@ -421,7 +647,6 @@
             { x: 83000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 8.5, minX: 82600, maxX: 84000, direction: 1, color: '#aa3a2a', stroke: '#7a1a00', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 0 }
         ];
 
-        // ---------- VERIFICAÇÃO DE TERRENO PARA MOBS ----------
         function mobPodeAvancar(mob) {
             const proxX = mob.x + (mob.speed + 15) * mob.direction;
             if (proxX < mob.minX || proxX > mob.maxX) return false;
@@ -462,11 +687,9 @@
         let particulasAmbiente = [];
         let particulas = [];
 
-               // ============================================
-        // PARTE 2/3 - LÓGICA DO JOGO
         // ============================================
-
-        // ---------- INICIALIZAR CENÁRIO ----------
+        // LÓGICA DO JOGO
+        // ============================================
         function inicializarCenario() {
             matinhos = [];
             for (let x = 0; x < WORLD_WIDTH; x += 30) {
@@ -507,7 +730,6 @@
             }
         }
 
-        // ---------- ATUALIZAR CENÁRIO ----------
         function atualizarCenario() {
             for (let n of nuvens) {
                 n.x -= n.velocidade;
@@ -525,7 +747,6 @@
             }
         }
 
-        // ---------- RESET PLAYER ----------
         function resetPlayer() {
             if (vidas <= 0) { gameOver = true; return; }
             let checkpointEncontrado = null;
@@ -544,7 +765,6 @@
             contadorTitulo = 0;
         }
 
-        // ---------- COLISÕES ----------
         function checkCollisions() {
             for (let mob of mobs) {
                 if (mob.morto || mob.emKnockback) continue;
@@ -571,7 +791,6 @@
             }
         }
 
-        // ---------- PARTÍCULAS ----------
         function criarParticulas(x, y, quantidade, cor, velocidade, vida) {
             for (let i = 0; i < quantidade; i++) {
                 const angulo = Math.random() * Math.PI * 2;
@@ -596,7 +815,6 @@
             }
         }
 
-        // ---------- CHECKPOINTS ----------
         function checkCheckpoints() {
             for (let cp of checkpoints) {
                 if (cp.ativado) continue;
@@ -612,7 +830,6 @@
             }
         }
 
-        // ---------- CONVERSA COM O SÁBIO ----------
         function iniciarConversa() {
             if (sabio.conversaTerminada || !checkpoints[0].ativado || sabio.conversaAtiva) return;
             sabio.conversaAtiva = true;
@@ -645,7 +862,6 @@
             }
         }
 
-        // ---------- ATAQUE ----------
         function executarAtaque() {
             if (!temEspada || atacando) return;
             atacando = true;
@@ -676,7 +892,6 @@
             }
         }
 
-        // ---------- REINICIAR JOGO ----------
         function restartGame() {
             gameOver = false; nivelConcluido = false; nivelAtual = 1;
             vidas = 5; moedas = 0; temEspada = false; atacando = false;
@@ -712,7 +927,6 @@
             cameraX = Math.max(0, Math.min(cameraX, WORLD_WIDTH - W));
         }
 
-        // ---------- ATUALIZAR NÍVEL ----------
         function atualizarNivel() {
             if (nivelAtual === 1 && player.x > 6200) {
                 nivelAtual = 2; mostrarTituloNivel2 = true; contadorTituloNivel2 = 0;
@@ -725,7 +939,6 @@
             }
         }
 
-        // ---------- UPDATE PRINCIPAL ----------
         function update() {
             tempoGlobal++;
             atualizarCenario();
@@ -733,7 +946,6 @@
             if (nivelConcluido || isResizing || gameOver) return;
             if (cooldownCipo > 0) cooldownCipo--;
 
-            // Física do jogador
             if (jogadorAgravado) {
                 player.x = jogadorAgravado.pontaX - player.w/2;
                 player.y = jogadorAgravado.pontaY;
@@ -761,7 +973,6 @@
 
                 player.onGround = false;
 
-                // Colisão com plataformas
                 for (let plat of platforms) {
                     if (player.x + player.w > plat.x && player.x < plat.x + plat.width) {
                         if (player.vy >= 0 && player.y + player.h >= plat.y &&
@@ -772,7 +983,6 @@
                     }
                 }
 
-                // Plataformas podres
                 for (let pp of PLATAFORMAS_PODRES) {
                     if (pp.destruida) continue;
                     if (player.x + player.w > pp.x && player.x < pp.x + pp.w) {
@@ -788,7 +998,6 @@
                     }
                 }
 
-                // Plataformas móveis
                 for (let pm of PLATAFORMAS_MOVEIS) {
                     if (player.x + player.w > pm.x && player.x < pm.x + pm.w) {
                         if (player.vy >= 0 && player.y + player.h >= pm.y &&
@@ -799,7 +1008,6 @@
                     }
                 }
 
-                // Colisão com estátuas
                 for (let canhao of CANHOES) {
                     const topoY = canhao.y - 55;
                     const left = canhao.x - 25;
@@ -827,7 +1035,6 @@
                     }
                 }
 
-                // Queda em buraco
                 if (!player.onGround && player.vy > 0 && player.y > chaoY + 30) {
                     for (let buraco of BURACOS) {
                         if (player.x + player.w > buraco.inicio && player.x < buraco.fim) {
@@ -837,7 +1044,6 @@
                 }
             }
 
-            // Plataformas podres - atualização
             for (let pp of PLATAFORMAS_PODRES) {
                 if (pp.destruida) {
                     pp.respawn++;
@@ -860,7 +1066,6 @@
                 }
             }
 
-            // Plataformas móveis - atualização
             for (let pm of PLATAFORMAS_MOVEIS) {
                 if (pm.tipo === 'horizontal') {
                     pm.x += pm.speed * pm.direction;
@@ -871,7 +1076,6 @@
                 }
             }
 
-            // Cipós - atualização
             for (let cip of CIPOS) {
                 cip.fase += cip.velocidade;
                 cip.angulo = Math.sin(cip.fase) * cip.anguloMax;
@@ -879,7 +1083,6 @@
                 cip.pontaY = cip.ancoraY + Math.cos(cip.angulo) * cip.comprimento;
             }
 
-            // Canhões disparam
             for (let canhao of CANHOES) {
                 canhao.cooldown--;
                 if (canhao.cooldown <= 0) {
@@ -894,7 +1097,6 @@
                 }
             }
 
-            // Bolas de fogo - atualização
             for (let i = bolasDeFogo.length - 1; i >= 0; i--) {
                 const bola = bolasDeFogo[i];
                 bola.x += bola.vx;
@@ -913,7 +1115,6 @@
                 }
             }
 
-            // Mobs
             for (let mob of mobs) {
                 if (mob.morto) continue;
                 if (mob.knockbackX !== 0 || mob.knockbackY !== 0) {
@@ -956,7 +1157,6 @@
                 if (ataqueTimer > DURACAO_ATAQUE) atacando = false;
             }
 
-            // Moedas (100 = 1 vida)
             for (let m of moedasArray) {
                 if (m.coletada) continue;
                 const dx = (player.x + player.w/2) - m.x;
@@ -980,7 +1180,6 @@
             checkBolasDeFogo();
             checkCheckpoints();
 
-            // Conversa com o sábio
             const distanciaHorizontal = Math.abs((player.x + player.w/2) - (sabio.x + sabio.largura/2));
             if (distanciaHorizontal < 120 && checkpoints[0].ativado &&
                 !sabio.conversaTerminada && !sabio.conversaAtiva) {
@@ -1008,11 +1207,9 @@
             if (mostrarTituloNivel4) { contadorTituloNivel4++; if (contadorTituloNivel4 > 120) mostrarTituloNivel4 = false; }
         }
 
-                // ============================================
-        // PARTE 3/3 - RENDERIZAÇÃO E LOOP
         // ============================================
-
-        // ---------- DESENHAR ORC ----------
+        // RENDERIZAÇÃO
+        // ============================================
         function desenharOrc(mx, my, mob) {
             const r = mob.radius;
             const walkCycle = tempoGlobal * 0.18 + mob.fase;
@@ -1229,7 +1426,6 @@
             ctx.restore();
         }
 
-        // ---------- DESENHAR MORCEGO ----------
         function desenharMorcego(mx, my, mob) {
             const r = mob.radius;
             const asaBat = Math.sin(tempoGlobal * 0.5 + mob.fase);
@@ -1298,7 +1494,6 @@
             ctx.restore();
         }
 
-        // ---------- DESENHAR ESPADA MÁGICA ----------
         function desenharEspadaMagica(px, py, w, h, estaAtacando, progresso) {
             const escala = w / 40;
             const maoX = px + w * 0.9;
@@ -1481,7 +1676,6 @@
             }
         }
 
-        // ---------- DESENHAR ESTÁTUA DE PEDRA ----------
         function desenharCanhao(canhao) {
             const cx = canhao.x - cameraX;
             const cy = canhao.y;
@@ -1489,7 +1683,6 @@
             ctx.save();
             ctx.translate(cx, cy);
             if (dir === -1) ctx.scale(-1, 1);
-            // Base
             ctx.fillStyle = '#3a3a42';
             ctx.strokeStyle = '#1a1a22';
             ctx.lineWidth = 2;
@@ -1500,7 +1693,6 @@
             ctx.lineTo(-24, 35);
             ctx.closePath();
             ctx.fill(); ctx.stroke();
-            // Corpo
             ctx.fillStyle = '#5a5a62';
             ctx.strokeStyle = '#2a2a32';
             ctx.lineWidth = 2.5;
@@ -1513,7 +1705,6 @@
             ctx.lineTo(22, 35);
             ctx.closePath();
             ctx.fill(); ctx.stroke();
-            // Rachaduras
             ctx.strokeStyle = 'rgba(0,0,0,0.3)';
             ctx.lineWidth = 1.5;
             ctx.beginPath();
@@ -1537,7 +1728,6 @@
             ctx.beginPath();
             ctx.ellipse(14, 8, 4, 2.5, -0.2, 0, Math.PI * 2);
             ctx.fill();
-            // Topo irregular
             ctx.fillStyle = '#6a6a72';
             ctx.strokeStyle = '#3a3a42';
             ctx.lineWidth = 2;
@@ -1551,7 +1741,6 @@
             ctx.lineTo(20, -45);
             ctx.closePath();
             ctx.fill(); ctx.stroke();
-            // Sobrancelhas
             ctx.fillStyle = '#3a3a42';
             ctx.beginPath();
             ctx.moveTo(-16, -40);
@@ -1567,7 +1756,6 @@
             ctx.lineTo(16, -37);
             ctx.closePath();
             ctx.fill();
-            // Olhos brilhantes
             const brilhoOlho = 0.85 + Math.sin(tempoGlobal * 0.2) * 0.15;
             ctx.fillStyle = `rgba(255, 120, 0, ${brilhoOlho})`;
             ctx.shadowColor = '#ff6600';
@@ -1582,12 +1770,10 @@
             ctx.arc(-11, -35, 1.5, 0, Math.PI * 2);
             ctx.arc(11, -35, 1.5, 0, Math.PI * 2);
             ctx.fill();
-            // Boca escura
             ctx.fillStyle = '#050505';
             ctx.beginPath();
             ctx.ellipse(0, 5, 22, 16, 0, 0, Math.PI * 2);
             ctx.fill();
-            // Glow interno
             const intensidadeFogo = 0.7 + Math.sin(tempoGlobal * 0.2) * 0.3;
             const glowBoca = ctx.createRadialGradient(0, 5, 0, 0, 5, 24);
             glowBoca.addColorStop(0, `rgba(255, 240, 150, ${intensidadeFogo})`);
@@ -1597,7 +1783,6 @@
             ctx.beginPath();
             ctx.ellipse(0, 5, 22, 16, 0, 0, Math.PI * 2);
             ctx.fill();
-            // Dentes
             ctx.fillStyle = '#8a8a92';
             ctx.strokeStyle = '#4a4a52';
             ctx.lineWidth = 1.5;
@@ -1609,7 +1794,6 @@
             ctx.beginPath(); ctx.moveTo(-6, 20); ctx.lineTo(-3, 6); ctx.lineTo(0, 20); ctx.closePath(); ctx.fill(); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(4, 20); ctx.lineTo(7, 6); ctx.lineTo(10, 20); ctx.closePath(); ctx.fill(); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(12, 18); ctx.lineTo(15, 7); ctx.lineTo(18, 18); ctx.closePath(); ctx.fill(); ctx.stroke();
-            // Contorno da boca
             ctx.strokeStyle = '#3a3a42';
             ctx.lineWidth = 2.5;
             ctx.beginPath();
@@ -1618,7 +1802,6 @@
             ctx.restore();
         }
 
-        // ---------- DESENHAR BOLA DE FOGO ----------
         function desenharBolaDeFogo(bola) {
             const bx = bola.x - cameraX;
             const by = bola.y;
@@ -1639,7 +1822,6 @@
             ctx.shadowBlur = 0;
         }
 
-        // ---------- DESENHAR CIPÓ ----------
         function desenharCipo(cip) {
             const ax = cip.ancoraX - cameraX;
             const ay = cip.ancoraY;
@@ -1657,7 +1839,6 @@
             ctx.moveTo(ax, ay);
             ctx.lineTo(px, py);
             ctx.stroke();
-            // Folhas
             ctx.fillStyle = '#4a6a2a';
             for (let i = 0.2; i < 0.9; i += 0.2) {
                 const fx = ax + (px - ax) * i;
@@ -1669,19 +1850,16 @@
                 ctx.ellipse(fx - 6, fy, 6, 3, -0.5, 0, Math.PI * 2);
                 ctx.fill();
             }
-            // Nó superior
             ctx.fillStyle = '#3a1a00';
             ctx.beginPath();
             ctx.arc(ax, ay, 7, 0, Math.PI * 2);
             ctx.fill();
-            // Nó inferior
             ctx.beginPath();
             ctx.arc(px, py, 9, 0, Math.PI * 2);
             ctx.fill();
             ctx.strokeStyle = '#5a3a1a';
             ctx.lineWidth = 2;
             ctx.stroke();
-            // Indicador de ESPAÇO
             if (!jogadorAgravado && cooldownCipo <= 0) {
                 const distX = Math.abs((player.x + player.w/2) - cip.pontaX);
                 const distY = Math.abs((player.y + player.h/2) - cip.pontaY);
@@ -1701,7 +1879,6 @@
             }
         }
 
-        // ---------- DESENHAR SÁBIO (MAGO) ----------
         function desenharSabio(sx, sy) {
             const r = sabio.largura / 2;
             const flutuacao = Math.sin(tempoGlobal * 0.04) * 8;
@@ -1751,7 +1928,6 @@
                 ctx.stroke();
             }
             ctx.restore();
-            // Partículas mágicas ao redor
             for (let i = 0; i < 6; i++) {
                 const fase = tempoGlobal * 0.05 + i * 1.3;
                 const raioOrbita = tamanhoMago * 0.55;
@@ -1768,7 +1944,6 @@
             }
         }
 
-        // ---------- DESENHAR CENÁRIO DE FUNDO ----------
         function desenharCenarioFundo() {
             if (bgImage.complete && bgImage.naturalWidth !== 0) {
                 ctx.drawImage(bgImage, 0, 0, W, H);
@@ -1854,12 +2029,10 @@
             }
         }
 
-        // ---------- DRAW ----------
         function draw() {
             ctx.clearRect(0, 0, W, H);
             desenharCenarioFundo();
 
-            // Plataformas
             for (let plat of platforms) {
                 const sx = plat.x - cameraX;
                 const sy = plat.y;
@@ -1885,7 +2058,6 @@
                 }
             }
 
-            // Plataformas móveis
             for (let pm of PLATAFORMAS_MOVEIS) {
                 const sx = pm.x - cameraX;
                 ctx.fillStyle = '#5566aa';
@@ -1900,7 +2072,6 @@
                 ctx.fillRect(sx + 5, pm.y + 3, pm.w - 10, 3);
             }
 
-            // Plataformas podres
             for (let pp of PLATAFORMAS_PODRES) {
                 if (pp.destruida) continue;
                 const sx = pp.x - cameraX;
@@ -1928,7 +2099,6 @@
 
             desenharMatinhos();
 
-            // Espinhos
             for (let espinho of ESPINHOS) {
                 const ex = espinho.x - cameraX;
                 const ey = espinho.y;
@@ -1948,7 +2118,6 @@
                 ctx.stroke();
             }
 
-            // Buracos
             for (let buraco of BURACOS) {
                 const bx = buraco.inicio - cameraX;
                 ctx.fillStyle = 'rgba(255,0,0,0.15)';
@@ -1958,22 +2127,18 @@
                 ctx.fillText('💀', bx + 10, chaoY - 10);
             }
 
-            // Cipós
             for (let cip of CIPOS) {
                 desenharCipo(cip);
             }
 
-            // Canhões/Estátuas
             for (let canhao of CANHOES) {
                 desenharCanhao(canhao);
             }
 
-            // Bolas de fogo
             for (let bola of bolasDeFogo) {
                 desenharBolaDeFogo(bola);
             }
 
-            // Moedas
             for (let m of moedasArray) {
                 if (m.coletada) continue;
                 const mx = m.x - cameraX;
@@ -1997,7 +2162,6 @@
                 ctx.fill();
             }
 
-            // Checkpoints
             for (let cp of checkpoints) {
                 const cx = cp.x - cameraX;
                 const cy = cp.y;
@@ -2019,7 +2183,6 @@
                 ctx.stroke();
             }
 
-            // Sábio
             const sxSabio = sabio.x - cameraX;
             const sySabio = sabio.y;
             if (sabio.alpha > 0) {
@@ -2028,7 +2191,6 @@
                 ctx.globalAlpha = 1;
             }
 
-            // Balão de fala do sábio
             if (sabio.conversaAtiva && !sabio.conversaTerminada) {
                 const falaAtual = sabio.falas[sabio.falaIndex] || '';
                 ctx.font = '16px "Pixelify Sans", monospace';
@@ -2076,7 +2238,6 @@
                 ctx.textBaseline = 'alphabetic';
             }
 
-            // Mobs
             for (let mob of mobs) {
                 if (mob.morto) continue;
                 const mx = mob.x - cameraX;
@@ -2093,7 +2254,6 @@
                 ctx.fillRect(mx - mob.radius, my - offsetBarra, mob.radius * 2 * (mob.hp / 2), 4);
             }
 
-            // Jogador
             if (!gameOver) {
                 const px = player.x - cameraX;
                 const py = player.y;
@@ -2129,7 +2289,6 @@
             desenharParticulas();
             desenharParticulasAmbiente();
 
-            // UI
             if (!gameOver) {
                 ctx.fillStyle = 'rgba(255,255,255,0.8)';
                 ctx.font = '20px "Pixelify Sans", monospace';
@@ -2153,7 +2312,6 @@
                 ctx.strokeRect(W/2 - 100, 20, 200, 8);
             }
 
-            // Títulos
             const titulos = [
                 { ativo: mostrarTitulo, texto: 'NÍVEL 1' },
                 { ativo: mostrarTituloNivel2, texto: 'NÍVEL 2' },
@@ -2207,7 +2365,6 @@
             }
         }
 
-        // ---------- POLYFILL roundRect ----------
         if (!CanvasRenderingContext2D.prototype.roundRect) {
             CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
                 if (r > w/2) r = w/2;
@@ -2225,14 +2382,12 @@
             };
         }
 
-        // ---------- LOOP PRINCIPAL ----------
         function gameLoop() {
             update();
             draw();
             requestAnimationFrame(gameLoop);
         }
 
-        // ---------- REDIMENSIONAMENTO ----------
         function resize() {
             isResizing = true;
             W = window.innerWidth;
@@ -2291,7 +2446,6 @@
 
         window.addEventListener('resize', resize);
 
-        // ---------- EVENTOS DE TECLADO ----------
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (key === 'a' || key === 'd' || key === 'w') {
@@ -2343,10 +2497,14 @@
         });
 
         // ---------- INICIALIZAÇÃO ----------
-        gerarMoedas();
-        resize();
-        checkpointY = player.spawnY;
-        gameLoop();
+        function iniciarJogo() {
+            if (jogoIniciado) return;
+            jogoIniciado = true;
+            gerarMoedas();
+            resize();
+            checkpointY = player.spawnY;
+            gameLoop();
+        }
     </script>
 </body>
 </html>
