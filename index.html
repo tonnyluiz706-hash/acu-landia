@@ -19,29 +19,38 @@
         }
         canvas { display: block; width: 100vw; height: 100vh; background: #000; }
 
-        /* === CUTSCENE === */
+        /* === TELA INICIAL === */
         #startOverlay {
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
-            background: #000;
             color: #f1c40f;
             font-family: 'Pixelify Sans', monospace;
             font-size: 36px;
             font-weight: bold;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-end;
+            padding-bottom: 8vh;
             z-index: 2000;
             cursor: pointer;
-            text-shadow: 0 0 20px #f1c40f, 0 0 40px #f39c12;
             user-select: none;
+            text-shadow: 0 0 20px #f1c40f, 0 0 40px #f39c12, 0 4px 12px #000;
             animation: piscar 1.5s infinite;
+            background-image:
+                linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 25%, rgba(0,0,0,0) 50%),
+                url('Home.png');
+            background-size: cover, cover;
+            background-position: center, center;
+            background-repeat: no-repeat, no-repeat;
+            background-color: #000;
         }
         @keyframes piscar {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.4; }
         }
+
+        /* === CUTSCENE === */
         #cutscene {
             position: fixed;
             top: 0; left: 0;
@@ -110,8 +119,13 @@
     </style>
 </head>
 <body>
-    <!-- Tela de "Clique para começar" -->
-    <div id="startOverlay">CLIQUE PARA COMEÇAR</div>
+    <!-- Tela inicial -->
+    <div id="startOverlay">
+        <div style="text-align:center;">
+            <div style="font-size: 60px; letter-spacing: 6px; margin-bottom: 20px; text-shadow: 0 0 25px #f1c40f, 0 0 50px #f39c12, 0 4px 12px #000;">ACUÍLÂNDIA</div>
+            <div>CLIQUE PARA COMEÇAR</div>
+        </div>
+    </div>
 
     <!-- Cutscene com vídeos -->
     <div id="cutscene">
@@ -154,12 +168,22 @@
         const boaSorteDiv = document.getElementById('boaSorte');
         const cutsceneFade = document.getElementById('cutsceneFade');
 
+        // ---------- ÁUDIO DA CUTSCENE ----------
+        const audioCutscene = new Audio('Home.mp3');
+        audioCutscene.loop = true;
+        audioCutscene.volume = 0.5;
+
         function iniciarCutscene() {
             if (cutsceneIniciada) return;
             cutsceneIniciada = true;
             startOverlay.style.display = 'none';
             cutsceneDiv.style.display = 'block';
             cutsceneIndex = 0;
+
+            // Toca a música da cutscene
+            audioCutscene.currentTime = 0;
+            audioCutscene.play().catch(() => {});
+
             playCutscene();
         }
 
@@ -236,6 +260,10 @@
             cutsceneText.style.opacity = '0';
             cutsceneFade.style.opacity = '1';
 
+            // Para a música da cutscene
+            audioCutscene.pause();
+            audioCutscene.currentTime = 0;
+
             setTimeout(() => {
                 cutsceneFade.style.opacity = '0';
                 boaSorteDiv.style.opacity = '1';
@@ -303,7 +331,7 @@
         let jogadorAgravado = null;
         let cooldownCipo = 0;
 
-        // ---------- ÁUDIO ----------
+        // ---------- ÁUDIO DO JOGO ----------
         const audioFundo = new Audio('fundo.mp3');
         audioFundo.loop = true;
         audioFundo.volume = 0.3;
@@ -2510,7 +2538,7 @@
         function iniciarJogo() {
             if (jogoIniciado) return;
             jogoIniciado = true;
-            // Libera a música só agora (depois da cutscene)
+            // Libera a música do jogo só agora (depois da cutscene)
             musicaPodeTocar = true;
             tentarTocarAudio();
             gerarMoedas();
