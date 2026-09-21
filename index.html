@@ -527,7 +527,7 @@
         let atacando = false;
         let ataqueTimer = 0;
         const ALCANCE_ATAQUE = 120;
-        const DURACAO_ATAQUE = 18; // animação mais curta = sensação mais responsiva
+        const DURACAO_ATAQUE = 18;
 
         let barreiraAtiva = false;
         let barreiraX = 0;
@@ -671,11 +671,16 @@
             { x: 70500, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 78500, y: chaoY - 90 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 83000, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 87800, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 89000, y: chaoY - 180 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 90300, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 91500, y: chaoY - 180 - PLAYER_SIZE, width: 120, height: 20 },
-            { x: 92800, y: chaoY - 220 - PLAYER_SIZE, width: 120, height: 20 }
+            // ✅ CORREÇÃO — rebaixadas pra serem alcançáveis do chão
+            { x: 87800, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 89000, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 90300, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 91500, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 92800, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
+            // ✅ CORREÇÃO — stepping stones pra destravar plataformas isoladas
+            { x: 62800, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 70200, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
+            { x: 78200, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 }
         ];
 
         const ESPINHOS = [
@@ -723,24 +728,20 @@
             { x: 81500, y: chaoY - 120, w: 110, h: 20, tipo: 'horizontal', minX: 81200, maxX: 82200, speed: 2.0, direction: 1 }
         ];
 
+        // ✅ CORREÇÃO — mantidas só as 3 plataformas podres úteis (as outras 7 eram decoração isolada)
         const PLATAFORMAS_PODRES = [
             { x: 48300, y: chaoY - 60, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
-            { x: 51500, y: chaoY - 80, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
             { x: 55500, y: chaoY - 60, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
-            { x: 57000, y: chaoY - 100, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
-            { x: 62000, y: chaoY - 80, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
-            { x: 64000, y: chaoY - 60, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
-            { x: 70000, y: chaoY - 60, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
-            { x: 72000, y: chaoY - 90, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
-            { x: 78000, y: chaoY - 70, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
-            { x: 80000, y: chaoY - 100, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 }
+            { x: 70000, y: chaoY - 60, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 }
         ];
 
         function gerarCipos() {
             const result = [];
+            // ✅ CORREÇÃO — cipó adicionado no buraco 67000-69500 (estava sem travessia)
             const configuracao = [
                 { inicio: 52000, fim: 54000, count: 5 },
                 { inicio: 59000, fim: 61500, count: 5 },
+                { inicio: 67000, fim: 69500, count: 5 },
                 { inicio: 75000, fim: 77500, count: 5 },
                 { inicio: 81000, fim: 82500, count: 4 }
             ];
@@ -834,7 +835,7 @@
         let tempoSegurando = 0;
         let espadaLancada = null;
         const FRAMES_HOLD_LANCAMENTO = 180;
-        const TEMPO_HOLD_MS = 3000; // 🔥 hold baseado em tempo real (3s garantidos)
+        const TEMPO_HOLD_MS = 3000;
         let inicioHold = 0;
 
         function lancarEspada() {
@@ -1149,7 +1150,6 @@
             if (vidas < 0) vidas = 0;
             mostrarTitulo = true;
             contadorTitulo = 0;
-            // Reseta estado de ataque também, pra não travar
             atacando = false;
             ataqueTimer = 0;
             segurandoAtaque = false;
@@ -1256,7 +1256,6 @@
             }
         }
 
-        // 🔥 REMOVIDO guard de `atacando` — agora dá pra atacar em sequência sem esperar a animação terminar
         function executarAtaque() {
             if (!temEspada || espadaLancada) return;
             atacando = true;
@@ -1596,7 +1595,6 @@
                 }
             }
 
-            // 🔥 Ataque anima e termina rápido (DURACAO_ATAQUE=18)
             if (atacando) {
                 ataqueTimer++;
                 if (ataqueTimer > DURACAO_ATAQUE) atacando = false;
@@ -1834,7 +1832,6 @@
 
             updateEspadaLancada();
 
-            // 🔥 HOLD BASEADO EM TEMPO REAL (3s garantidos, independente de FPS)
             if (segurandoAtaque && podeLancarEspada && temEspada && !espadaLancada && !jogadorAgravado && inicioHold > 0) {
                 tempoSegurando++;
                 if (performance.now() - inicioHold >= TEMPO_HOLD_MS) {
@@ -3207,7 +3204,6 @@
                     ctx.fillStyle = 'rgba(255, 255, 100, 0.9)';
                     ctx.fillText('🌿 Agarrado! (ESPAÇO para soltar)', 20, 160);
                 }
-                // 🔥 Barra de carregamento do arremesso baseada em TEMPO REAL
                 if (podeLancarEspada && temEspada && segurandoAtaque && !espadaLancada && inicioHold > 0) {
                     const pct = Math.min(1, (performance.now() - inicioHold) / TEMPO_HOLD_MS);
                     ctx.fillStyle = 'rgba(0,0,0,0.6)';
@@ -3428,7 +3424,6 @@
             if (key === ' ') {
                 e.preventDefault();
 
-                // Solta do cipó
                 if (jogadorAgravado) {
                     const omega = Math.cos(jogadorAgravado.fase) * jogadorAgravado.anguloMax * jogadorAgravado.velocidade;
                     const velLinear = jogadorAgravado.comprimento * omega;
@@ -3444,7 +3439,6 @@
                     return;
                 }
 
-                // Ignora repeats (segurar espaço) — evita spam de ataques durante a carga
                 if (e.repeat) return;
 
                 if (cooldownCipo <= 0 && !espadaLancada) {
@@ -3461,7 +3455,6 @@
                     }
 
                     if (maisProximo) {
-                        // Agarra o cipó
                         jogadorAgravado = maisProximo;
                         maisProximo.ocupado = true;
                         player.x = maisProximo.pontaX - player.w/2;
@@ -3469,9 +3462,7 @@
                         player.vx = 0;
                         player.vy = 0;
                     } else {
-                        // 🔥 ATAQUE IMEDIATO no press (sem delay!)
                         executarAtaque();
-                        // Começa a contar o hold pro arremesso (3s)
                         segurandoAtaque = true;
                         tempoSegurando = 0;
                         inicioHold = performance.now();
@@ -3491,7 +3482,6 @@
                 return;
             }
             if (key === ' ') {
-                // Só reseta o hold; o ataque já saiu no keydown
                 segurandoAtaque = false;
                 tempoSegurando = 0;
                 inicioHold = 0;
