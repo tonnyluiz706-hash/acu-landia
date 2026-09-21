@@ -2009,20 +2009,21 @@
             ctx.strokeStyle = '#5a3a1a';
             ctx.lineWidth = 2;
             ctx.stroke();
+            // AVISO VISUAL — aumentado pra 150 e raio 40
             if (!jogadorAgravado && cooldownCipo <= 0) {
                 const distX = Math.abs((player.x + player.w/2) - cip.pontaX);
                 const distY = Math.abs((player.y + player.h/2) - cip.pontaY);
-                if (distX < 90 && distY < 90) {
+                if (distX < 150 && distY < 150) {
                     const pulso = 0.6 + Math.sin(tempoGlobal * 0.25) * 0.4;
                     ctx.strokeStyle = `rgba(255, 255, 100, ${pulso})`;
                     ctx.lineWidth = 3;
                     ctx.beginPath();
-                    ctx.arc(px, py, 22 + Math.sin(tempoGlobal * 0.2) * 3, 0, Math.PI * 2);
+                    ctx.arc(px, py, 40 + Math.sin(tempoGlobal * 0.2) * 4, 0, Math.PI * 2);
                     ctx.stroke();
                     ctx.fillStyle = `rgba(255, 255, 100, ${pulso})`;
-                    ctx.font = 'bold 12px "Pixelify Sans", monospace';
+                    ctx.font = 'bold 14px "Pixelify Sans", monospace';
                     ctx.textAlign = 'center';
-                    ctx.fillText('ESPAÇO', px, py - 35);
+                    ctx.fillText('ESPAÇO', px, py - 50);
                     ctx.textAlign = 'left';
                 }
             }
@@ -2610,7 +2611,8 @@
                         const distX = Math.abs((player.x + player.w/2) - cip.pontaX);
                         const distY = Math.abs((player.y + player.h/2) - cip.pontaY);
                         const dist = Math.sqrt(distX*distX + distY*distY);
-                        if (distX < 90 && distY < 90 && dist < menorDist) {
+                        // HITBOX AUMENTADA — 150 ao invés de 90
+                        if (distX < 150 && distY < 150 && dist < menorDist) {
                             menorDist = dist;
                             maisProximo = cip;
                         }
