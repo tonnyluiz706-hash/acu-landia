@@ -160,9 +160,7 @@
             transform: scale(1.05);
             text-shadow: none;
         }
-        #skipBtn:active {
-            transform: scale(0.97);
-        }
+        #skipBtn:active { transform: scale(0.97); }
         #skipBtn .tecla {
             display: inline-block;
             margin-left: 8px;
@@ -188,20 +186,14 @@
             color: #fff;
             font-family: 'Pixelify Sans', monospace;
             z-index: 3000;
-            box-shadow:
-                0 0 30px rgba(241, 196, 15, 0.6),
-                0 8px 24px rgba(0, 0, 0, 0.6),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 30px rgba(241, 196, 15, 0.6), 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
             transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s;
             opacity: 0;
             pointer-events: none;
             max-width: 90vw;
             min-width: 280px;
         }
-        .conquista-toast.mostrar {
-            transform: translate(-50%, 0);
-            opacity: 1;
-        }
+        .conquista-toast.mostrar { transform: translate(-50%, 0); opacity: 1; }
         .conquista-icone {
             font-size: 36px;
             filter: drop-shadow(0 0 10px #f1c40f);
@@ -219,16 +211,8 @@
             letter-spacing: 3px;
             opacity: 0.85;
         }
-        .conquista-nome {
-            font-size: 19px;
-            font-weight: 700;
-            color: #fff;
-        }
-        .conquista-desc {
-            font-size: 12px;
-            color: #d8d8d8;
-            opacity: 0.9;
-        }
+        .conquista-nome { font-size: 19px; font-weight: 700; color: #fff; }
+        .conquista-desc { font-size: 12px; color: #d8d8d8; opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -248,7 +232,7 @@
 
     <script>
         // ============================================
-        // SISTEMA DE CONQUISTAS
+        // CONQUISTAS
         // ============================================
         const CONQUISTAS = {
             armado:        { nome: "Armado e Perigoso",    desc: "Conseguiu a espada mágica",               desbloqueada: false },
@@ -325,16 +309,12 @@
                 homeAudioSource.connect(gainNodeHome);
                 gainNodeHome.connect(audioCtxHome.destination);
                 homeConectado = true;
-            } catch (e) {
-                homeConectado = true;
-            }
+            } catch (e) { homeConectado = true; }
         }
 
         function tocarHome() {
             conectarHomeNoGain();
-            if (audioCtxHome && audioCtxHome.state === 'suspended') {
-                audioCtxHome.resume().catch(() => {});
-            }
+            if (audioCtxHome && audioCtxHome.state === 'suspended') audioCtxHome.resume().catch(() => {});
             audioHome.play().catch(() => {});
         }
 
@@ -350,7 +330,6 @@
             "E falou que se ela não se casar com ele, seu exército atacaria Acuílandia",
             "Sua missão será partir em uma jornada em busca da princesa e derrotar o rei orc"
         ];
-
         const cutsceneVideos = ['intro1.mp4','intro2.mp4','intro3.mp4','intro4.mp4','intro5.mp4'];
 
         let cutsceneIndex = 0;
@@ -380,37 +359,25 @@
         function playCutscene() {
             if (cutsceneEncerrada) return;
             if (cutsceneIndex >= cutsceneVideos.length) { mostrarBoaSorte(); return; }
-
             cutsceneFade.style.opacity = '0';
             cutsceneText.style.opacity = '0';
             cutsceneVideo.style.opacity = '0';
-
             let caiuNoTexto = false;
-
             const fallbackTexto = () => {
                 if (caiuNoTexto || cutsceneEncerrada) return;
                 caiuNoTexto = true;
                 cutsceneVideo.style.opacity = '0';
                 cutsceneText.textContent = cutsceneTexts[cutsceneIndex];
                 cutsceneText.style.opacity = '1';
-                setTimeout(() => {
-                    if (!caiuNoTexto || cutsceneEncerrada) return;
-                    avancarCutscene();
-                }, 3500);
+                setTimeout(() => { if (!caiuNoTexto || cutsceneEncerrada) return; avancarCutscene(); }, 3500);
             };
-
             cutsceneVideo.onerror = fallbackTexto;
-            cutsceneVideo.oncanplay = () => {
-                if (caiuNoTexto || cutsceneEncerrada) return;
-                cutsceneVideo.style.opacity = '1';
-            };
-
+            cutsceneVideo.oncanplay = () => { if (!caiuNoTexto || cutsceneEncerrada) return; cutsceneVideo.style.opacity = '1'; };
             cutsceneVideo.src = cutsceneVideos[cutsceneIndex];
             cutsceneVideo.currentTime = 0;
             cutsceneVideo.muted = true;
             cutsceneVideo.load();
             cutsceneVideo.play().catch(() => { fallbackTexto(); });
-
             setTimeout(() => {
                 if (caiuNoTexto || cutsceneEncerrada) return;
                 cutsceneText.textContent = cutsceneTexts[cutsceneIndex];
@@ -426,11 +393,8 @@
             setTimeout(() => {
                 if (cutsceneEncerrada) return;
                 cutsceneIndex++;
-                if (cutsceneIndex >= cutsceneVideos.length) {
-                    mostrarBoaSorte();
-                } else {
-                    playCutscene();
-                }
+                if (cutsceneIndex >= cutsceneVideos.length) mostrarBoaSorte();
+                else playCutscene();
             }, 550);
         }
 
@@ -448,49 +412,25 @@
             cutsceneText.style.opacity = '0';
             cutsceneFade.style.opacity = '1';
             skipBtn.style.display = 'none';
-
-            setTimeout(() => {
-                cutsceneFade.style.opacity = '0';
-                boaSorteDiv.style.opacity = '1';
-            }, 300);
-
+            setTimeout(() => { cutsceneFade.style.opacity = '0'; boaSorteDiv.style.opacity = '1'; }, 300);
             setTimeout(() => {
                 cutsceneFade.style.opacity = '1';
-                setTimeout(() => {
-                    cutsceneDiv.style.display = 'none';
-                    iniciarJogo();
-                }, 700);
+                setTimeout(() => { cutsceneDiv.style.display = 'none'; iniciarJogo(); }, 700);
             }, 2900);
         }
 
-        cutsceneVideo.addEventListener('ended', () => {
-            if (cutsceneEncerrada) return;
-            avancarCutscene();
-        });
+        cutsceneVideo.addEventListener('ended', () => { if (!cutsceneEncerrada) avancarCutscene(); });
 
         const startBtn = document.getElementById('startBtn');
-        startBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            iniciarCutscene();
-        });
-
-        skipBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            pularCutscene();
-        });
+        startBtn.addEventListener('click', (e) => { e.stopPropagation(); iniciarCutscene(); });
+        skipBtn.addEventListener('click', (e) => { e.stopPropagation(); pularCutscene(); });
 
         document.addEventListener('keydown', (e) => {
             if (!cutsceneIniciada) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    iniciarCutscene();
-                }
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); iniciarCutscene(); }
                 return;
             }
-            if (e.key === 'Enter' && !cutsceneEncerrada && !jogoIniciado) {
-                e.preventDefault();
-                pularCutscene();
-            }
+            if (e.key === 'Enter' && !cutsceneEncerrada && !jogoIniciado) { e.preventDefault(); pularCutscene(); }
         });
 
         // ============================================
@@ -513,10 +453,7 @@
         let mostrarTituloNivel2 = false;
         let mostrarTituloNivel3 = false;
         let mostrarTituloNivel4 = false;
-        let contadorTitulo = 0;
-        let contadorTituloNivel2 = 0;
-        let contadorTituloNivel3 = 0;
-        let contadorTituloNivel4 = 0;
+        let contadorTitulo = 0, contadorTituloNivel2 = 0, contadorTituloNivel3 = 0, contadorTituloNivel4 = 0;
         let isResizing = false;
         let gameOver = false;
         let tempoGlobal = 0;
@@ -534,12 +471,13 @@
         let jogadorAgravado = null;
         let cooldownCipo = 0;
 
-        const bgImage = new Image();
-        bgImage.src = 'Bacground.jpg';
-        const imgPlataforma = new Image();
-        imgPlataforma.src = 'plataforma.png';
-        const imgMago = new Image();
-        imgMago.src = 'mago.png';
+        // 🔥 Animações do player
+        let playerSquash = 0;        // - = esticado / + = achatado
+        let playerNoChaoAnterior = true;
+
+        const bgImage = new Image(); bgImage.src = 'Bacground.jpg';
+        const imgPlataforma = new Image(); imgPlataforma.src = 'plataforma.png';
+        const imgMago = new Image(); imgMago.src = 'mago.png';
 
         const CHAO_ALTURA = Math.floor(H * 0.15);
         let chaoY = H - CHAO_ALTURA;
@@ -557,9 +495,7 @@
         ];
 
         function estaSobreBuraco(x) {
-            for (let buraco of BURACOS) {
-                if (x + PLAYER_SIZE > buraco.inicio && x < buraco.fim) return true;
-            }
+            for (let buraco of BURACOS) if (x + PLAYER_SIZE > buraco.inicio && x < buraco.fim) return true;
             return false;
         }
 
@@ -671,37 +607,26 @@
             { x: 70500, y: chaoY - 160 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 78500, y: chaoY - 90 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 83000, y: chaoY - 100 - PLAYER_SIZE, width: 120, height: 20 },
-            // ✅ CORREÇÃO — rebaixadas pra serem alcançáveis do chão
             { x: 87800, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 89000, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 90300, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 91500, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 92800, y: chaoY - 80 - PLAYER_SIZE, width: 120, height: 20 },
-            // ✅ CORREÇÃO — stepping stones pra destravar plataformas isoladas
             { x: 62800, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 70200, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 },
             { x: 78200, y: chaoY - 60 - PLAYER_SIZE, width: 120, height: 20 }
         ];
 
         const ESPINHOS = [
-            { x: 10500, y: chaoY - 20, w: 30, h: 20 },
-            { x: 11500, y: chaoY - 20, w: 30, h: 20 },
-            { x: 12000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 13500, y: chaoY - 20, w: 30, h: 20 },
-            { x: 14500, y: chaoY - 20, w: 30, h: 20 },
-            { x: 17000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 18500, y: chaoY - 20, w: 30, h: 20 },
-            { x: 20000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 22500, y: chaoY - 20, w: 30, h: 20 },
-            { x: 24000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 27000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 29000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 31000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 34000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 36000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 39000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 41000, y: chaoY - 20, w: 30, h: 20 },
-            { x: 43000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 10500, y: chaoY - 20, w: 30, h: 20 }, { x: 11500, y: chaoY - 20, w: 30, h: 20 },
+            { x: 12000, y: chaoY - 20, w: 30, h: 20 }, { x: 13500, y: chaoY - 20, w: 30, h: 20 },
+            { x: 14500, y: chaoY - 20, w: 30, h: 20 }, { x: 17000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 18500, y: chaoY - 20, w: 30, h: 20 }, { x: 20000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 22500, y: chaoY - 20, w: 30, h: 20 }, { x: 24000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 27000, y: chaoY - 20, w: 30, h: 20 }, { x: 29000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 31000, y: chaoY - 20, w: 30, h: 20 }, { x: 34000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 36000, y: chaoY - 20, w: 30, h: 20 }, { x: 39000, y: chaoY - 20, w: 30, h: 20 },
+            { x: 41000, y: chaoY - 20, w: 30, h: 20 }, { x: 43000, y: chaoY - 20, w: 30, h: 20 },
             { x: 45000, y: chaoY - 20, w: 30, h: 20 }
         ];
 
@@ -720,24 +645,19 @@
 
         let bolasDeFogo = [];
 
-        const PLATAFORMAS_MOVEIS = [
-            { x: 60000, y: chaoY - 100, w: 110, h: 20, tipo: 'horizontal', minX: 59500, maxX: 61000, speed: 1.8, direction: 1 },
-            { x: 68000, y: chaoY - 120, w: 110, h: 20, tipo: 'vertical', minY: chaoY - 200, maxY: chaoY - 60, speed: 1.5, direction: 1 },
-            { x: 69000, y: chaoY - 100, w: 110, h: 20, tipo: 'vertical', minY: chaoY - 220, maxY: chaoY - 70, speed: 1.8, direction: -1 },
-            { x: 76000, y: chaoY - 100, w: 110, h: 20, tipo: 'horizontal', minX: 75200, maxX: 77000, speed: 2.2, direction: 1 },
-            { x: 81500, y: chaoY - 120, w: 110, h: 20, tipo: 'horizontal', minX: 81200, maxX: 82200, speed: 2.0, direction: 1 }
-        ];
-
-        // ✅ CORREÇÃO — mantidas só as 3 plataformas podres úteis (as outras 7 eram decoração isolada)
+        // ✅ PLATAFORMAS PODRES agora são PONTES úteis sobre buracos pequenos e degraus
         const PLATAFORMAS_PODRES = [
-            { x: 48300, y: chaoY - 60, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
-            { x: 55500, y: chaoY - 60, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
-            { x: 70000, y: chaoY - 60, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 }
+            // Pontes temporárias sobre buracos pequenos (200px)
+            { x: 1450, y: chaoY - 40, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
+            { x: 6550, y: chaoY - 40, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
+            { x: 7450, y: chaoY - 40, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
+            { x: 8250, y: chaoY - 40, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
+            // Degrau útil pra alcançar plataformas em 70000/70500
+            { x: 69750, y: chaoY - 60, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 }
         ];
 
         function gerarCipos() {
             const result = [];
-            // ✅ CORREÇÃO — cipó adicionado no buraco 67000-69500 (estava sem travessia)
             const configuracao = [
                 { inicio: 52000, fim: 54000, count: 5 },
                 { inicio: 59000, fim: 61500, count: 5 },
@@ -758,9 +678,7 @@
                         anguloMax: 1.2,
                         velocidade: 0.045,
                         fase: (idx * 0.9) % (Math.PI * 2),
-                        pontaX: 0,
-                        pontaY: 0,
-                        ocupado: false
+                        pontaX: 0, pontaY: 0, ocupado: false
                     });
                     idx++;
                 }
@@ -771,7 +689,7 @@
         const CIPOS = gerarCipos();
 
         // ============================================
-        // SISTEMA DE DIÁLOGO GENÉRICO
+        // DIÁLOGO
         // ============================================
         const dialogo = {
             ativo: false, falas: [], index: 0, timer: 0,
@@ -805,15 +723,8 @@
         // ============================================
         // NÍVEL 5 — PÁSSARO + CARTA
         // ============================================
-        const passaroCarta = {
-            ativo: false, x: 0, y: 0, vx: -4, fase: 0,
-            soltou: false, saiu: false
-        };
-
-        const carta = {
-            ativa: false, caiu: false, x: 0, y: 0, vy: 0,
-            coletada: false, lida: false
-        };
+        const passaroCarta = { ativo: false, x: 0, y: 0, vx: -4, fase: 0, soltou: false, saiu: false };
+        const carta = { ativa: false, caiu: false, x: 0, y: 0, vy: 0, coletada: false, lida: false };
 
         const CARTA_TEXTO = [
             "Ao herói de Acuílandia,",
@@ -834,7 +745,6 @@
         let segurandoAtaque = false;
         let tempoSegurando = 0;
         let espadaLancada = null;
-        const FRAMES_HOLD_LANCAMENTO = 180;
         const TEMPO_HOLD_MS = 3000;
         let inicioHold = 0;
 
@@ -844,10 +754,7 @@
             espadaLancada = {
                 x: player.x + player.w / 2 + dir * player.w,
                 y: player.y + player.h / 2,
-                vx: dir * 20,
-                frames: 0,
-                voltando: false,
-                angulo: 0
+                vx: dir * 20, frames: 0, voltando: false, angulo: 0
             };
             criarParticulas(player.x + player.w / 2, player.y + player.h / 2, 20, '#88ddff', 6, 25);
         }
@@ -859,14 +766,12 @@
 
             if (!espadaLancada.voltando) {
                 espadaLancada.x += espadaLancada.vx;
-
                 for (let mob of mobs) {
                     if (mob.morto) continue;
                     const dx = espadaLancada.x - mob.x;
                     const dy = espadaLancada.y - mob.y;
                     if (Math.sqrt(dx * dx + dy * dy) < mob.radius + 25) {
-                        mob.hp = 0;
-                        mob.morto = true;
+                        mob.hp = 0; mob.morto = true;
                         criarParticulas(mob.x, mob.y, 30, mob.color, 6, 40);
                         criarParticulas(mob.x, mob.y, 15, '#ffffff', 3, 20);
                         desbloquearConquista('primeiroSangue');
@@ -874,10 +779,8 @@
                         break;
                     }
                 }
-
                 if (espadaLancada && boss.ativo && !boss.morto && boss.fase === 'lutando') {
-                    if (Math.abs(espadaLancada.x - boss.x) < boss.w / 2 + 30 &&
-                        Math.abs(espadaLancada.y - boss.y) < boss.h / 2 + 30) {
+                    if (Math.abs(espadaLancada.x - boss.x) < boss.w / 2 + 30 && Math.abs(espadaLancada.y - boss.y) < boss.h / 2 + 30) {
                         boss.hp -= 150;
                         criarParticulas(boss.x, boss.y, 40, '#ff3366', 8, 40);
                         criarParticulas(boss.x, boss.y, 20, '#ffffff', 4, 25);
@@ -885,11 +788,8 @@
                         espadaLancada.voltando = true;
                     }
                 }
-
                 if (espadaLancada && espadaLancada.frames > 45) espadaLancada.voltando = true;
-                if (espadaLancada && (espadaLancada.x < cameraX - 200 || espadaLancada.x > cameraX + W + 200)) {
-                    espadaLancada.voltando = true;
-                }
+                if (espadaLancada && (espadaLancada.x < cameraX - 200 || espadaLancada.x > cameraX + W + 200)) espadaLancada.voltando = true;
             } else {
                 const px = player.x + player.w / 2;
                 const py = player.y + player.h / 2;
@@ -908,12 +808,12 @@
         }
 
         // ============================================
-        // BOSS — MORCEGO GIGANTE
+        // BOSS — MORCEGO ANCESTRAL (REDESENHADO)
         // ============================================
         const boss = {
             ativo: false,
             x: 0, y: 0,
-            w: 300, h: 220,
+            w: 320, h: 240,
             hp: 1500, hpMax: 1500,
             morto: false,
             fase: 'inativo',
@@ -926,25 +826,19 @@
                 "Se der mais um passo... eu bebo tua alma devagar."
             ],
             bolasFogo: [],
-            cooldownTiro: 60,
-            tirosSeguidos: 0,
-            descansoPosTiro: 0,
+            cooldownTiro: 180,
+            carregando: 0,
+            bocaAberta: 0,
             invocacoesFeitas: [false, false],
             morcegos: [],
             batidaAsa: 0,
-            vidaAnterior: 1500
+            flutuacaoOffset: 0,
+            rotacaoCorpo: 0
         };
 
-        const caverna = {
-            x: 94500,
-            y: 0,
-            w: 500,
-            h: 260
-        };
-
+        const caverna = { x: 94500, y: 0, w: 500, h: 260 };
         let mostrarTituloNivel5 = false;
         let contadorTituloNivel5 = 0;
-
         let fadeFinal = 0;
         let finalIniciado = false;
 
@@ -964,9 +858,7 @@
                 for (let plat of platforms) {
                     if (plat.y === chaoY && x > plat.x && x < plat.x + plat.width) { noChao = true; break; }
                 }
-                if (noChao) {
-                    moedasArray.push({ x: x, y: chaoY - 15, raio: raioMoeda, coletada: false, fase: Math.random() * Math.PI * 2 });
-                }
+                if (noChao) moedasArray.push({ x: x, y: chaoY - 15, raio: raioMoeda, coletada: false, fase: Math.random() * Math.PI * 2 });
             }
             for (let plat of platforms) {
                 if (plat.y !== chaoY) {
@@ -1037,11 +929,11 @@
             { x: 83000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 8.5, minX: 82600, maxX: 84000, direction: 1, color: '#aa3a2a', stroke: '#7a1a00', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 0 }
         ];
 
+        // ✅ Orc não fica mais preso nos canhões
         function mobPodeAvancar(mob) {
             const proxX = mob.x + (mob.speed + 15) * mob.direction;
             if (proxX < mob.minX || proxX > mob.maxX) return false;
             for (let b of BURACOS) if (proxX > b.inicio && proxX < b.fim) return false;
-            for (let c of CANHOES) if (Math.abs(proxX - c.x) < 45) return false;
             return true;
         }
 
@@ -1072,9 +964,11 @@
         let nuvens = [];
         let particulasAmbiente = [];
         let particulas = [];
+        let folhas = [];         // 🍂 animação de folhas voando
+        let borboletas = [];     // 🦋 animação de borboletas
 
         // ============================================
-        // LÓGICA DO JOGO
+        // CENÁRIO
         // ============================================
         function inicializarCenario() {
             matinhos = [];
@@ -1114,15 +1008,45 @@
                     cor: Math.random() > 0.5 ? '#fff8c4' : '#c4e8ff'
                 });
             }
+
+            // 🍂 Folhas voando
+            folhas = [];
+            for (let i = 0; i < 35; i++) {
+                folhas.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    vx: -0.4 - Math.random() * 0.6,
+                    vy: 0.3 + Math.random() * 0.5,
+                    rotacao: Math.random() * Math.PI * 2,
+                    rotVel: (Math.random() - 0.5) * 0.06,
+                    tamanho: 4 + Math.random() * 5,
+                    cor: ['#d4a373', '#c9a227', '#a67c52', '#8b6f47', '#e0b567'][Math.floor(Math.random() * 5)],
+                    oscilacao: Math.random() * Math.PI * 2
+                });
+            }
+
+            // 🦋 Borboletas
+            borboletas = [];
+            for (let i = 0; i < 5; i++) {
+                borboletas.push({
+                    x: Math.random() * W,
+                    y: 100 + Math.random() * (H * 0.5),
+                    fase: Math.random() * Math.PI * 2,
+                    tamanho: 6 + Math.random() * 4,
+                    cor: ['#ff9ec4', '#ffd670', '#a4d8ff', '#c4ffb0'][Math.floor(Math.random() * 4)],
+                    vel: 0.3 + Math.random() * 0.4,
+                    raioX: 40 + Math.random() * 60,
+                    raioY: 20 + Math.random() * 30,
+                    centroX: Math.random() * W,
+                    centroY: 100 + Math.random() * (H * 0.5)
+                });
+            }
         }
 
         function atualizarCenario() {
             for (let n of nuvens) {
                 n.x -= n.velocidade;
-                if (n.x < -300) {
-                    n.x = W + 200 + Math.random() * 200;
-                    n.y = 40 + Math.random() * (H * 0.35);
-                }
+                if (n.x < -300) { n.x = W + 200 + Math.random() * 200; n.y = 40 + Math.random() * (H * 0.35); }
             }
             for (let p of particulasAmbiente) {
                 p.x += p.vx; p.y += p.vy; p.brilho += 0.05;
@@ -1131,30 +1055,49 @@
                 if (p.y < -20) p.y = H * 0.85;
                 if (p.y > H * 0.9) p.y = -20;
             }
+            // 🍂 folhas
+            for (let f of folhas) {
+                f.oscilacao += 0.03;
+                f.x += f.vx + Math.sin(f.oscilacao) * 0.6;
+                f.y += f.vy;
+                f.rotacao += f.rotVel;
+                if (f.y > H + 20) { f.y = -20; f.x = Math.random() * W; }
+                if (f.x < -20) f.x = W + 20;
+            }
+            // 🦋 borboletas
+            for (let b of borboletas) {
+                b.fase += 0.02 * b.vel;
+                b.x = b.centroX + Math.cos(b.fase) * b.raioX;
+                b.y = b.centroY + Math.sin(b.fase * 1.3) * b.raioY;
+                if (b.centroX < cameraX - 200) {
+                    b.centroX = cameraX + W + 200 + Math.random() * 200;
+                    b.centroY = 100 + Math.random() * (H * 0.5);
+                }
+                if (b.centroX > cameraX + W + 400) {
+                    b.centroX = cameraX - 200;
+                }
+            }
         }
 
+        // ============================================
+        // LÓGICA DO JOGO
+        // ============================================
         function resetPlayer() {
             if (vidas <= 0) { gameOver = true; return; }
             let checkpointEncontrado = null;
             for (let cp of checkpoints) if (cp.ativado) checkpointEncontrado = cp;
-            if (checkpointEncontrado) {
-                player.x = checkpointX; player.y = checkpointY;
-            } else {
-                player.x = player.spawnX; player.y = player.spawnY;
-            }
+            if (checkpointEncontrado) { player.x = checkpointX; player.y = checkpointY; }
+            else { player.x = player.spawnX; player.y = player.spawnY; }
             player.vx = 0; player.vy = 0; player.onGround = false;
             jogadorAgravado = null;
             cooldownCipo = 30;
             vidas--;
             vidasPerdidasTotal++;
             if (vidas < 0) vidas = 0;
-            mostrarTitulo = true;
-            contadorTitulo = 0;
-            atacando = false;
-            ataqueTimer = 0;
-            segurandoAtaque = false;
-            tempoSegurando = 0;
-            inicioHold = 0;
+            mostrarTitulo = true; contadorTitulo = 0;
+            atacando = false; ataqueTimer = 0;
+            segurandoAtaque = false; tempoSegurando = 0; inicioHold = 0;
+            playerSquash = 0;
         }
 
         function checkCollisions() {
@@ -1277,13 +1220,8 @@
                         if (todosMortos) desbloquearConquista('exterminador');
                     } else {
                         const forca = 20;
-                        if (mob.tipo === 'voador') {
-                            mob.knockbackX = ultimaDirecao * 25;
-                            mob.knockbackY = 0;
-                        } else {
-                            mob.knockbackX = -mob.direction * forca;
-                            mob.knockbackY = 0;
-                        }
+                        if (mob.tipo === 'voador') { mob.knockbackX = ultimaDirecao * 25; mob.knockbackY = 0; }
+                        else { mob.knockbackX = -mob.direction * forca; mob.knockbackY = 0; }
                         mob.emKnockback = true;
                     }
                 }
@@ -1296,12 +1234,9 @@
                 boss.morcegos.push({
                     x: boss.x + Math.cos(ang) * 120,
                     y: boss.y + Math.sin(ang) * 60,
-                    radius: 22,
-                    speed: 2.8,
-                    color: '#5d4a7a',
-                    stroke: '#3d2e52',
-                    morto: false,
-                    fase: Math.random() * Math.PI * 2
+                    radius: 22, speed: 2.8,
+                    color: '#5d4a7a', stroke: '#3d2e52',
+                    morto: false, fase: Math.random() * Math.PI * 2
                 });
             }
         }
@@ -1314,14 +1249,11 @@
             sabio.falaIndex = 0; sabio.timer = 0; sabio.esperandoProxima = false;
             sabio.alpha = 1; sabio.desaparecendo = false;
             barreiraAtiva = false; barreiraX = 0;
-            jogadorAgravado = null;
-            cooldownCipo = 0;
+            jogadorAgravado = null; cooldownCipo = 0;
             checkpointX = player.spawnX; checkpointY = player.spawnY;
             mostrarTitulo = true; mostrarTituloNivel2 = false; mostrarTituloNivel3 = false; mostrarTituloNivel4 = false;
             contadorTitulo = 0; contadorTituloNivel2 = 0; contadorTituloNivel3 = 0; contadorTituloNivel4 = 0;
-            particulas = [];
-            bolasDeFogo = [];
-
+            particulas = []; bolasDeFogo = [];
             for (let cp of checkpoints) cp.ativado = false;
             for (let m of moedasArray) m.coletada = false;
             for (let pp of PLATAFORMAS_PODRES) { pp.destruida = false; pp.tremendo = false; pp.tempoPisada = 0; pp.respawn = 0; pp.alpha = 1; }
@@ -1330,6 +1262,7 @@
 
             player.x = player.spawnX; player.y = player.spawnY;
             player.vx = 0; player.vy = 0; player.onGround = false;
+            playerSquash = 0;
 
             for (let i = 0; i < mobs.length; i++) {
                 mobs[i].morto = false; mobs[i].direction = 1; mobs[i].hp = 2;
@@ -1338,17 +1271,15 @@
                 mobs[i].fase = Math.random() * Math.PI * 2;
             }
 
-            espadaLancada = null;
-            segurandoAtaque = false;
-            tempoSegurando = 0;
-            inicioHold = 0;
+            espadaLancada = null; segurandoAtaque = false; tempoSegurando = 0; inicioHold = 0;
             podeLancarEspada = false;
             carta.ativa = false; carta.caiu = false; carta.coletada = false;
             passaroCarta.ativo = false; passaroCarta.soltou = false;
             boss.ativo = false; boss.morto = false; boss.fase = 'inativo'; boss.timer = 0;
             boss.hp = boss.hpMax; boss.bolasFogo = []; boss.morcegos = [];
-            boss.invocacoesFeitas = [false, false]; boss.tirosSeguidos = 0;
-            boss.cooldownTiro = 60; boss.descansoPosTiro = 0;
+            boss.invocacoesFeitas = [false, false];
+            boss.cooldownTiro = 180; boss.carregando = 0; boss.bocaAberta = 0;
+            boss.flutuacaoOffset = 0; boss.rotacaoCorpo = 0;
             fadeFinal = 0; finalIniciado = false;
             mostrarTituloNivel5 = false; contadorTituloNivel5 = 0;
             dialogo.ativo = false; dialogo.index = 0; dialogo.timer = 0;
@@ -1358,16 +1289,9 @@
         }
 
         function atualizarNivel() {
-            if (nivelAtual === 1 && player.x > 6200) {
-                nivelAtual = 2; mostrarTituloNivel2 = true; contadorTituloNivel2 = 0;
-            }
-            if (nivelAtual === 2 && player.x > 9500) {
-                nivelAtual = 3; mostrarTituloNivel3 = true; contadorTituloNivel3 = 0;
-            }
-            if (nivelAtual === 3 && player.x > 48000) {
-                nivelAtual = 4; mostrarTituloNivel4 = true; contadorTituloNivel4 = 0;
-                desbloquearConquista('perigo');
-            }
+            if (nivelAtual === 1 && player.x > 6200) { nivelAtual = 2; mostrarTituloNivel2 = true; contadorTituloNivel2 = 0; }
+            if (nivelAtual === 2 && player.x > 9500) { nivelAtual = 3; mostrarTituloNivel3 = true; contadorTituloNivel3 = 0; }
+            if (nivelAtual === 3 && player.x > 48000) { nivelAtual = 4; mostrarTituloNivel4 = true; contadorTituloNivel4 = 0; desbloquearConquista('perigo'); }
             if (nivelAtual === 4 && player.x > 85000) {
                 nivelAtual = 5;
                 mostrarTituloNivel5 = true; contadorTituloNivel5 = 0;
@@ -1392,9 +1316,7 @@
             if (jogadorAgravado) {
                 player.x = jogadorAgravado.pontaX - player.w/2;
                 player.y = jogadorAgravado.pontaY;
-                player.vx = 0;
-                player.vy = 0;
-                player.onGround = false;
+                player.vx = 0; player.vy = 0; player.onGround = false;
             } else {
                 if (keys.a) { player.vx = -player.speed; ultimaDirecao = -1; }
                 else if (keys.d) { player.vx = player.speed; ultimaDirecao = 1; }
@@ -1405,48 +1327,35 @@
                 if (player.x + player.w > WORLD_WIDTH) player.x = WORLD_WIDTH - player.w;
 
                 if (barreiraAtiva) {
-                    if (player.x + player.w > barreiraX && player.x < barreiraX) {
-                        player.x = barreiraX - player.w;
-                    }
+                    if (player.x + player.w > barreiraX && player.x < barreiraX) player.x = barreiraX - player.w;
                 }
 
-                if (keys.w && player.onGround) { player.vy = player.jumpPower; player.onGround = false; }
+                // 🔥 Pulo com squash (estica)
+                if (keys.w && player.onGround) {
+                    player.vy = player.jumpPower;
+                    player.onGround = false;
+                    playerSquash = -0.3;
+                    criarParticulas(player.x + player.w/2, player.y + player.h, 8, '#ffffff', 3, 15);
+                }
                 player.vy += player.gravity;
                 player.y += player.vy;
-
                 player.onGround = false;
 
                 for (let plat of platforms) {
                     if (player.x + player.w > plat.x && player.x < plat.x + plat.width) {
-                        if (player.vy >= 0 && player.y + player.h >= plat.y &&
-                            player.y + player.h <= plat.y + plat.height + player.vy + 2) {
+                        if (player.vy >= 0 && player.y + player.h >= plat.y && player.y + player.h <= plat.y + plat.height + player.vy + 2) {
                             player.y = plat.y - player.h;
                             player.vy = 0; player.onGround = true;
                         }
                     }
                 }
-
                 for (let pp of PLATAFORMAS_PODRES) {
                     if (pp.destruida) continue;
                     if (player.x + player.w > pp.x && player.x < pp.x + pp.w) {
-                        if (player.vy >= 0 && player.y + player.h >= pp.y &&
-                            player.y + player.h <= pp.y + pp.h + player.vy + 2) {
+                        if (player.vy >= 0 && player.y + player.h >= pp.y && player.y + player.h <= pp.y + pp.h + player.vy + 2) {
                             player.y = pp.y - player.h;
                             player.vy = 0; player.onGround = true;
-                            if (!pp.tremendo) {
-                                pp.tremendo = true;
-                                pp.tempoPisada = 0;
-                            }
-                        }
-                    }
-                }
-
-                for (let pm of PLATAFORMAS_MOVEIS) {
-                    if (player.x + player.w > pm.x && player.x < pm.x + pm.w) {
-                        if (player.vy >= 0 && player.y + player.h >= pm.y &&
-                            player.y + player.h <= pm.y + pm.h + player.vy + 2) {
-                            player.y = pm.y - player.h;
-                            player.vy = 0; player.onGround = true;
+                            if (!pp.tremendo) { pp.tremendo = true; pp.tempoPisada = 0; }
                         }
                     }
                 }
@@ -1455,47 +1364,44 @@
                     const topoY = canhao.y - 55;
                     const left = canhao.x - 25;
                     const right = canhao.x + 25;
-
                     if (player.x + player.w > left && player.x < right) {
-                        if (player.vy >= 0 && player.y + player.h >= topoY &&
-                            player.y + player.h <= topoY + 20 + player.vy) {
-                            player.y = topoY - player.h;
-                            player.vy = 0;
-                            player.onGround = true;
+                        if (player.vy >= 0 && player.y + player.h >= topoY && player.y + player.h <= topoY + 20 + player.vy) {
+                            player.y = topoY - player.h; player.vy = 0; player.onGround = true;
                         }
                     }
-
                     if (player.y + player.h > topoY && player.y < chaoY) {
                         if (player.x + player.w > left && player.x < right) {
                             const distEsquerda = Math.abs(player.x + player.w - left);
                             const distDireita = Math.abs(right - player.x);
-                            if (distEsquerda < distDireita) {
-                                player.x = left - player.w;
-                            } else {
-                                player.x = right;
-                            }
+                            if (distEsquerda < distDireita) player.x = left - player.w;
+                            else player.x = right;
                         }
                     }
                 }
 
+                // 🔥 Impacto ao aterrissar (squash + partículas)
+                if (player.onGround && !playerNoChaoAnterior) {
+                    playerSquash = 0.35;
+                    criarParticulas(player.x + player.w/2, player.y + player.h, 6, '#e8d5a0', 2, 12);
+                }
+                playerNoChaoAnterior = player.onGround;
+
                 if (!player.onGround && player.vy > 0 && player.y > chaoY + 30) {
                     for (let buraco of BURACOS) {
-                        if (player.x + player.w > buraco.inicio && player.x < buraco.fim) {
-                            resetPlayer(); return;
-                        }
+                        if (player.x + player.w > buraco.inicio && player.x < buraco.fim) { resetPlayer(); return; }
                     }
                 }
             }
+
+            // Decai squash
+            playerSquash *= 0.82;
 
             for (let pp of PLATAFORMAS_PODRES) {
                 if (pp.destruida) {
                     pp.respawn++;
                     if (pp.respawn > 300) {
-                        pp.destruida = false;
-                        pp.tremendo = false;
-                        pp.tempoPisada = 0;
-                        pp.respawn = 0;
-                        pp.alpha = 1;
+                        pp.destruida = false; pp.tremendo = false;
+                        pp.tempoPisada = 0; pp.respawn = 0; pp.alpha = 1;
                     }
                     continue;
                 }
@@ -1509,16 +1415,6 @@
                 }
             }
 
-            for (let pm of PLATAFORMAS_MOVEIS) {
-                if (pm.tipo === 'horizontal') {
-                    pm.x += pm.speed * pm.direction;
-                    if (pm.x > pm.maxX || pm.x < pm.minX) pm.direction *= -1;
-                } else {
-                    pm.y += pm.speed * pm.direction;
-                    if (pm.y > pm.maxY || pm.y < pm.minY) pm.direction *= -1;
-                }
-            }
-
             for (let cip of CIPOS) {
                 cip.fase += cip.velocidade;
                 cip.angulo = Math.sin(cip.fase) * cip.anguloMax;
@@ -1529,13 +1425,7 @@
             for (let canhao of CANHOES) {
                 canhao.cooldown--;
                 if (canhao.cooldown <= 0) {
-                    bolasDeFogo.push({
-                        x: canhao.x,
-                        y: canhao.y,
-                        vx: canhao.direcao * 5,
-                        raio: 15,
-                        vida: 200
-                    });
+                    bolasDeFogo.push({ x: canhao.x, y: canhao.y, vx: canhao.direcao * 5, raio: 15, vida: 200 });
                     canhao.cooldown = canhao.cooldownMax;
                 }
             }
@@ -1553,9 +1443,7 @@
                         tamanho: 4 + Math.random() * 3
                     });
                 }
-                if (bola.x < cameraX - 200 || bola.x > cameraX + W + 200 || bola.vida <= 0) {
-                    bolasDeFogo.splice(i, 1);
-                }
+                if (bola.x < cameraX - 200 || bola.x > cameraX + W + 200 || bola.vida <= 0) bolasDeFogo.splice(i, 1);
             }
 
             for (let mob of mobs) {
@@ -1571,7 +1459,6 @@
                     if (mob.x > mob.maxX) { mob.x = mob.maxX; mob.direction = -1; mob.knockbackX = 0; mob.emKnockback = false; }
                     continue;
                 }
-
                 if (mob.tipo === 'voador') {
                     mob.x += mob.speed * mob.direction;
                     if (mob.x > mob.maxX || mob.x < mob.minX) {
@@ -1582,10 +1469,7 @@
                     mob.fase += 0.03;
                     mob.y = (chaoY - 100) + Math.sin(mob.fase) * mob.amplitude;
                 } else {
-                    if (!mobPodeAvancar(mob)) {
-                        mob.direction *= -1;
-                        continue;
-                    }
+                    if (!mobPodeAvancar(mob)) { mob.direction *= -1; continue; }
                     mob.x += mob.speed * mob.direction;
                     if (mob.x > mob.maxX || mob.x < mob.minX) {
                         mob.direction *= -1;
@@ -1618,9 +1502,7 @@
                     }
                     if (moedasColetadasTotal >= 100) desbloquearConquista('rico');
                     let todasColetadas = true;
-                    for (let mm of moedasArray) {
-                        if (!mm.coletada) { todasColetadas = false; break; }
-                    }
+                    for (let mm of moedasArray) if (!mm.coletada) { todasColetadas = false; break; }
                     if (todasColetadas) desbloquearConquista('cacador');
                 }
             }
@@ -1631,20 +1513,18 @@
             checkCheckpoints();
 
             const distanciaHorizontal = Math.abs((player.x + player.w/2) - (sabio.x + sabio.largura/2));
-            if (distanciaHorizontal < 120 && checkpoints[0].ativado &&
-                !sabio.conversaTerminada && !sabio.conversaAtiva) {
+            if (distanciaHorizontal < 120 && checkpoints[0].ativado && !sabio.conversaTerminada && !sabio.conversaAtiva) {
                 iniciarConversa();
             }
 
             updateConversa();
             atualizarNivel();
 
-            // ============ NÍVEL 5 ============
+            // NÍVEL 5
             if (passaroCarta.ativo && !carta.caiu) {
                 passaroCarta.fase += 0.35;
                 passaroCarta.x += passaroCarta.vx;
                 passaroCarta.y = chaoY - 400 + Math.sin(passaroCarta.fase) * 20;
-
                 if (!passaroCarta.soltou && passaroCarta.x < player.x + 250) {
                     passaroCarta.soltou = true;
                     carta.ativa = true;
@@ -1658,10 +1538,7 @@
             if (carta.ativa && !carta.caiu) {
                 carta.vy += 0.4;
                 carta.y += carta.vy;
-                if (carta.y >= chaoY - 20) {
-                    carta.y = chaoY - 20;
-                    carta.caiu = true;
-                }
+                if (carta.y >= chaoY - 20) { carta.y = chaoY - 20; carta.caiu = true; }
             }
 
             if (carta.caiu && !carta.coletada && !dialogo.ativo) {
@@ -1670,10 +1547,7 @@
                 if (Math.sqrt(dx * dx + dy * dy) < 60) {
                     carta.coletada = true;
                     criarParticulas(carta.x, carta.y, 25, '#fff8c4', 5, 40);
-                    iniciarDialogo(CARTA_TEXTO, () => {
-                        podeLancarEspada = true;
-                        desbloquearConquista('armado');
-                    }, '📜 Carta Misteriosa');
+                    iniciarDialogo(CARTA_TEXTO, () => { podeLancarEspada = true; desbloquearConquista('armado'); }, '📜 Carta Misteriosa');
                 }
             }
 
@@ -1685,19 +1559,14 @@
                 boss.y = chaoY - 180;
                 boss.fase = 'aparecendo';
                 boss.timer = 0;
-                player.x = 92300;
-                player.vx = 0;
-                player.vy = -6;
+                player.x = 92300; player.vx = 0; player.vy = -6;
                 criarParticulas(player.x + player.w / 2, player.y + player.h / 2, 30, '#ffffff', 8, 30);
                 for (let i = 0; i < 25; i++) {
                     particulas.push({
                         x: player.x + (Math.random() - 0.5) * 200,
                         y: chaoY - Math.random() * 100,
-                        vx: (Math.random() - 0.5) * 4,
-                        vy: -Math.random() * 5,
-                        vida: 40, vidaMax: 40,
-                        cor: '#333',
-                        tamanho: 4 + Math.random() * 4
+                        vx: (Math.random() - 0.5) * 4, vy: -Math.random() * 5,
+                        vida: 40, vidaMax: 40, cor: '#333', tamanho: 4 + Math.random() * 4
                     });
                 }
             }
@@ -1713,37 +1582,63 @@
                         iniciarDialogo(boss.falas, () => {
                             boss.fase = 'lutando';
                             boss.timer = 0;
-                            boss.cooldownTiro = 60;
+                            boss.cooldownTiro = 180;
                         }, '🦇 ???');
                     }
                 } else if (boss.fase === 'falando') {
-                    // Aguardando diálogo
+                    // aguardando diálogo
                 } else if (boss.fase === 'lutando') {
-                    boss.cooldownTiro--;
-                    if (boss.cooldownTiro <= 0 && boss.descansoPosTiro <= 0) {
-                        const alvoX = player.x + player.w / 2;
-                        const alvoY = player.y + player.h / 2;
-                        const dx = alvoX - boss.x;
-                        const dy = alvoY - boss.y;
-                        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                        boss.bolasFogo.push({
-                            x: boss.x,
-                            y: boss.y + 20,
-                            vx: (dx / dist) * 7,
-                            vy: (dy / dist) * 7,
-                            raio: 18,
-                            vida: 200
-                        });
-                        boss.tirosSeguidos++;
-                        if (boss.tirosSeguidos >= 3) {
-                            boss.tirosSeguidos = 0;
-                            boss.descansoPosTiro = 90;
-                            boss.cooldownTiro = 180;
-                        } else {
-                            boss.cooldownTiro = 20;
+                    // 🎬 Flutuação vertical suave
+                    boss.flutuacaoOffset = Math.sin(boss.timer * 0.035) * 30;
+                    boss.y = chaoY - 180 + boss.flutuacaoOffset;
+
+                    // 🎬 Rotação leve (respiração)
+                    boss.rotacaoCorpo = Math.sin(boss.timer * 0.02) * 0.05;
+
+                    // 🎬 Movimento horizontal lento seguindo player
+                    const alvoX = player.x + player.w / 2;
+                    const diffX = alvoX - boss.x;
+                    if (Math.abs(diffX) > 250) {
+                        boss.x += Math.sign(diffX) * 0.7;
+                    }
+
+                    // 🎬 Sistema de tiro: 1 a cada 3-5s, com telegraph
+                    if (boss.carregando > 0) {
+                        boss.carregando--;
+                        boss.bocaAberta = Math.min(1, boss.bocaAberta + 0.05);
+                        // Partículas de "carga" na boca
+                        if (boss.carregando % 5 === 0) {
+                            particulas.push({
+                                x: boss.x + (Math.random() - 0.5) * 40,
+                                y: boss.y + 20 + (Math.random() - 0.5) * 20,
+                                vx: (Math.random() - 0.5) * 3,
+                                vy: (Math.random() - 0.5) * 3,
+                                vida: 20, vidaMax: 20,
+                                cor: Math.random() > 0.5 ? '#ff2200' : '#ffaa00',
+                                tamanho: 4 + Math.random() * 3
+                            });
+                        }
+                        if (boss.carregando === 0) {
+                            const dx = player.x + player.w/2 - boss.x;
+                            const dy = player.y + player.h/2 - (boss.y + 20);
+                            const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+                            boss.bolasFogo.push({
+                                x: boss.x, y: boss.y + 20,
+                                vx: (dx/dist) * 5.5,
+                                vy: (dy/dist) * 5.5,
+                                raio: 22, vida: 300
+                            });
+                            criarParticulas(boss.x, boss.y + 20, 25, '#ff6622', 6, 30);
+                            boss.bocaAberta = 0;
+                            boss.cooldownTiro = 180 + Math.floor(Math.random() * 120); // 3-5 segundos
+                        }
+                    } else {
+                        boss.bocaAberta = Math.max(0, boss.bocaAberta - 0.05);
+                        boss.cooldownTiro--;
+                        if (boss.cooldownTiro <= 0) {
+                            boss.carregando = 45; // ~0.75s de telegraph
                         }
                     }
-                    if (boss.descansoPosTiro > 0) boss.descansoPosTiro--;
 
                     const hpRatio = boss.hp / boss.hpMax;
                     if (hpRatio <= 2 / 3 && !boss.invocacoesFeitas[0]) {
@@ -1776,14 +1671,13 @@
                     b.x += b.vx;
                     b.y += b.vy;
                     b.vida--;
-                    if (tempoGlobal % 3 === 0) {
+                    if (tempoGlobal % 2 === 0) {
                         particulas.push({
-                            x: b.x, y: b.y,
-                            vx: (Math.random() - 0.5) * 1.5,
-                            vy: (Math.random() - 0.5) * 1.5,
-                            vida: 15, vidaMax: 15,
-                            cor: Math.random() > 0.5 ? '#ff8c00' : '#ffcc00',
-                            tamanho: 5 + Math.random() * 3
+                            x: b.x - b.vx * 2, y: b.y - b.vy * 2,
+                            vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2,
+                            vida: 20, vidaMax: 20,
+                            cor: Math.random() > 0.5 ? '#ffcc00' : '#ff6600',
+                            tamanho: 5 + Math.random() * 4
                         });
                     }
                     const dx = (player.x + player.w / 2) - b.x;
@@ -1793,9 +1687,7 @@
                         resetPlayer();
                         return;
                     }
-                    if (b.vida <= 0 || b.x < cameraX - 400 || b.x > cameraX + W + 400) {
-                        boss.bolasFogo.splice(i, 1);
-                    }
+                    if (b.vida <= 0 || b.x < cameraX - 400 || b.x > cameraX + W + 400) boss.bolasFogo.splice(i, 1);
                 }
 
                 for (let m of boss.morcegos) {
@@ -1806,9 +1698,7 @@
                     m.x += (dx / dist) * m.speed;
                     m.y += (dy / dist) * m.speed;
                     m.fase += 0.4;
-
                     if (dist < player.w / 2 + m.radius) { resetPlayer(); return; }
-
                     if (espadaLancada && !espadaLancada.voltando) {
                         const ex = espadaLancada.x - m.x;
                         const ey = espadaLancada.y - m.y;
@@ -1821,14 +1711,8 @@
                 }
             }
 
-            if (boss.morto && !finalIniciado && player.x + player.w > caverna.x + 120) {
-                finalIniciado = true;
-            }
-
-            if (finalIniciado) {
-                fadeFinal += 0.008;
-                if (fadeFinal > 1) fadeFinal = 1;
-            }
+            if (boss.morto && !finalIniciado && player.x + player.w > caverna.x + 120) finalIniciado = true;
+            if (finalIniciado) { fadeFinal += 0.008; if (fadeFinal > 1) fadeFinal = 1; }
 
             updateEspadaLancada();
 
@@ -1873,203 +1757,75 @@
             ctx.save();
             ctx.translate(mx, my + bodyBob);
             ctx.fillStyle = 'rgba(0,0,0,0.35)';
-            ctx.beginPath();
-            ctx.ellipse(0, r * 0.95 - bodyBob, r * 0.85, r * 0.14, 0, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.beginPath(); ctx.ellipse(0, r * 0.95 - bodyBob, r * 0.85, r * 0.14, 0, 0, Math.PI * 2); ctx.fill();
             const legBaseY = r * 0.15;
             const legLen = r * 0.65;
             const legLeftY = legSwing * r * 0.12;
             const legRightY = -legSwing * r * 0.12;
-            ctx.fillStyle = pele;
-            ctx.strokeStyle = peleEsc;
-            ctx.lineWidth = 2;
+            ctx.fillStyle = pele; ctx.strokeStyle = peleEsc; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.ellipse(-r * 0.32, legBaseY + legLen / 2 + legLeftY, r * 0.19, legLen / 2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.ellipse(r * 0.32, legBaseY + legLen / 2 + legRightY, r * 0.19, legLen / 2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#3a2010'; ctx.strokeStyle = '#1a0800'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.ellipse(-r * 0.32, legBaseY + legLen + legLeftY, r * 0.27, r * 0.15, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.ellipse(r * 0.32, legBaseY + legLen + legRightY, r * 0.27, r * 0.15, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#6b3a1a'; ctx.strokeStyle = '#3a1a00'; ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.ellipse(-r * 0.32, legBaseY + legLen / 2 + legLeftY, r * 0.19, legLen / 2, 0, 0, Math.PI * 2);
-            ctx.fill(); ctx.stroke();
-            ctx.beginPath();
-            ctx.ellipse(r * 0.32, legBaseY + legLen / 2 + legRightY, r * 0.19, legLen / 2, 0, 0, Math.PI * 2);
-            ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#3a2010';
-            ctx.strokeStyle = '#1a0800';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.ellipse(-r * 0.32, legBaseY + legLen + legLeftY, r * 0.27, r * 0.15, 0, 0, Math.PI * 2);
-            ctx.fill(); ctx.stroke();
-            ctx.beginPath();
-            ctx.ellipse(r * 0.32, legBaseY + legLen + legRightY, r * 0.27, r * 0.15, 0, 0, Math.PI * 2);
-            ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#6b3a1a';
-            ctx.strokeStyle = '#3a1a00';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(-r * 0.75, r * 0.2);
-            ctx.lineTo(r * 0.75, r * 0.2);
-            ctx.lineTo(r * 0.6, r * 0.55);
-            ctx.lineTo(-r * 0.6, r * 0.55);
-            ctx.closePath();
-            ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#2a1200';
-            ctx.fillRect(-r * 0.78, r * 0.15, r * 1.56, r * 0.12);
-            ctx.fillStyle = '#c9a961';
-            ctx.beginPath();
-            ctx.arc(0, r * 0.21, r * 0.1, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#2a1200';
-            ctx.beginPath();
-            ctx.arc(0, r * 0.21, r * 0.045, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.moveTo(-r * 0.75, r * 0.2); ctx.lineTo(r * 0.75, r * 0.2);
+            ctx.lineTo(r * 0.6, r * 0.55); ctx.lineTo(-r * 0.6, r * 0.55);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#2a1200'; ctx.fillRect(-r * 0.78, r * 0.15, r * 1.56, r * 0.12);
+            ctx.fillStyle = '#c9a961'; ctx.beginPath(); ctx.arc(0, r * 0.21, r * 0.1, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#2a1200'; ctx.beginPath(); ctx.arc(0, r * 0.21, r * 0.045, 0, Math.PI * 2); ctx.fill();
             ctx.save();
-            ctx.translate(-r * 0.72, -r * 0.35);
-            ctx.rotate(armSwing * 0.35);
-            ctx.fillStyle = pele;
-            ctx.strokeStyle = peleEsc;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.ellipse(0, r * 0.35, r * 0.17, r * 0.4, 0, 0, Math.PI * 2);
-            ctx.fill(); ctx.stroke();
-            ctx.fillStyle = peleEsc;
-            ctx.beginPath();
-            ctx.arc(0, r * 0.75, r * 0.21, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#1a0800';
-            ctx.stroke();
+            ctx.translate(-r * 0.72, -r * 0.35); ctx.rotate(armSwing * 0.35);
+            ctx.fillStyle = pele; ctx.strokeStyle = peleEsc; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.ellipse(0, r * 0.35, r * 0.17, r * 0.4, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = peleEsc; ctx.beginPath(); ctx.arc(0, r * 0.75, r * 0.21, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#1a0800'; ctx.stroke();
             ctx.restore();
             ctx.save();
-            ctx.translate(r * 0.72, -r * 0.35);
-            ctx.rotate(-armSwing * 0.35);
-            ctx.fillStyle = pele;
-            ctx.strokeStyle = peleEsc;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.ellipse(0, r * 0.35, r * 0.17, r * 0.4, 0, 0, Math.PI * 2);
-            ctx.fill(); ctx.stroke();
-            ctx.fillStyle = peleEsc;
-            ctx.beginPath();
-            ctx.arc(0, r * 0.75, r * 0.21, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#1a0800';
-            ctx.stroke();
+            ctx.translate(r * 0.72, -r * 0.35); ctx.rotate(-armSwing * 0.35);
+            ctx.fillStyle = pele; ctx.strokeStyle = peleEsc; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.ellipse(0, r * 0.35, r * 0.17, r * 0.4, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = peleEsc; ctx.beginPath(); ctx.arc(0, r * 0.75, r * 0.21, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#1a0800'; ctx.stroke();
             ctx.restore();
-            ctx.fillStyle = pele;
-            ctx.strokeStyle = peleEsc;
-            ctx.lineWidth = 2.5;
-            ctx.shadowColor = 'rgba(0,0,0,0.4)';
-            ctx.shadowBlur = 10;
-            ctx.beginPath();
-            ctx.ellipse(0, -r * 0.15, r * 0.8, r * 0.68, 0, 0, Math.PI * 2);
-            ctx.fill(); ctx.stroke();
+            ctx.fillStyle = pele; ctx.strokeStyle = peleEsc; ctx.lineWidth = 2.5;
+            ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 10;
+            ctx.beginPath(); ctx.ellipse(0, -r * 0.15, r * 0.8, r * 0.68, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
             ctx.shadowBlur = 0;
-            ctx.strokeStyle = peleEsc;
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(0, -r * 0.4);
-            ctx.lineTo(0, r * 0.05);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.ellipse(-r * 0.28, -r * 0.28, r * 0.22, r * 0.14, 0, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.ellipse(r * 0.28, -r * 0.28, r * 0.22, r * 0.14, 0, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.fillStyle = '#3a2010';
-            ctx.strokeStyle = '#1a0800';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.ellipse(-r * 0.78, -r * 0.55, r * 0.28, r * 0.2, -0.25, 0, Math.PI * 2);
-            ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#3a2010'; ctx.strokeStyle = '#1a0800'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.ellipse(-r * 0.78, -r * 0.55, r * 0.28, r * 0.2, -0.25, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
             ctx.fillStyle = '#909090';
-            ctx.beginPath();
-            ctx.moveTo(-r * 0.95, -r * 0.65);
-            ctx.lineTo(-r * 1.05, -r * 1.0);
-            ctx.lineTo(-r * 0.78, -r * 0.68);
-            ctx.closePath();
-            ctx.fill();
-            ctx.strokeStyle = '#404040';
-            ctx.stroke();
-            ctx.fillStyle = '#3a2010';
-            ctx.strokeStyle = '#1a0800';
-            ctx.beginPath();
-            ctx.ellipse(r * 0.78, -r * 0.55, r * 0.28, r * 0.2, 0.25, 0, Math.PI * 2);
-            ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-r * 0.95, -r * 0.65); ctx.lineTo(-r * 1.05, -r * 1.0); ctx.lineTo(-r * 0.78, -r * 0.68); ctx.closePath(); ctx.fill();
+            ctx.strokeStyle = '#404040'; ctx.stroke();
+            ctx.fillStyle = '#3a2010'; ctx.strokeStyle = '#1a0800';
+            ctx.beginPath(); ctx.ellipse(r * 0.78, -r * 0.55, r * 0.28, r * 0.2, 0.25, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
             ctx.fillStyle = '#909090';
-            ctx.beginPath();
-            ctx.moveTo(r * 0.95, -r * 0.65);
-            ctx.lineTo(r * 1.05, -r * 1.0);
-            ctx.lineTo(r * 0.78, -r * 0.68);
-            ctx.closePath();
-            ctx.fill();
-            ctx.strokeStyle = '#404040';
-            ctx.stroke();
-            ctx.fillStyle = pele;
-            ctx.strokeStyle = peleEsc;
-            ctx.lineWidth = 2.5;
-            ctx.shadowColor = 'rgba(0,0,0,0.4)';
-            ctx.shadowBlur = 10;
-            ctx.beginPath();
-            ctx.ellipse(0, -r * 1.0, r * 0.58, r * 0.55, 0, 0, Math.PI * 2);
-            ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(r * 0.95, -r * 0.65); ctx.lineTo(r * 1.05, -r * 1.0); ctx.lineTo(r * 0.78, -r * 0.68); ctx.closePath(); ctx.fill();
+            ctx.strokeStyle = '#404040'; ctx.stroke();
+            ctx.fillStyle = pele; ctx.strokeStyle = peleEsc; ctx.lineWidth = 2.5;
+            ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 10;
+            ctx.beginPath(); ctx.ellipse(0, -r * 1.0, r * 0.58, r * 0.55, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
             ctx.shadowBlur = 0;
-            ctx.fillStyle = pele;
-            ctx.strokeStyle = peleEsc;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.ellipse(0, -r * 0.78, r * 0.42, r * 0.24, 0, 0, Math.PI * 2);
-            ctx.fill(); ctx.stroke();
-            ctx.fillStyle = pele;
-            ctx.strokeStyle = peleEsc;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(-r * 0.5, -r * 1.2);
-            ctx.lineTo(-r * 0.85, -r * 1.6);
-            ctx.lineTo(-r * 0.32, -r * 1.35);
-            ctx.closePath();
-            ctx.fill(); ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(r * 0.5, -r * 1.2);
-            ctx.lineTo(r * 0.85, -r * 1.6);
-            ctx.lineTo(r * 0.32, -r * 1.35);
-            ctx.closePath();
-            ctx.fill(); ctx.stroke();
-            ctx.strokeStyle = '#1a0800';
-            ctx.lineWidth = 3.5;
-            ctx.lineCap = 'round';
-            ctx.beginPath();
-            ctx.moveTo(-r * 0.42, -r * 1.2);
-            ctx.lineTo(-r * 0.08, -r * 1.02);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(r * 0.42, -r * 1.2);
-            ctx.lineTo(r * 0.08, -r * 1.02);
-            ctx.stroke();
+            ctx.fillStyle = pele; ctx.strokeStyle = peleEsc; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.ellipse(0, -r * 0.78, r * 0.42, r * 0.24, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-r * 0.5, -r * 1.2); ctx.lineTo(-r * 0.85, -r * 1.6); ctx.lineTo(-r * 0.32, -r * 1.35); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(r * 0.5, -r * 1.2); ctx.lineTo(r * 0.85, -r * 1.6); ctx.lineTo(r * 0.32, -r * 1.35); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = '#1a0800'; ctx.lineWidth = 3.5; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(-r * 0.42, -r * 1.2); ctx.lineTo(-r * 0.08, -r * 1.02); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(r * 0.42, -r * 1.2); ctx.lineTo(r * 0.08, -r * 1.02); ctx.stroke();
             ctx.lineCap = 'butt';
             ctx.fillStyle = '#fff8e0';
-            ctx.beginPath();
-            ctx.ellipse(-r * 0.22, -r * 1.0, r * 0.15, r * 0.13, 0, 0, Math.PI * 2);
-            ctx.ellipse(r * 0.22, -r * 1.0, r * 0.15, r * 0.13, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#ff2200';
-            ctx.shadowColor = '#ff2200';
-            ctx.shadowBlur = 8;
-            ctx.beginPath();
-            ctx.arc(-r * 0.22, -r * 1.0, r * 0.075, 0, Math.PI * 2);
-            ctx.arc(r * 0.22, -r * 1.0, r * 0.075, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.beginPath(); ctx.ellipse(-r * 0.22, -r * 1.0, r * 0.15, r * 0.13, 0, 0, Math.PI * 2); ctx.ellipse(r * 0.22, -r * 1.0, r * 0.15, r * 0.13, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#ff2200'; ctx.shadowColor = '#ff2200'; ctx.shadowBlur = 8;
+            ctx.beginPath(); ctx.arc(-r * 0.22, -r * 1.0, r * 0.075, 0, Math.PI * 2); ctx.arc(r * 0.22, -r * 1.0, r * 0.075, 0, Math.PI * 2); ctx.fill();
             ctx.shadowBlur = 0;
             ctx.fillStyle = '#fff';
-            ctx.beginPath();
-            ctx.arc(-r * 0.24, -r * 1.03, r * 0.03, 0, Math.PI * 2);
-            ctx.arc(r * 0.2, -r * 1.03, r * 0.03, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#3a5a1a';
-            ctx.beginPath();
-            ctx.ellipse(0, -r * 0.88, r * 0.1, r * 0.075, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#1a0800';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.moveTo(-r * 0.26, -r * 0.72);
-            ctx.quadraticCurveTo(0, -r * 0.6, r * 0.26, -r * 0.72);
-            ctx.stroke();
+            ctx.beginPath(); ctx.arc(-r * 0.24, -r * 1.03, r * 0.03, 0, Math.PI * 2); ctx.arc(r * 0.2, -r * 1.03, r * 0.03, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#3a5a1a'; ctx.beginPath(); ctx.ellipse(0, -r * 0.88, r * 0.1, r * 0.075, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#1a0800'; ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.moveTo(-r * 0.26, -r * 0.72); ctx.quadraticCurveTo(0, -r * 0.6, r * 0.26, -r * 0.72); ctx.stroke();
             ctx.fillStyle = 'rgba(180, 40, 30, 0.75)';
             ctx.fillRect(-r * 0.45, -r * 0.92, r * 0.14, r * 0.05);
             ctx.fillRect(-r * 0.45, -r * 0.82, r * 0.14, r * 0.05);
@@ -2083,13 +1839,9 @@
             const asaBat = Math.sin(tempoGlobal * 0.5 + mob.fase);
             const dir = mob.direction >= 0 ? 1 : -1;
             ctx.save();
-            ctx.translate(mx, my);
-            ctx.scale(dir, 1);
-            ctx.fillStyle = mob.color;
-            ctx.strokeStyle = mob.stroke;
-            ctx.lineWidth = 2;
-            ctx.shadowColor = 'rgba(0,0,0,0.5)';
-            ctx.shadowBlur = 12;
+            ctx.translate(mx, my); ctx.scale(dir, 1);
+            ctx.fillStyle = mob.color; ctx.strokeStyle = mob.stroke; ctx.lineWidth = 2;
+            ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 12;
             ctx.beginPath();
             ctx.moveTo(-r * 0.4, -r * 0.2);
             ctx.quadraticCurveTo(-r * 1.3, -r * (0.9 + asaBat * 0.5), -r * 2.1, -r * (0.3 + asaBat * 1.0));
@@ -2098,9 +1850,7 @@
             ctx.quadraticCurveTo(-r * 1.25, r * 0.25, -r * 1.1, r * 0.1);
             ctx.quadraticCurveTo(-r * 0.9, r * 0.35, -r * 0.75, r * 0.15);
             ctx.quadraticCurveTo(-r * 0.6, r * 0.35, -r * 0.45, r * 0.1);
-            ctx.lineTo(-r * 0.4, 0);
-            ctx.closePath();
-            ctx.fill(); ctx.stroke();
+            ctx.lineTo(-r * 0.4, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
             ctx.beginPath();
             ctx.moveTo(r * 0.4, -r * 0.2);
             ctx.quadraticCurveTo(r * 1.3, -r * (0.9 + asaBat * 0.5), r * 2.1, -r * (0.3 + asaBat * 1.0));
@@ -2109,40 +1859,16 @@
             ctx.quadraticCurveTo(r * 1.25, r * 0.25, r * 1.1, r * 0.1);
             ctx.quadraticCurveTo(r * 0.9, r * 0.35, r * 0.75, r * 0.15);
             ctx.quadraticCurveTo(r * 0.6, r * 0.35, r * 0.45, r * 0.1);
-            ctx.lineTo(r * 0.4, 0);
-            ctx.closePath();
-            ctx.fill(); ctx.stroke();
-            ctx.beginPath();
-            ctx.ellipse(0, 0, r * 0.55, r * 0.75, 0, 0, Math.PI * 2);
-            ctx.fill(); ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(0, -r * 0.7, r * 0.45, 0, Math.PI * 2);
-            ctx.fill(); ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(-r * 0.35, -r * 0.95);
-            ctx.lineTo(-r * 0.55, -r * 1.5);
-            ctx.lineTo(-r * 0.1, -r * 1.0);
-            ctx.closePath();
-            ctx.fill(); ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(r * 0.35, -r * 0.95);
-            ctx.lineTo(r * 0.55, -r * 1.5);
-            ctx.lineTo(r * 0.1, -r * 1.0);
-            ctx.closePath();
-            ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#ffeb3b';
-            ctx.shadowColor = '#ffeb3b';
-            ctx.shadowBlur = 8;
-            ctx.beginPath();
-            ctx.arc(-r * 0.18, -r * 0.7, r * 0.13, 0, Math.PI * 2);
-            ctx.arc(r * 0.18, -r * 0.7, r * 0.13, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.lineTo(r * 0.4, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.ellipse(0, 0, r * 0.55, r * 0.75, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.arc(0, -r * 0.7, r * 0.45, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-r * 0.35, -r * 0.95); ctx.lineTo(-r * 0.55, -r * 1.5); ctx.lineTo(-r * 0.1, -r * 1.0); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(r * 0.35, -r * 0.95); ctx.lineTo(r * 0.55, -r * 1.5); ctx.lineTo(r * 0.1, -r * 1.0); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#ffeb3b'; ctx.shadowColor = '#ffeb3b'; ctx.shadowBlur = 8;
+            ctx.beginPath(); ctx.arc(-r * 0.18, -r * 0.7, r * 0.13, 0, Math.PI * 2); ctx.arc(r * 0.18, -r * 0.7, r * 0.13, 0, Math.PI * 2); ctx.fill();
             ctx.shadowBlur = 0;
             ctx.fillStyle = '#000';
-            ctx.beginPath();
-            ctx.arc(-r * 0.18, -r * 0.7, r * 0.06, 0, Math.PI * 2);
-            ctx.arc(r * 0.18, -r * 0.7, r * 0.06, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.beginPath(); ctx.arc(-r * 0.18, -r * 0.7, r * 0.06, 0, Math.PI * 2); ctx.arc(r * 0.18, -r * 0.7, r * 0.06, 0, Math.PI * 2); ctx.fill();
             ctx.restore();
         }
 
@@ -2156,9 +1882,7 @@
                 const t = progresso;
                 const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
                 rotacao = rotInicial + eased * Math.PI * 2;
-            } else {
-                rotacao = -0.15;
-            }
+            } else rotacao = -0.15;
             const pulso = 0.75 + Math.sin(tempoGlobal * 0.12) * 0.25;
             const intensidadeAtaque = estaAtacando ? 1.6 : 1;
             const flutuacao = estaAtacando ? 0 : Math.sin(tempoGlobal * 0.08) * 1.5;
@@ -2168,9 +1892,7 @@
             gradAura.addColorStop(0.5, `rgba(80, 180, 255, ${0.25 * pulso * intensidadeAtaque})`);
             gradAura.addColorStop(1, 'rgba(80, 180, 255, 0)');
             ctx.fillStyle = gradAura;
-            ctx.beginPath();
-            ctx.arc(maoX, maoY + flutuacao, raioAura, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.beginPath(); ctx.arc(maoX, maoY + flutuacao, raioAura, 0, Math.PI * 2); ctx.fill();
             if (estaAtacando && progresso > 0.05) {
                 const distPonta = 46 * escala;
                 const numSegmentos = 24;
@@ -2186,129 +1908,61 @@
                     const alpha = (i / numSegmentos) * 0.75 * (1 - progresso * 0.4);
                     const larguraSeg = (2 + i * 0.3) * escala;
                     ctx.strokeStyle = `rgba(150, 230, 255, ${alpha})`;
-                    ctx.lineWidth = larguraSeg;
-                    ctx.lineCap = 'round';
-                    ctx.shadowColor = '#66ccff';
-                    ctx.shadowBlur = 14;
-                    ctx.beginPath();
-                    ctx.moveTo(x1, y1);
-                    ctx.lineTo(x2, y2);
-                    ctx.stroke();
+                    ctx.lineWidth = larguraSeg; ctx.lineCap = 'round';
+                    ctx.shadowColor = '#66ccff'; ctx.shadowBlur = 14;
+                    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
                 }
-                ctx.shadowBlur = 0;
-                ctx.lineCap = 'butt';
+                ctx.shadowBlur = 0; ctx.lineCap = 'butt';
             }
             ctx.save();
-            ctx.translate(maoX, maoY + flutuacao);
-            ctx.rotate(rotacao);
-            ctx.fillStyle = '#8a6a2a';
-            ctx.strokeStyle = '#4a3000';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.arc(0, 22 * escala, 4 * escala, 0, Math.PI * 2);
-            ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#ff2244';
-            ctx.shadowColor = '#ff2244';
-            ctx.shadowBlur = 8 * pulso;
-            ctx.beginPath();
-            ctx.arc(0, 22 * escala, 2.2 * escala, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.translate(maoX, maoY + flutuacao); ctx.rotate(rotacao);
+            ctx.fillStyle = '#8a6a2a'; ctx.strokeStyle = '#4a3000'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.arc(0, 22 * escala, 4 * escala, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#ff2244'; ctx.shadowColor = '#ff2244'; ctx.shadowBlur = 8 * pulso;
+            ctx.beginPath(); ctx.arc(0, 22 * escala, 2.2 * escala, 0, Math.PI * 2); ctx.fill();
             ctx.shadowBlur = 0;
-            ctx.fillStyle = '#5a3a1a';
-            ctx.strokeStyle = '#3a1a00';
-            ctx.lineWidth = 1;
+            ctx.fillStyle = '#5a3a1a'; ctx.strokeStyle = '#3a1a00'; ctx.lineWidth = 1;
             ctx.fillRect(-3 * escala, 8 * escala, 6 * escala, 12 * escala);
             ctx.strokeRect(-3 * escala, 8 * escala, 6 * escala, 12 * escala);
-            ctx.strokeStyle = '#3a1a00';
-            ctx.lineWidth = 1.2;
+            ctx.strokeStyle = '#3a1a00'; ctx.lineWidth = 1.2;
             for (let i = 0; i < 4; i++) {
                 const yy = 9 * escala + i * 3 * escala;
-                ctx.beginPath();
-                ctx.moveTo(-3 * escala, yy);
-                ctx.lineTo(3 * escala, yy + 1.5 * escala);
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(-3 * escala, yy); ctx.lineTo(3 * escala, yy + 1.5 * escala); ctx.stroke();
             }
-            ctx.fillStyle = '#d4a44a';
-            ctx.strokeStyle = '#8a5a10';
-            ctx.lineWidth = 1.5;
+            ctx.fillStyle = '#d4a44a'; ctx.strokeStyle = '#8a5a10'; ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.moveTo(-10 * escala, 6 * escala);
-            ctx.lineTo(10 * escala, 6 * escala);
-            ctx.lineTo(8 * escala, 9 * escala);
-            ctx.lineTo(-8 * escala, 9 * escala);
-            ctx.closePath();
-            ctx.fill(); ctx.stroke();
+            ctx.moveTo(-10 * escala, 6 * escala); ctx.lineTo(10 * escala, 6 * escala);
+            ctx.lineTo(8 * escala, 9 * escala); ctx.lineTo(-8 * escala, 9 * escala);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#ff2244'; ctx.shadowColor = '#ff2244'; ctx.shadowBlur = 10 * pulso;
             ctx.beginPath();
-            ctx.moveTo(-10 * escala, 6 * escala);
-            ctx.lineTo(-13 * escala, 4 * escala);
-            ctx.lineTo(-11 * escala, 8 * escala);
-            ctx.closePath();
-            ctx.fill(); ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(10 * escala, 6 * escala);
-            ctx.lineTo(13 * escala, 4 * escala);
-            ctx.lineTo(11 * escala, 8 * escala);
-            ctx.closePath();
-            ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#ff2244';
-            ctx.shadowColor = '#ff2244';
-            ctx.shadowBlur = 10 * pulso;
-            ctx.beginPath();
-            ctx.moveTo(0, 4 * escala);
-            ctx.lineTo(3 * escala, 7 * escala);
-            ctx.lineTo(0, 10 * escala);
-            ctx.lineTo(-3 * escala, 7 * escala);
-            ctx.closePath();
-            ctx.fill();
+            ctx.moveTo(0, 4 * escala); ctx.lineTo(3 * escala, 7 * escala);
+            ctx.lineTo(0, 10 * escala); ctx.lineTo(-3 * escala, 7 * escala);
+            ctx.closePath(); ctx.fill();
             ctx.shadowBlur = 0;
-            ctx.strokeStyle = '#8a0010';
-            ctx.lineWidth = 0.8;
-            ctx.stroke();
-            ctx.shadowColor = '#66ccff';
-            ctx.shadowBlur = 14 * pulso * intensidadeAtaque;
+            ctx.strokeStyle = '#8a0010'; ctx.lineWidth = 0.8; ctx.stroke();
+            ctx.shadowColor = '#66ccff'; ctx.shadowBlur = 14 * pulso * intensidadeAtaque;
             const gradLamina = ctx.createLinearGradient(0, 0, 0, -45 * escala);
             gradLamina.addColorStop(0, '#e8f4ff');
             gradLamina.addColorStop(0.4, '#b8d8ee');
             gradLamina.addColorStop(0.7, '#88aacc');
             gradLamina.addColorStop(1, '#aaddff');
-            ctx.fillStyle = gradLamina;
-            ctx.strokeStyle = '#4a7a9a';
-            ctx.lineWidth = 1.2;
+            ctx.fillStyle = gradLamina; ctx.strokeStyle = '#4a7a9a'; ctx.lineWidth = 1.2;
             ctx.beginPath();
-            ctx.moveTo(-3.5 * escala, 5 * escala);
-            ctx.lineTo(-3 * escala, -38 * escala);
-            ctx.lineTo(0, -46 * escala);
-            ctx.lineTo(3 * escala, -38 * escala);
+            ctx.moveTo(-3.5 * escala, 5 * escala); ctx.lineTo(-3 * escala, -38 * escala);
+            ctx.lineTo(0, -46 * escala); ctx.lineTo(3 * escala, -38 * escala);
             ctx.lineTo(3.5 * escala, 5 * escala);
-            ctx.closePath();
-            ctx.fill(); ctx.stroke();
+            ctx.closePath(); ctx.fill(); ctx.stroke();
             ctx.shadowBlur = 0;
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
-            ctx.lineWidth = 0.8;
-            ctx.beginPath();
-            ctx.moveTo(0, 3 * escala);
-            ctx.lineTo(0, -42 * escala);
-            ctx.stroke();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)'; ctx.lineWidth = 0.8;
+            ctx.beginPath(); ctx.moveTo(0, 3 * escala); ctx.lineTo(0, -42 * escala); ctx.stroke();
             const runaPulso = 0.5 + Math.sin(tempoGlobal * 0.15) * 0.5;
             ctx.strokeStyle = `rgba(120, 220, 255, ${runaPulso * intensidadeAtaque})`;
-            ctx.shadowColor = '#66ccff';
-            ctx.shadowBlur = 8 * pulso;
-            ctx.lineWidth = 1.5;
+            ctx.shadowColor = '#66ccff'; ctx.shadowBlur = 8 * pulso; ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.moveTo(0, -20 * escala);
-            ctx.lineTo(2.5 * escala, -17 * escala);
-            ctx.lineTo(0, -14 * escala);
-            ctx.lineTo(-2.5 * escala, -17 * escala);
-            ctx.closePath();
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(0, -26 * escala);
-            ctx.lineTo(0, -22 * escala);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(0, -12 * escala);
-            ctx.lineTo(0, -8 * escala);
-            ctx.stroke();
+            ctx.moveTo(0, -20 * escala); ctx.lineTo(2.5 * escala, -17 * escala);
+            ctx.lineTo(0, -14 * escala); ctx.lineTo(-2.5 * escala, -17 * escala);
+            ctx.closePath(); ctx.stroke();
             ctx.shadowBlur = 0;
             ctx.restore();
             const numFaiscas = estaAtacando ? 9 : 4;
@@ -2319,11 +1973,8 @@
                 const fy = maoY + flutuacao + Math.sin(faseFaisca * 0.8) * raio - 5;
                 const tamanhoFaisca = 1.5 + Math.sin(faseFaisca * 2) * 1;
                 ctx.fillStyle = `rgba(150, 230, 255, ${0.6 + Math.sin(faseFaisca * 3) * 0.3})`;
-                ctx.shadowColor = '#66ccff';
-                ctx.shadowBlur = 10;
-                ctx.beginPath();
-                ctx.arc(fx, fy, tamanhoFaisca, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.shadowColor = '#66ccff'; ctx.shadowBlur = 10;
+                ctx.beginPath(); ctx.arc(fx, fy, tamanhoFaisca, 0, Math.PI * 2); ctx.fill();
                 ctx.shadowBlur = 0;
             }
         }
@@ -2335,143 +1986,85 @@
             ctx.save();
             ctx.translate(cx, cy);
             if (dir === -1) ctx.scale(-1, 1);
-            ctx.fillStyle = '#3a3a42';
-            ctx.strokeStyle = '#1a1a22';
-            ctx.lineWidth = 2;
+            ctx.fillStyle = '#3a3a42'; ctx.strokeStyle = '#1a1a22'; ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(-32, 60);
-            ctx.lineTo(32, 60);
-            ctx.lineTo(24, 35);
-            ctx.lineTo(-24, 35);
-            ctx.closePath();
-            ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#5a5a62';
-            ctx.strokeStyle = '#2a2a32';
-            ctx.lineWidth = 2.5;
+            ctx.moveTo(-32, 60); ctx.lineTo(32, 60); ctx.lineTo(24, 35); ctx.lineTo(-24, 35);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#5a5a62'; ctx.strokeStyle = '#2a2a32'; ctx.lineWidth = 2.5;
             ctx.beginPath();
-            ctx.moveTo(-22, 35);
-            ctx.lineTo(-26, -10);
-            ctx.lineTo(-20, -45);
-            ctx.lineTo(20, -45);
-            ctx.lineTo(26, -10);
-            ctx.lineTo(22, 35);
-            ctx.closePath();
-            ctx.fill(); ctx.stroke();
-            ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-            ctx.lineWidth = 1.5;
+            ctx.moveTo(-22, 35); ctx.lineTo(-26, -10); ctx.lineTo(-20, -45);
+            ctx.lineTo(20, -45); ctx.lineTo(26, -10); ctx.lineTo(22, 35);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#6a6a72'; ctx.strokeStyle = '#3a3a42'; ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(-14, 25);
-            ctx.lineTo(-8, 10);
-            ctx.lineTo(-16, -5);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(12, 20);
-            ctx.lineTo(16, 5);
-            ctx.lineTo(10, -10);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(-4, -40);
-            ctx.lineTo(0, -30);
-            ctx.stroke();
-            ctx.fillStyle = 'rgba(0,0,0,0.15)';
-            ctx.beginPath();
-            ctx.ellipse(-12, 15, 5, 3, 0.3, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.ellipse(14, 8, 4, 2.5, -0.2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#6a6a72';
-            ctx.strokeStyle = '#3a3a42';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(-20, -45);
-            ctx.lineTo(-16, -60);
-            ctx.lineTo(-8, -55);
-            ctx.lineTo(0, -65);
-            ctx.lineTo(8, -57);
-            ctx.lineTo(16, -60);
-            ctx.lineTo(20, -45);
-            ctx.closePath();
-            ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#3a3a42';
-            ctx.beginPath();
-            ctx.moveTo(-16, -40);
-            ctx.lineTo(-6, -36);
-            ctx.lineTo(-6, -33);
-            ctx.lineTo(-16, -37);
-            ctx.closePath();
-            ctx.fill();
-            ctx.beginPath();
-            ctx.moveTo(16, -40);
-            ctx.lineTo(6, -36);
-            ctx.lineTo(6, -33);
-            ctx.lineTo(16, -37);
-            ctx.closePath();
-            ctx.fill();
+            ctx.moveTo(-20, -45); ctx.lineTo(-16, -60); ctx.lineTo(-8, -55);
+            ctx.lineTo(0, -65); ctx.lineTo(8, -57); ctx.lineTo(16, -60); ctx.lineTo(20, -45);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
             const brilhoOlho = 0.85 + Math.sin(tempoGlobal * 0.2) * 0.15;
             ctx.fillStyle = `rgba(255, 120, 0, ${brilhoOlho})`;
-            ctx.shadowColor = '#ff6600';
-            ctx.shadowBlur = 18;
-            ctx.beginPath();
-            ctx.arc(-11, -35, 3.5, 0, Math.PI * 2);
-            ctx.arc(11, -35, 3.5, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.shadowColor = '#ff6600'; ctx.shadowBlur = 18;
+            ctx.beginPath(); ctx.arc(-11, -35, 3.5, 0, Math.PI * 2); ctx.arc(11, -35, 3.5, 0, Math.PI * 2); ctx.fill();
             ctx.shadowBlur = 0;
-            ctx.fillStyle = '#1a0800';
-            ctx.beginPath();
-            ctx.arc(-11, -35, 1.5, 0, Math.PI * 2);
-            ctx.arc(11, -35, 1.5, 0, Math.PI * 2);
-            ctx.fill();
             ctx.fillStyle = '#050505';
-            ctx.beginPath();
-            ctx.ellipse(0, 5, 22, 16, 0, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.beginPath(); ctx.ellipse(0, 5, 22, 16, 0, 0, Math.PI * 2); ctx.fill();
             const intensidadeFogo = 0.7 + Math.sin(tempoGlobal * 0.2) * 0.3;
             const glowBoca = ctx.createRadialGradient(0, 5, 0, 0, 5, 24);
             glowBoca.addColorStop(0, `rgba(255, 240, 150, ${intensidadeFogo})`);
             glowBoca.addColorStop(0.4, `rgba(255, 140, 0, ${intensidadeFogo * 0.85})`);
             glowBoca.addColorStop(1, 'rgba(255, 60, 0, 0)');
             ctx.fillStyle = glowBoca;
-            ctx.beginPath();
-            ctx.ellipse(0, 5, 22, 16, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#8a8a92';
-            ctx.strokeStyle = '#4a4a52';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.moveTo(-16, -8); ctx.lineTo(-13, 3); ctx.lineTo(-10, -8); ctx.closePath(); ctx.fill(); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(-6, -10); ctx.lineTo(-3, 4); ctx.lineTo(0, -10); ctx.closePath(); ctx.fill(); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(4, -10); ctx.lineTo(7, 4); ctx.lineTo(10, -10); ctx.closePath(); ctx.fill(); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(12, -8); ctx.lineTo(15, 3); ctx.lineTo(18, -8); ctx.closePath(); ctx.fill(); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(-16, 18); ctx.lineTo(-13, 7); ctx.lineTo(-10, 18); ctx.closePath(); ctx.fill(); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(-6, 20); ctx.lineTo(-3, 6); ctx.lineTo(0, 20); ctx.closePath(); ctx.fill(); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(4, 20); ctx.lineTo(7, 6); ctx.lineTo(10, 20); ctx.closePath(); ctx.fill(); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(12, 18); ctx.lineTo(15, 7); ctx.lineTo(18, 18); ctx.closePath(); ctx.fill(); ctx.stroke();
-            ctx.strokeStyle = '#3a3a42';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.ellipse(0, 5, 23, 17, 0, 0, Math.PI * 2);
-            ctx.stroke();
+            ctx.beginPath(); ctx.ellipse(0, 5, 22, 16, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#3a3a42'; ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.ellipse(0, 5, 23, 17, 0, 0, Math.PI * 2); ctx.stroke();
             ctx.restore();
         }
 
+        // 🔥 BOLA DE FOGO MELHORADA (parece fogo de verdade)
         function desenharBolaDeFogo(bola) {
             const bx = bola.x - cameraX;
             const by = bola.y;
-            const grad = ctx.createRadialGradient(bx, by, 0, bx, by, bola.raio * 2);
-            grad.addColorStop(0, 'rgba(255, 255, 200, 0.95)');
-            grad.addColorStop(0.4, 'rgba(255, 140, 0, 0.85)');
-            grad.addColorStop(1, 'rgba(255, 60, 0, 0)');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(bx, by, bola.raio * 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#ffee88';
-            ctx.shadowColor = '#ff6600';
-            ctx.shadowBlur = 20;
-            ctx.beginPath();
-            ctx.arc(bx, by, bola.raio, 0, Math.PI * 2);
-            ctx.fill();
+            const pulso = 1 + Math.sin(tempoGlobal * 0.4 + bola.x * 0.1) * 0.08;
+
+            // Aura externa (vermelha)
+            const gradExterno = ctx.createRadialGradient(bx, by, 0, bx, by, bola.raio * 3);
+            gradExterno.addColorStop(0, 'rgba(255, 200, 80, 0.9)');
+            gradExterno.addColorStop(0.35, 'rgba(255, 120, 0, 0.7)');
+            gradExterno.addColorStop(0.7, 'rgba(200, 40, 0, 0.4)');
+            gradExterno.addColorStop(1, 'rgba(120, 0, 0, 0)');
+            ctx.fillStyle = gradExterno;
+            ctx.beginPath(); ctx.arc(bx, by, bola.raio * 3, 0, Math.PI * 2); ctx.fill();
+
+            // Chamas ao redor (triângulos irregulares)
+            const numChamas = 8;
+            for (let i = 0; i < numChamas; i++) {
+                const ang = (Math.PI * 2 / numChamas) * i + tempoGlobal * 0.15;
+                const dist = bola.raio * (1.1 + Math.sin(tempoGlobal * 0.3 + i) * 0.2);
+                const cx2 = bx + Math.cos(ang) * dist;
+                const cy2 = by + Math.sin(ang) * dist;
+                const tam = bola.raio * (0.5 + Math.sin(tempoGlobal * 0.4 + i * 1.5) * 0.2);
+                ctx.fillStyle = `rgba(255, ${140 + Math.floor(Math.sin(i) * 40)}, 0, 0.75)`;
+                ctx.beginPath();
+                ctx.moveTo(cx2, cy2 - tam);
+                ctx.lineTo(cx2 + tam * 0.6, cy2 + tam * 0.5);
+                ctx.lineTo(cx2 - tam * 0.6, cy2 + tam * 0.5);
+                ctx.closePath(); ctx.fill();
+            }
+
+            // Corpo principal da bola (amarelo brilhante)
+            ctx.fillStyle = '#ffcc33';
+            ctx.shadowColor = '#ff6600'; ctx.shadowBlur = 30;
+            ctx.beginPath(); ctx.arc(bx, by, bola.raio * 0.9 * pulso, 0, Math.PI * 2); ctx.fill();
             ctx.shadowBlur = 0;
+
+            // Núcleo branco quente
+            ctx.fillStyle = '#fff8d0';
+            ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 20;
+            ctx.beginPath(); ctx.arc(bx, by, bola.raio * 0.45 * pulso, 0, Math.PI * 2); ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Núcleo branco puro
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath(); ctx.arc(bx, by, bola.raio * 0.22, 0, Math.PI * 2); ctx.fill();
         }
 
         function desenharCipo(cip) {
@@ -2479,49 +2072,28 @@
             const ay = cip.ancoraY;
             const px = cip.pontaX - cameraX;
             const py = cip.pontaY;
-            ctx.strokeStyle = '#5a3a1a';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(ax, ay);
-            ctx.lineTo(px, py);
-            ctx.stroke();
-            ctx.strokeStyle = '#6b8a3a';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(ax, ay);
-            ctx.lineTo(px, py);
-            ctx.stroke();
+            ctx.strokeStyle = '#5a3a1a'; ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(px, py); ctx.stroke();
+            ctx.strokeStyle = '#6b8a3a'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(px, py); ctx.stroke();
             ctx.fillStyle = '#4a6a2a';
             for (let i = 0.2; i < 0.9; i += 0.2) {
                 const fx = ax + (px - ax) * i;
                 const fy = ay + (py - ay) * i;
-                ctx.beginPath();
-                ctx.ellipse(fx + 6, fy, 6, 3, 0.5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.ellipse(fx - 6, fy, 6, 3, -0.5, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.ellipse(fx + 6, fy, 6, 3, 0.5, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.ellipse(fx - 6, fy, 6, 3, -0.5, 0, Math.PI * 2); ctx.fill();
             }
             ctx.fillStyle = '#3a1a00';
-            ctx.beginPath();
-            ctx.arc(ax, ay, 7, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(px, py, 9, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#5a3a1a';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+            ctx.beginPath(); ctx.arc(ax, ay, 7, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(px, py, 9, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#5a3a1a'; ctx.lineWidth = 2; ctx.stroke();
             if (!jogadorAgravado && cooldownCipo <= 0) {
                 const distX = Math.abs((player.x + player.w/2) - cip.pontaX);
                 const distY = Math.abs((player.y + player.h/2) - cip.pontaY);
                 if (distX < 250 && distY < 250) {
                     const pulso = 0.6 + Math.sin(tempoGlobal * 0.25) * 0.4;
-                    ctx.strokeStyle = `rgba(255, 255, 100, ${pulso})`;
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.arc(px, py, 40 + Math.sin(tempoGlobal * 0.2) * 4, 0, Math.PI * 2);
-                    ctx.stroke();
+                    ctx.strokeStyle = `rgba(255, 255, 100, ${pulso})`; ctx.lineWidth = 3;
+                    ctx.beginPath(); ctx.arc(px, py, 40 + Math.sin(tempoGlobal * 0.2) * 4, 0, Math.PI * 2); ctx.stroke();
                     ctx.fillStyle = `rgba(255, 255, 100, ${pulso})`;
                     ctx.font = 'bold 14px "Pixelify Sans", monospace';
                     ctx.textAlign = 'center';
@@ -2543,9 +2115,7 @@
             const centroY = sy + sabio.altura / 2 + flutuacao - alturaMago * 0.15;
             const sombraEscala = 1 - (flutuacao + 8) / 60;
             ctx.fillStyle = `rgba(0,0,0,${0.25 + 0.1 * (1 - sombraEscala)})`;
-            ctx.beginPath();
-            ctx.ellipse(centroX, sy + sabio.altura + 4, tamanhoMago * 0.35 * sombraEscala, 6 * sombraEscala, 0, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.beginPath(); ctx.ellipse(centroX, sy + sabio.altura + 4, tamanhoMago * 0.35 * sombraEscala, 6 * sombraEscala, 0, 0, Math.PI * 2); ctx.fill();
             const pulsoAura = 0.7 + Math.sin(tempoGlobal * 0.08) * 0.3;
             const raioAura = tamanhoMago * 0.7;
             const gradAura = ctx.createRadialGradient(centroX, centroY, 0, centroX, centroY, raioAura);
@@ -2553,31 +2123,22 @@
             gradAura.addColorStop(0.6, `rgba(80, 160, 255, ${0.18 * pulsoAura})`);
             gradAura.addColorStop(1, 'rgba(80, 160, 255, 0)');
             ctx.fillStyle = gradAura;
-            ctx.beginPath();
-            ctx.arc(centroX, centroY, raioAura, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.beginPath(); ctx.arc(centroX, centroY, raioAura, 0, Math.PI * 2); ctx.fill();
             ctx.save();
-            ctx.translate(centroX, centroY);
-            ctx.rotate(rotacaoLeve);
+            ctx.translate(centroX, centroY); ctx.rotate(rotacaoLeve);
             if (imgMago.complete && imgMago.naturalWidth !== 0) {
-                ctx.shadowColor = 'rgba(120, 200, 255, 0.7)';
-                ctx.shadowBlur = 20 * pulsoAura;
+                ctx.shadowColor = 'rgba(120, 200, 255, 0.7)'; ctx.shadowBlur = 20 * pulsoAura;
                 ctx.drawImage(imgMago, -larguraMago / 2, -alturaMago / 2, larguraMago, alturaMago);
                 ctx.shadowBlur = 0;
             } else {
-                ctx.shadowColor = 'rgba(0,0,0,0.4)';
-                ctx.shadowBlur = 12;
+                ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 12;
                 ctx.fillStyle = sabio.cor;
                 ctx.beginPath();
-                ctx.moveTo(0, -alturaMago / 2);
-                ctx.lineTo(larguraMago / 2, alturaMago / 2);
+                ctx.moveTo(0, -alturaMago / 2); ctx.lineTo(larguraMago / 2, alturaMago / 2);
                 ctx.lineTo(-larguraMago / 2, alturaMago / 2);
-                ctx.closePath();
-                ctx.fill();
+                ctx.closePath(); ctx.fill();
                 ctx.shadowBlur = 0;
-                ctx.strokeStyle = '#2980b9';
-                ctx.lineWidth = 2;
-                ctx.stroke();
+                ctx.strokeStyle = '#2980b9'; ctx.lineWidth = 2; ctx.stroke();
             }
             ctx.restore();
             for (let i = 0; i < 6; i++) {
@@ -2587,11 +2148,8 @@
                 const orbY = centroY + Math.sin(fase * 1.5) * raioOrbita * 0.5;
                 const tamanhoOrb = 2.5 + Math.sin(fase * 2) * 1.5;
                 ctx.fillStyle = `rgba(150, 220, 255, ${0.6 + Math.sin(fase * 3) * 0.3})`;
-                ctx.shadowColor = '#88ddff';
-                ctx.shadowBlur = 12;
-                ctx.beginPath();
-                ctx.arc(orbX, orbY, tamanhoOrb, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.shadowColor = '#88ddff'; ctx.shadowBlur = 12;
+                ctx.beginPath(); ctx.arc(orbX, orbY, tamanhoOrb, 0, Math.PI * 2); ctx.fill();
                 ctx.shadowBlur = 0;
             }
         }
@@ -2604,8 +2162,7 @@
                 grad.addColorStop(0, '#1a2a6c');
                 grad.addColorStop(0.5, '#b21f1f');
                 grad.addColorStop(1, '#fdbb2d');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, W, H);
+                ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
             }
             const raioSol = 60 + Math.sin(tempoGlobal * 0.02) * 5;
             const solX = W * 0.8 - cameraX * 0.02;
@@ -2615,9 +2172,7 @@
             gradSol.addColorStop(0.3, 'rgba(255, 200, 80, 0.5)');
             gradSol.addColorStop(1, 'rgba(255, 200, 80, 0)');
             ctx.fillStyle = gradSol;
-            ctx.beginPath();
-            ctx.arc(solX, solY, raioSol * 3, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.beginPath(); ctx.arc(solX, solY, raioSol * 3, 0, Math.PI * 2); ctx.fill();
             for (let n of nuvens) {
                 ctx.globalAlpha = n.opacidade;
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
@@ -2636,9 +2191,7 @@
                 const mx = m.x - cameraX;
                 if (mx < -20 || mx > W + 20) continue;
                 const balanco = Math.sin(tempoGlobal * 0.05 + m.fase) * 2;
-                ctx.strokeStyle = m.cor;
-                ctx.lineWidth = 2;
-                ctx.lineCap = 'round';
+                ctx.strokeStyle = m.cor; ctx.lineWidth = 2; ctx.lineCap = 'round';
                 ctx.beginPath();
                 ctx.moveTo(mx, chaoY);
                 ctx.quadraticCurveTo(mx + balanco * 0.5, chaoY - m.altura * 0.6, mx + balanco, chaoY - m.altura);
@@ -2655,12 +2208,8 @@
             for (let p of particulas) {
                 const op = p.vida / p.vidaMax;
                 ctx.globalAlpha = op;
-                ctx.fillStyle = p.cor;
-                ctx.shadowColor = p.cor;
-                ctx.shadowBlur = 8;
-                ctx.beginPath();
-                ctx.arc(p.x - cameraX, p.y, p.tamanho * op, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.fillStyle = p.cor; ctx.shadowColor = p.cor; ctx.shadowBlur = 8;
+                ctx.beginPath(); ctx.arc(p.x - cameraX, p.y, p.tamanho * op, 0, Math.PI * 2); ctx.fill();
                 ctx.shadowBlur = 0;
                 ctx.globalAlpha = 1;
             }
@@ -2670,21 +2219,260 @@
             for (let p of particulasAmbiente) {
                 const brilho = 0.4 + Math.sin(p.brilho) * 0.3;
                 ctx.globalAlpha = brilho;
-                ctx.fillStyle = p.cor;
-                ctx.shadowColor = p.cor;
-                ctx.shadowBlur = 6;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.tamanho, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.fillStyle = p.cor; ctx.shadowColor = p.cor; ctx.shadowBlur = 6;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.tamanho, 0, Math.PI * 2); ctx.fill();
                 ctx.shadowBlur = 0;
                 ctx.globalAlpha = 1;
             }
+        }
+
+        // 🍂
+        function desenharFolhas() {
+            for (let f of folhas) {
+                ctx.save();
+                ctx.translate(f.x, f.y); ctx.rotate(f.rotacao);
+                ctx.fillStyle = f.cor; ctx.globalAlpha = 0.75;
+                ctx.beginPath(); ctx.ellipse(0, 0, f.tamanho, f.tamanho * 0.45, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.globalAlpha = 0.4; ctx.strokeStyle = '#5a3a1a'; ctx.lineWidth = 0.8;
+                ctx.beginPath(); ctx.moveTo(-f.tamanho, 0); ctx.lineTo(f.tamanho, 0); ctx.stroke();
+                ctx.restore();
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        // 🦋
+        function desenharBorboletas() {
+            for (let b of borboletas) {
+                const asaBat = Math.sin(tempoGlobal * 0.3 + b.fase) * 0.7 + 0.3;
+                ctx.save();
+                ctx.translate(b.x, b.y);
+                ctx.fillStyle = b.cor;
+                ctx.globalAlpha = 0.85;
+                // asa esquerda
+                ctx.save(); ctx.rotate(-asaBat * 0.6);
+                ctx.beginPath(); ctx.ellipse(-b.tamanho * 0.6, 0, b.tamanho * 0.5, b.tamanho * 0.35, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+                // asa direita
+                ctx.save(); ctx.rotate(asaBat * 0.6);
+                ctx.beginPath(); ctx.ellipse(b.tamanho * 0.6, 0, b.tamanho * 0.5, b.tamanho * 0.35, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+                // corpo
+                ctx.fillStyle = '#3a2a1a';
+                ctx.beginPath(); ctx.ellipse(0, 0, b.tamanho * 0.15, b.tamanho * 0.5, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        // ============================================
+        // BOSS — DESENHO NOVO
+        // ============================================
+        function desenharBoss(bx, by) {
+            const r = boss.w / 2;
+            const flap = Math.sin(boss.batidaAsa) * 0.7;
+            const dir = player.x > boss.x ? 1 : -1;
+            const pulsoAura = 0.6 + Math.sin(tempoGlobal * 0.08) * 0.4;
+            const cargaGlow = boss.carregando > 0 ? (1 - boss.carregando / 45) : 0;
+            const boca = boss.bocaAberta;
+
+            ctx.save();
+            ctx.translate(bx, by);
+            ctx.scale(dir, 1);
+            ctx.rotate(boss.rotacaoCorpo);
+
+            // Aura sombria
+            const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 2);
+            gr.addColorStop(0, `rgba(80, 0, 100, ${0.5 * pulsoAura})`);
+            gr.addColorStop(0.6, `rgba(60, 0, 80, ${0.25 * pulsoAura})`);
+            gr.addColorStop(1, 'rgba(60, 0, 80, 0)');
+            ctx.fillStyle = gr;
+            ctx.beginPath(); ctx.arc(0, 0, r * 2, 0, Math.PI * 2); ctx.fill();
+
+            // ASAS (com membrana entre dedos)
+            const desenharAsa = (lado) => {
+                ctx.save();
+                ctx.scale(lado, 1);
+                // Membrana
+                const gradAsa = ctx.createLinearGradient(0, -r * 0.5, r * 1.8, r * 0.3);
+                gradAsa.addColorStop(0, '#4a2050');
+                gradAsa.addColorStop(0.5, '#2a1030');
+                gradAsa.addColorStop(1, '#1a0820');
+                ctx.fillStyle = gradAsa;
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(r * 0.3, -10);
+                // osso do topo
+                ctx.quadraticCurveTo(r * 1.1, -r * (0.9 + flap * 0.6), r * 1.9, -r * (0.4 + flap * 0.5));
+                // ponta
+                ctx.lineTo(r * 1.8, -r * 0.15);
+                // dedo 1
+                ctx.quadraticCurveTo(r * 1.6, r * 0.1, r * 1.5, r * 0.05);
+                ctx.quadraticCurveTo(r * 1.3, r * 0.4, r * 1.1, r * 0.15);
+                // dedo 2
+                ctx.quadraticCurveTo(r * 0.95, r * 0.45, r * 0.75, r * 0.2);
+                // dedo 3
+                ctx.quadraticCurveTo(r * 0.6, r * 0.4, r * 0.4, r * 0.15);
+                ctx.lineTo(r * 0.3, 0);
+                ctx.closePath();
+                ctx.fill(); ctx.stroke();
+                // Ossos (detalhes)
+                ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(r * 0.3, -10);
+                ctx.quadraticCurveTo(r * 1.2, -r * 0.55, r * 1.8, -r * 0.15);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(r * 0.3, -10);
+                ctx.quadraticCurveTo(r * 0.9, r * 0.15, r * 1.1, r * 0.1);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(r * 0.3, -10);
+                ctx.quadraticCurveTo(r * 0.6, r * 0.15, r * 0.75, r * 0.15);
+                ctx.stroke();
+                // Garras na ponta
+                ctx.fillStyle = '#d8c8e0';
+                ctx.beginPath();
+                ctx.moveTo(r * 1.9, -r * (0.4 + flap * 0.5));
+                ctx.lineTo(r * 2.05, -r * (0.55 + flap * 0.5));
+                ctx.lineTo(r * 1.85, -r * 0.35);
+                ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.restore();
+            };
+            desenharAsa(-1);
+            desenharAsa(1);
+
+            // CORPO (torso peludo)
+            const gradCorpo = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 0.6);
+            gradCorpo.addColorStop(0, '#4a2050');
+            gradCorpo.addColorStop(0.7, '#2a1030');
+            gradCorpo.addColorStop(1, '#1a0820');
+            ctx.fillStyle = gradCorpo;
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, r * 0.45, r * 0.6, 0, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+
+            // Pelinhos no corpo
+            ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 12; i++) {
+                const ang = (Math.PI * 2 / 12) * i;
+                const px = Math.cos(ang) * r * 0.42;
+                const py = Math.sin(ang) * r * 0.55;
+                ctx.beginPath();
+                ctx.moveTo(px, py);
+                ctx.lineTo(px + Math.cos(ang) * 8, py + Math.sin(ang) * 8);
+                ctx.stroke();
+            }
+
+            // CABEÇA
+            const cabecaY = -r * 0.55;
+            const gradCabeca = ctx.createRadialGradient(0, cabecaY, 0, 0, cabecaY, r * 0.45);
+            gradCabeca.addColorStop(0, '#5a2a60');
+            gradCabeca.addColorStop(0.7, '#3a1a40');
+            gradCabeca.addColorStop(1, '#1a0820');
+            ctx.fillStyle = gradCabeca;
+            ctx.beginPath();
+            ctx.arc(0, cabecaY, r * 0.4, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+
+            // ORELHAS grandes
+            ctx.fillStyle = '#3a1a40';
+            // esquerda
+            ctx.beginPath();
+            ctx.moveTo(-r * 0.3, cabecaY - r * 0.3);
+            ctx.lineTo(-r * 0.55, cabecaY - r * 0.95);
+            ctx.lineTo(-r * 0.1, cabecaY - r * 0.4);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+            // direita
+            ctx.beginPath();
+            ctx.moveTo(r * 0.3, cabecaY - r * 0.3);
+            ctx.lineTo(r * 0.55, cabecaY - r * 0.95);
+            ctx.lineTo(r * 0.1, cabecaY - r * 0.4);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+            // Detalhe interno orelha
+            ctx.strokeStyle = '#8a3a90';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(-r * 0.28, cabecaY - r * 0.35);
+            ctx.lineTo(-r * 0.45, cabecaY - r * 0.8);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(r * 0.28, cabecaY - r * 0.35);
+            ctx.lineTo(r * 0.45, cabecaY - r * 0.8);
+            ctx.stroke();
+
+            // OLHOS brilhantes (seguem o player)
+            const olhoDirX = (player.x - boss.x) / 400;
+            const olhoDirY = (player.y - boss.y) / 400;
+            // Glow ao redor
+            ctx.fillStyle = `rgba(255, 30, 0, ${0.5 + Math.sin(tempoGlobal * 0.2) * 0.3})`;
+            ctx.shadowColor = '#ff2200'; ctx.shadowBlur = 30;
+            ctx.beginPath();
+            ctx.arc(-r * 0.16, cabecaY - r * 0.05, 12, 0, Math.PI * 2);
+            ctx.arc(r * 0.16, cabecaY - r * 0.05, 12, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            // Globo ocular
+            ctx.fillStyle = '#ff3300';
+            ctx.beginPath();
+            ctx.arc(-r * 0.16, cabecaY - r * 0.05, 8, 0, Math.PI * 2);
+            ctx.arc(r * 0.16, cabecaY - r * 0.05, 8, 0, Math.PI * 2);
+            ctx.fill();
+            // Pupila que segue o player
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(-r * 0.16 + olhoDirX * 3, cabecaY - r * 0.05 + olhoDirY * 3, 4, 0, Math.PI * 2);
+            ctx.arc(r * 0.16 + olhoDirX * 3, cabecaY - r * 0.05 + olhoDirY * 3, 4, 0, Math.PI * 2);
+            ctx.fill();
+            // Reflexo
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(-r * 0.18, cabecaY - r * 0.08, 1.5, 0, Math.PI * 2);
+            ctx.arc(r * 0.14, cabecaY - r * 0.08, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // BOCA (abre quando atira)
+            const bocaY = cabecaY + r * 0.18;
+            const alturaBoca = r * 0.15 * (0.3 + boca * 1.2);
+            // Fundo da boca
+            ctx.fillStyle = '#0a0000';
+            ctx.beginPath();
+            ctx.ellipse(0, bocaY, r * 0.22, alturaBoca * 0.7, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Glow vermelho dentro da boca (carga)
+            if (cargaGlow > 0) {
+                const grBoca = ctx.createRadialGradient(0, bocaY, 0, 0, bocaY, r * 0.4);
+                grBoca.addColorStop(0, `rgba(255, 240, 100, ${cargaGlow})`);
+                grBoca.addColorStop(0.4, `rgba(255, 100, 0, ${cargaGlow * 0.9})`);
+                grBoca.addColorStop(1, 'rgba(255, 0, 0, 0)');
+                ctx.fillStyle = grBoca;
+                ctx.beginPath(); ctx.arc(0, bocaY, r * 0.4, 0, Math.PI * 2); ctx.fill();
+            }
+            // Presas superiores
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.moveTo(-r * 0.16, bocaY - alturaBoca * 0.3);
+            ctx.lineTo(-r * 0.12, bocaY - alturaBoca * 0.9);
+            ctx.lineTo(-r * 0.06, bocaY - alturaBoca * 0.3);
+            ctx.closePath(); ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(r * 0.06, bocaY - alturaBoca * 0.3);
+            ctx.lineTo(r * 0.12, bocaY - alturaBoca * 0.9);
+            ctx.lineTo(r * 0.16, bocaY - alturaBoca * 0.3);
+            ctx.closePath(); ctx.fill();
+
+            ctx.restore();
         }
 
         function draw() {
             ctx.clearRect(0, 0, W, H);
             desenharCenarioFundo();
 
+            // Plataformas fixas
             for (let plat of platforms) {
                 const sx = plat.x - cameraX;
                 const sy = plat.y;
@@ -2699,31 +2487,16 @@
                         ctx.drawImage(imgPlataforma, sx, sy, plat.width, plat.height);
                     } else {
                         ctx.fillStyle = '#8e44ad';
-                        ctx.shadowColor = 'rgba(0,0,0,0.4)';
-                        ctx.shadowBlur = 12;
+                        ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 12;
                         ctx.fillRect(sx, sy, plat.width, plat.height);
                         ctx.shadowBlur = 0;
-                        ctx.strokeStyle = '#6c3483';
-                        ctx.lineWidth = 2;
+                        ctx.strokeStyle = '#6c3483'; ctx.lineWidth = 2;
                         ctx.strokeRect(sx, sy, plat.width, plat.height);
                     }
                 }
             }
 
-            for (let pm of PLATAFORMAS_MOVEIS) {
-                const sx = pm.x - cameraX;
-                ctx.fillStyle = '#5566aa';
-                ctx.shadowColor = 'rgba(100, 150, 255, 0.6)';
-                ctx.shadowBlur = 15;
-                ctx.fillRect(sx, pm.y, pm.w, pm.h);
-                ctx.shadowBlur = 0;
-                ctx.strokeStyle = '#3344aa';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(sx, pm.y, pm.w, pm.h);
-                ctx.fillStyle = 'rgba(200, 220, 255, 0.5)';
-                ctx.fillRect(sx + 5, pm.y + 3, pm.w - 10, 3);
-            }
-
+            // Plataformas podres
             for (let pp of PLATAFORMAS_PODRES) {
                 if (pp.destruida) continue;
                 const sx = pp.x - cameraX;
@@ -2733,11 +2506,9 @@
                 const corBase = pp.tremendo ? '#6a3a1a' : '#8a5a3a';
                 ctx.fillStyle = corBase;
                 ctx.fillRect(sx + tremorX, pp.y + tremorY, pp.w, pp.h);
-                ctx.strokeStyle = '#3a1a00';
-                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#3a1a00'; ctx.lineWidth = 2;
                 ctx.strokeRect(sx + tremorX, pp.y + tremorY, pp.w, pp.h);
-                ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(sx + pp.w * 0.3 + tremorX, pp.y + tremorY);
                 ctx.lineTo(sx + pp.w * 0.4 + tremorX, pp.y + pp.h + tremorY);
@@ -2762,12 +2533,9 @@
                 ctx.moveTo(ex + espinho.w/2, ey - 3 * pulso);
                 ctx.lineTo(ex + espinho.w, ey + espinho.h);
                 ctx.lineTo(ex, ey + espinho.h);
-                ctx.closePath();
-                ctx.fill();
+                ctx.closePath(); ctx.fill();
                 ctx.shadowBlur = 0;
-                ctx.strokeStyle = '#c0392b';
-                ctx.lineWidth = 1;
-                ctx.stroke();
+                ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 1; ctx.stroke();
             }
 
             for (let buraco of BURACOS) {
@@ -2779,18 +2547,11 @@
                 ctx.fillText('💀', bx + 10, chaoY - 10);
             }
 
-            for (let cip of CIPOS) {
-                desenharCipo(cip);
-            }
+            for (let cip of CIPOS) desenharCipo(cip);
+            for (let canhao of CANHOES) desenharCanhao(canhao);
+            for (let bola of bolasDeFogo) desenharBolaDeFogo(bola);
 
-            for (let canhao of CANHOES) {
-                desenharCanhao(canhao);
-            }
-
-            for (let bola of bolasDeFogo) {
-                desenharBolaDeFogo(bola);
-            }
-
+            // Moedas
             for (let m of moedasArray) {
                 if (m.coletada) continue;
                 const mx = m.x - cameraX;
@@ -2801,20 +2562,15 @@
                 ctx.shadowColor = '#ffd700';
                 ctx.shadowBlur = 15 + Math.sin(tempoGlobal * 0.1 + m.fase) * 5;
                 ctx.fillStyle = '#ffd700';
-                ctx.beginPath();
-                ctx.arc(mx, my, m.raio * escala, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(mx, my, m.raio * escala, 0, Math.PI * 2); ctx.fill();
                 ctx.shadowBlur = 0;
                 ctx.fillStyle = '#ffaa00';
-                ctx.beginPath();
-                ctx.arc(mx - 2, my - 2, m.raio * escala * 0.4, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(mx - 2, my - 2, m.raio * escala * 0.4, 0, Math.PI * 2); ctx.fill();
                 ctx.fillStyle = 'rgba(255,255,255,0.7)';
-                ctx.beginPath();
-                ctx.arc(mx - 3, my - 3, m.raio * escala * 0.2, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(mx - 3, my - 3, m.raio * escala * 0.2, 0, Math.PI * 2); ctx.fill();
             }
 
+            // Checkpoints
             for (let cp of checkpoints) {
                 const cx = cp.x - cameraX;
                 if (cx < -50 || cx > W + 50) continue;
@@ -2829,12 +2585,9 @@
                 ctx.moveTo(cx + 7, cy + 5);
                 ctx.quadraticCurveTo(cx + 20, cy + 12 + onda, cx + 30, cy + 15);
                 ctx.lineTo(cx + 7, cy + 30);
-                ctx.closePath();
-                ctx.fill();
+                ctx.closePath(); ctx.fill();
                 ctx.shadowBlur = 0;
-                ctx.strokeStyle = '#666';
-                ctx.lineWidth = 1;
-                ctx.stroke();
+                ctx.strokeStyle = '#666'; ctx.lineWidth = 1; ctx.stroke();
             }
 
             const sxSabio = sabio.x - cameraX;
@@ -2857,39 +2610,28 @@
                 const alturaMago = sabio.largura * 4 * 1.2;
                 const bx = sxSabio + sabio.largura/2 - bw/2 + balancoX;
                 const by = sySabio + sabio.altura/2 - alturaMago * 0.94 + flutuacao;
-                ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                ctx.shadowBlur = 12;
+                ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 12;
                 ctx.fillStyle = 'rgba(255,255,255,0.95)';
-                ctx.beginPath();
-                ctx.roundRect(bx, by, bw, bh, 12);
-                ctx.fill();
+                ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 12); ctx.fill();
                 ctx.shadowBlur = 0;
-                ctx.strokeStyle = '#333';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.roundRect(bx, by, bw, bh, 12);
-                ctx.stroke();
+                ctx.strokeStyle = '#333'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 12); ctx.stroke();
                 ctx.fillStyle = 'rgba(255,255,255,0.95)';
                 ctx.beginPath();
                 ctx.moveTo(sxSabio + sabio.largura/2 - 8 + balancoX, by + bh);
                 ctx.lineTo(sxSabio + sabio.largura/2 + balancoX, by + bh + 12);
                 ctx.lineTo(sxSabio + sabio.largura/2 + 8 + balancoX, by + bh);
-                ctx.closePath();
-                ctx.fill();
-                ctx.strokeStyle = '#333';
-                ctx.lineWidth = 2;
+                ctx.closePath(); ctx.fill();
+                ctx.strokeStyle = '#333'; ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(sxSabio + sabio.largura/2 - 8 + balancoX, by + bh);
                 ctx.lineTo(sxSabio + sabio.largura/2 + balancoX, by + bh + 12);
                 ctx.lineTo(sxSabio + sabio.largura/2 + 8 + balancoX, by + bh);
                 ctx.stroke();
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillStyle = '#222';
-                ctx.shadowBlur = 0;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#222'; ctx.shadowBlur = 0;
                 ctx.fillText(falaAtual, bx + bw/2, by + bh/2);
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'alphabetic';
+                ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
             }
 
             for (let mob of mobs) {
@@ -2897,11 +2639,8 @@
                 const mx = mob.x - cameraX;
                 if (mx < -100 || mx > W + 100) continue;
                 const my = mob.y;
-                if (mob.tipo === 'voador') {
-                    desenharMorcego(mx, my, mob);
-                } else {
-                    desenharOrc(mx, my, mob);
-                }
+                if (mob.tipo === 'voador') desenharMorcego(mx, my, mob);
+                else desenharOrc(mx, my, mob);
                 const offsetBarra = mob.tipo === 'voador' ? mob.radius * 1.9 : mob.radius * 1.75;
                 ctx.fillStyle = 'rgba(255,0,0,0.7)';
                 ctx.fillRect(mx - mob.radius, my - offsetBarra, mob.radius * 2, 4);
@@ -2909,32 +2648,35 @@
                 ctx.fillRect(mx - mob.radius, my - offsetBarra, mob.radius * 2 * (mob.hp / 2), 4);
             }
 
+            // 🎬 PLAYER com squash/stretch
             if (!gameOver) {
                 const px = player.x - cameraX;
                 const py = player.y;
                 if (!jogadorAgravado) {
                     ctx.fillStyle = 'rgba(0,0,0,0.3)';
                     ctx.beginPath();
-                    ctx.ellipse(px + player.w/2, chaoY + 3, player.w * 0.5, 4, 0, 0, Math.PI * 2);
+                    ctx.ellipse(px + player.w/2, chaoY + 3, player.w * 0.5 * (1 - playerSquash * 0.4), 4, 0, 0, Math.PI * 2);
                     ctx.fill();
                 }
-                ctx.shadowColor = 'rgba(0,0,0,0.3)';
-                ctx.shadowBlur = 12;
+                const sw = player.w * (1 + playerSquash * 0.5);
+                const sh = player.h * (1 - playerSquash * 0.5);
+                const sx2 = px + (player.w - sw) / 2;
+                const sy2 = py + (player.h - sh);
+                ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 12;
                 ctx.fillStyle = '#e74c3c';
-                ctx.fillRect(px, py, player.w, player.h);
+                ctx.fillRect(sx2, sy2, sw, sh);
                 ctx.shadowBlur = 0;
-                ctx.strokeStyle = '#c0392b';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(px, py, player.w, player.h);
-                const eyeSize = player.w * 0.2;
-                const eyeOffset = player.w * 0.2;
+                ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 2;
+                ctx.strokeRect(sx2, sy2, sw, sh);
+                const eyeSize = sw * 0.2;
+                const eyeOffset = sw * 0.2;
                 ctx.fillStyle = '#fff';
-                ctx.fillRect(px + eyeOffset, py + eyeOffset, eyeSize, eyeSize);
-                ctx.fillRect(px + player.w - eyeOffset - eyeSize, py + eyeOffset, eyeSize, eyeSize);
+                ctx.fillRect(sx2 + eyeOffset, sy2 + eyeOffset, eyeSize, eyeSize);
+                ctx.fillRect(sx2 + sw - eyeOffset - eyeSize, sy2 + eyeOffset, eyeSize, eyeSize);
                 ctx.fillStyle = '#2c3e50';
                 const pupil = eyeSize * 0.4;
-                ctx.fillRect(px + eyeOffset + pupil * 0.5, py + eyeOffset + pupil * 0.5, pupil, pupil);
-                ctx.fillRect(px + player.w - eyeOffset - eyeSize + pupil * 0.5, py + eyeOffset + pupil * 0.5, pupil, pupil);
+                ctx.fillRect(sx2 + eyeOffset + pupil * 0.5, sy2 + eyeOffset + pupil * 0.5, pupil, pupil);
+                ctx.fillRect(sx2 + sw - eyeOffset - eyeSize + pupil * 0.5, sy2 + eyeOffset + pupil * 0.5, pupil, pupil);
                 if (temEspada && !espadaLancada) {
                     const progressoAtaque = atacando ? (ataqueTimer / DURACAO_ATAQUE) : 0;
                     desenharEspadaMagica(px, py, player.w, player.h, atacando, progressoAtaque);
@@ -2944,31 +2686,22 @@
             desenharParticulas();
             desenharParticulasAmbiente();
 
+            // Passarão + carta
             if (passaroCarta.ativo) {
                 const bx = passaroCarta.x - cameraX;
                 const by = passaroCarta.y;
                 const flap = Math.sin(passaroCarta.fase * 2) * 0.5;
                 ctx.fillStyle = '#222';
-                ctx.beginPath();
-                ctx.ellipse(bx, by, 20, 10, 0, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.ellipse(bx, by, 20, 10, 0, 0, Math.PI * 2); ctx.fill();
                 ctx.fillStyle = '#333';
                 ctx.beginPath();
-                ctx.moveTo(bx - 8, by);
-                ctx.lineTo(bx - 35, by - 15 + flap * 15);
-                ctx.lineTo(bx - 10, by + 5);
-                ctx.closePath();
-                ctx.fill();
+                ctx.moveTo(bx - 8, by); ctx.lineTo(bx - 35, by - 15 + flap * 15); ctx.lineTo(bx - 10, by + 5);
+                ctx.closePath(); ctx.fill();
                 ctx.beginPath();
-                ctx.moveTo(bx + 8, by);
-                ctx.lineTo(bx + 35, by - 15 + flap * 15);
-                ctx.lineTo(bx + 10, by + 5);
-                ctx.closePath();
-                ctx.fill();
+                ctx.moveTo(bx + 8, by); ctx.lineTo(bx + 35, by - 15 + flap * 15); ctx.lineTo(bx + 10, by + 5);
+                ctx.closePath(); ctx.fill();
                 ctx.fillStyle = '#ffcc00';
-                ctx.beginPath();
-                ctx.arc(bx + 12, by - 3, 2, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(bx + 12, by - 3, 2, 0, Math.PI * 2); ctx.fill();
             }
 
             if (carta.ativa && !carta.coletada) {
@@ -2978,34 +2711,24 @@
                 ctx.save();
                 ctx.translate(cx, cy + flutua);
                 ctx.rotate(Math.sin(tempoGlobal * 0.04) * 0.15);
-                ctx.fillStyle = '#f5e8c8';
-                ctx.strokeStyle = '#8a6a3a';
-                ctx.lineWidth = 2;
+                ctx.fillStyle = '#f5e8c8'; ctx.strokeStyle = '#8a6a3a'; ctx.lineWidth = 2;
                 ctx.fillRect(-18, -12, 36, 24);
                 ctx.strokeRect(-18, -12, 36, 24);
                 ctx.strokeStyle = '#c9a961';
-                ctx.beginPath();
-                ctx.moveTo(-18, -12); ctx.lineTo(0, 2); ctx.lineTo(18, -12);
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(-18, -12); ctx.lineTo(0, 2); ctx.lineTo(18, -12); ctx.stroke();
                 ctx.fillStyle = '#aa2222';
-                ctx.beginPath();
-                ctx.arc(0, 2, 4, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(0, 2, 4, 0, Math.PI * 2); ctx.fill();
                 ctx.restore();
                 const pulso = 0.5 + Math.sin(tempoGlobal * 0.2) * 0.4;
-                ctx.strokeStyle = `rgba(255, 240, 150, ${pulso})`;
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(cx, cy + flutua, 40, 0, Math.PI * 2);
-                ctx.stroke();
+                ctx.strokeStyle = `rgba(255, 240, 150, ${pulso})`; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(cx, cy + flutua, 40, 0, Math.PI * 2); ctx.stroke();
             }
 
             if (espadaLancada) {
                 const ex = espadaLancada.x - cameraX;
                 const ey = espadaLancada.y;
                 ctx.save();
-                ctx.translate(ex, ey);
-                ctx.rotate(espadaLancada.angulo);
+                ctx.translate(ex, ey); ctx.rotate(espadaLancada.angulo);
                 const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, 50);
                 gr.addColorStop(0, 'rgba(120, 220, 255, 0.7)');
                 gr.addColorStop(1, 'rgba(120, 220, 255, 0)');
@@ -3015,8 +2738,8 @@
                 ctx.fillStyle = '#d8ecff';
                 ctx.strokeStyle = '#4a7a9a'; ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.moveTo(-6, 15); ctx.lineTo(-4, -30);
-                ctx.lineTo(0, -40); ctx.lineTo(4, -30); ctx.lineTo(6, 15);
+                ctx.moveTo(-6, 15); ctx.lineTo(-4, -30); ctx.lineTo(0, -40);
+                ctx.lineTo(4, -30); ctx.lineTo(6, 15);
                 ctx.closePath(); ctx.fill(); ctx.stroke();
                 ctx.shadowBlur = 0;
                 ctx.fillStyle = '#8a6a2a';
@@ -3024,6 +2747,7 @@
                 ctx.restore();
             }
 
+            // BOSS
             if (boss.ativo) {
                 const bx = boss.x - cameraX;
                 const by = boss.y;
@@ -3049,73 +2773,7 @@
                     }
                     ctx.restore();
                 } else if (!boss.morto) {
-                    const r = boss.w / 2;
-                    const flap = Math.sin(boss.batidaAsa) * 0.6;
-                    const dir = player.x > boss.x ? 1 : -1;
-                    ctx.save();
-                    ctx.translate(bx, by);
-                    ctx.scale(dir, 1);
-                    const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 1.8);
-                    gr.addColorStop(0, 'rgba(80, 0, 100, 0.5)');
-                    gr.addColorStop(1, 'rgba(80, 0, 100, 0)');
-                    ctx.fillStyle = gr;
-                    ctx.beginPath(); ctx.arc(0, 0, r * 1.8, 0, Math.PI * 2); ctx.fill();
-                    ctx.fillStyle = '#2a1030';
-                    ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.moveTo(-r * 0.3, -10);
-                    ctx.quadraticCurveTo(-r * 1.3, -r * (0.9 + flap * 0.6), -r * 1.8, -r * 0.2);
-                    ctx.lineTo(-r * 1.5, r * 0.15);
-                    ctx.quadraticCurveTo(-r * 1.2, r * 0.35, -r * 1.0, r * 0.1);
-                    ctx.quadraticCurveTo(-r * 0.8, r * 0.4, -r * 0.55, r * 0.2);
-                    ctx.closePath(); ctx.fill(); ctx.stroke();
-                    ctx.beginPath();
-                    ctx.moveTo(r * 0.3, -10);
-                    ctx.quadraticCurveTo(r * 1.3, -r * (0.9 + flap * 0.6), r * 1.8, -r * 0.2);
-                    ctx.lineTo(r * 1.5, r * 0.15);
-                    ctx.quadraticCurveTo(r * 1.2, r * 0.35, r * 1.0, r * 0.1);
-                    ctx.quadraticCurveTo(r * 0.8, r * 0.4, r * 0.55, r * 0.2);
-                    ctx.closePath(); ctx.fill(); ctx.stroke();
-                    ctx.fillStyle = '#3a1a40';
-                    ctx.beginPath();
-                    ctx.ellipse(0, 0, r * 0.42, r * 0.55, 0, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-                    ctx.fillStyle = '#3a1a40';
-                    ctx.beginPath();
-                    ctx.arc(0, -r * 0.55, r * 0.32, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
-                    ctx.beginPath();
-                    ctx.moveTo(-r * 0.25, -r * 0.8); ctx.lineTo(-r * 0.42, -r * 1.25); ctx.lineTo(-r * 0.08, -r * 0.85);
-                    ctx.closePath(); ctx.fill(); ctx.stroke();
-                    ctx.beginPath();
-                    ctx.moveTo(r * 0.25, -r * 0.8); ctx.lineTo(r * 0.42, -r * 1.25); ctx.lineTo(r * 0.08, -r * 0.85);
-                    ctx.closePath(); ctx.fill(); ctx.stroke();
-                    const brilho = 0.85 + Math.sin(tempoGlobal * 0.15) * 0.15;
-                    ctx.fillStyle = `rgba(255, 30, 0, ${brilho})`;
-                    ctx.shadowColor = '#ff2200'; ctx.shadowBlur = 25;
-                    ctx.beginPath();
-                    ctx.arc(-r * 0.13, -r * 0.55, 7, 0, Math.PI * 2);
-                    ctx.arc(r * 0.13, -r * 0.55, 7, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.shadowBlur = 0;
-                    ctx.fillStyle = '#000';
-                    ctx.beginPath();
-                    ctx.arc(-r * 0.13, -r * 0.55, 3, 0, Math.PI * 2);
-                    ctx.arc(r * 0.13, -r * 0.55, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.moveTo(-r * 0.2, -r * 0.35);
-                    ctx.quadraticCurveTo(0, -r * 0.25, r * 0.2, -r * 0.35);
-                    ctx.stroke();
-                    ctx.fillStyle = '#fff';
-                    ctx.beginPath();
-                    ctx.moveTo(-r * 0.14, -r * 0.36); ctx.lineTo(-r * 0.10, -r * 0.24); ctx.lineTo(-r * 0.06, -r * 0.36);
-                    ctx.closePath(); ctx.fill();
-                    ctx.beginPath();
-                    ctx.moveTo(r * 0.06, -r * 0.36); ctx.lineTo(r * 0.10, -r * 0.24); ctx.lineTo(r * 0.14, -r * 0.36);
-                    ctx.closePath(); ctx.fill();
-                    ctx.restore();
+                    desenharBoss(bx, by);
                 }
 
                 if (!boss.morto && boss.fase === 'lutando') {
@@ -3145,16 +2803,36 @@
                 for (let b of boss.bolasFogo) {
                     const bxx = b.x - cameraX;
                     const byy = b.y;
-                    const grad = ctx.createRadialGradient(bxx, byy, 0, bxx, byy, b.raio * 2.2);
-                    grad.addColorStop(0, 'rgba(255, 255, 200, 0.95)');
-                    grad.addColorStop(0.4, 'rgba(200, 40, 120, 0.85)');
-                    grad.addColorStop(1, 'rgba(120, 0, 80, 0)');
+                    const pulso = 1 + Math.sin(tempoGlobal * 0.4 + b.x * 0.1) * 0.1;
+                    const grad = ctx.createRadialGradient(bxx, byy, 0, bxx, byy, b.raio * 3);
+                    grad.addColorStop(0, 'rgba(255, 240, 150, 1)');
+                    grad.addColorStop(0.25, 'rgba(255, 180, 40, 0.95)');
+                    grad.addColorStop(0.55, 'rgba(255, 80, 0, 0.7)');
+                    grad.addColorStop(1, 'rgba(120, 0, 0, 0)');
                     ctx.fillStyle = grad;
-                    ctx.beginPath(); ctx.arc(bxx, byy, b.raio * 2.2, 0, Math.PI * 2); ctx.fill();
-                    ctx.fillStyle = '#ff88cc';
-                    ctx.shadowColor = '#ff0080'; ctx.shadowBlur = 25;
-                    ctx.beginPath(); ctx.arc(bxx, byy, b.raio, 0, Math.PI * 2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(bxx, byy, b.raio * 3, 0, Math.PI * 2); ctx.fill();
+                    // chamas
+                    for (let i = 0; i < 6; i++) {
+                        const ang = (Math.PI * 2 / 6) * i + tempoGlobal * 0.2;
+                        const dx2 = Math.cos(ang) * b.raio * (1.0 + Math.sin(tempoGlobal * 0.3 + i) * 0.15);
+                        const dy2 = Math.sin(ang) * b.raio * (1.0 + Math.sin(tempoGlobal * 0.3 + i) * 0.15);
+                        ctx.fillStyle = `rgba(255, ${120 + Math.floor(Math.sin(i + tempoGlobal * 0.2) * 60)}, 0, 0.7)`;
+                        ctx.beginPath();
+                        ctx.moveTo(bxx + dx2, byy + dy2 - b.raio * 0.4);
+                        ctx.lineTo(bxx + dx2 * 1.3, byy + dy2);
+                        ctx.lineTo(bxx + dx2 - b.raio * 0.3, byy + dy2);
+                        ctx.closePath(); ctx.fill();
+                    }
+                    // corpo
+                    ctx.fillStyle = '#ffcc33';
+                    ctx.shadowColor = '#ff6600'; ctx.shadowBlur = 25;
+                    ctx.beginPath(); ctx.arc(bxx, byy, b.raio * 0.85 * pulso, 0, Math.PI * 2); ctx.fill();
                     ctx.shadowBlur = 0;
+                    // núcleo
+                    ctx.fillStyle = '#fff8d0';
+                    ctx.beginPath(); ctx.arc(bxx, byy, b.raio * 0.4, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath(); ctx.arc(bxx, byy, b.raio * 0.2, 0, Math.PI * 2); ctx.fill();
                 }
 
                 for (let m of boss.morcegos) {
@@ -3168,34 +2846,29 @@
                 const cvy = chaoY - caverna.h;
                 ctx.fillStyle = '#1a1a22';
                 ctx.beginPath();
-                ctx.moveTo(cvx - 100, chaoY);
-                ctx.lineTo(cvx, cvy - 40);
-                ctx.lineTo(cvx + 60, cvy);
-                ctx.lineTo(cvx + 100, cvy - 80);
-                ctx.lineTo(cvx + 200, cvy - 40);
-                ctx.lineTo(cvx + 320, cvy);
-                ctx.lineTo(cvx + 400, cvy - 60);
+                ctx.moveTo(cvx - 100, chaoY); ctx.lineTo(cvx, cvy - 40); ctx.lineTo(cvx + 60, cvy);
+                ctx.lineTo(cvx + 100, cvy - 80); ctx.lineTo(cvx + 200, cvy - 40);
+                ctx.lineTo(cvx + 320, cvy); ctx.lineTo(cvx + 400, cvy - 60);
                 ctx.lineTo(cvx + caverna.w + 100, chaoY);
-                ctx.closePath();
-                ctx.fill();
+                ctx.closePath(); ctx.fill();
                 ctx.fillStyle = boss.morto ? '#000' : '#0a0a12';
-                ctx.beginPath();
-                ctx.ellipse(cvx + caverna.w / 2, chaoY - 80, 80, 100, 0, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.ellipse(cvx + caverna.w / 2, chaoY - 80, 80, 100, 0, 0, Math.PI * 2); ctx.fill();
                 if (!boss.morto) {
                     const pulso = 0.4 + Math.sin(tempoGlobal * 0.12) * 0.3;
                     ctx.fillStyle = `rgba(200, 0, 80, ${pulso})`;
-                    ctx.beginPath();
-                    ctx.ellipse(cvx + caverna.w / 2, chaoY - 80, 80, 100, 0, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.beginPath(); ctx.ellipse(cvx + caverna.w / 2, chaoY - 80, 80, 100, 0, 0, Math.PI * 2); ctx.fill();
                 }
             }
 
+            // 🍂 folhas + 🦋 borboletas (foreground)
+            desenharFolhas();
+            desenharBorboletas();
+
+            // HUD
             if (!gameOver) {
                 ctx.fillStyle = 'rgba(255,255,255,0.8)';
                 ctx.font = '20px "Pixelify Sans", monospace';
-                ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                ctx.shadowBlur = 8;
+                ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 8;
                 ctx.fillText('❤️ ' + vidas, 20, 40);
                 ctx.fillText('Nível ' + nivelAtual, 20, 70);
                 ctx.fillText('🪙 ' + moedas + ' / 100', 20, 100);
@@ -3210,8 +2883,7 @@
                     ctx.fillRect(20, 180, 220, 20);
                     ctx.fillStyle = 'rgba(120, 220, 255, 0.9)';
                     ctx.fillRect(20, 180, 220 * pct, 20);
-                    ctx.strokeStyle = '#fff';
-                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
                     ctx.strokeRect(20, 180, 220, 20);
                     ctx.fillStyle = '#fff';
                     ctx.font = 'bold 12px "Pixelify Sans", monospace';
@@ -3223,8 +2895,7 @@
                 ctx.fillRect(W/2 - 100, 20, 200, 8);
                 ctx.fillStyle = 'rgba(46, 204, 113, 0.6)';
                 ctx.fillRect(W/2 - 100, 20, 200 * progresso, 8);
-                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
                 ctx.strokeRect(W/2 - 100, 20, 200, 8);
             }
 
@@ -3237,30 +2908,24 @@
             ];
             for (let t of titulos) {
                 if (t.ativo && !gameOver) {
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                     ctx.fillStyle = 'rgba(255,255,255,0.5)';
                     ctx.font = 'bold 80px "Pixelify Sans", monospace';
-                    ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 20;
                     ctx.fillText(t.texto, W/2, H/2 - 50);
                     ctx.shadowBlur = 0;
-                    ctx.textAlign = 'left';
-                    ctx.textBaseline = 'alphabetic';
+                    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
                 }
             }
 
             if (nivelConcluido) {
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 ctx.fillStyle = 'rgba(46, 204, 113, 0.9)';
                 ctx.font = 'bold 60px "Pixelify Sans", monospace';
-                ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                ctx.shadowBlur = 20;
+                ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 20;
                 ctx.fillText('🏆 JOGO CONCLUÍDO! 🏆', W/2, H/2);
                 ctx.shadowBlur = 0;
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'alphabetic';
+                ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
             }
 
             if (fadeFinal > 0) {
@@ -3269,16 +2934,14 @@
             }
             if (fadeFinal >= 1) {
                 ctx.fillStyle = '#ffffff';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 ctx.font = 'bold 72px "Pixelify Sans", monospace';
                 ctx.shadowColor = '#f1c40f'; ctx.shadowBlur = 30;
                 ctx.fillText('Você chegou ao final!', W / 2, H / 2 - 50);
                 ctx.shadowBlur = 0;
                 ctx.font = '32px "Pixelify Sans", monospace';
                 ctx.fillText('Aguarde as próximas atualizações', W / 2, H / 2 + 50);
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'alphabetic';
+                ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
             }
 
             if (dialogo.ativo) {
@@ -3291,11 +2954,8 @@
                 const bx = W / 2 - bw / 2;
                 const by = H - 200;
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
-                ctx.strokeStyle = '#f1c40f';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.roundRect(bx, by, bw, bh, 16);
-                ctx.fill(); ctx.stroke();
+                ctx.strokeStyle = '#f1c40f'; ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 16); ctx.fill(); ctx.stroke();
                 ctx.fillStyle = '#f1c40f';
                 ctx.font = 'bold 18px "Pixelify Sans", monospace';
                 ctx.fillText(dialogo.titulo, bx + 20, by + 30);
@@ -3307,21 +2967,18 @@
             }
 
             if (gameOver) {
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 ctx.fillStyle = 'rgba(0,0,0,0.7)';
                 ctx.fillRect(0, 0, W, H);
                 ctx.fillStyle = '#ff0000';
                 ctx.font = 'bold 90px "Pixelify Sans", monospace';
-                ctx.shadowColor = '#ff0000';
-                ctx.shadowBlur = 40;
+                ctx.shadowColor = '#ff0000'; ctx.shadowBlur = 40;
                 ctx.fillText('PERDEU OTÁRIO', W/2, H/2 - 30);
                 ctx.shadowBlur = 0;
                 ctx.fillStyle = '#ffffff';
                 ctx.font = '24px "Pixelify Sans", monospace';
                 ctx.fillText('Pressione R para reiniciar', W/2, H/2 + 70);
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'alphabetic';
+                ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
             }
         }
 
@@ -3363,25 +3020,14 @@
             chaoY = novoChaoY;
 
             for (let plat of platforms) {
-                if (plat.y === chaoY - deltaY) {
-                    plat.y = chaoY;
-                    plat.height = newChaoAltura;
-                } else {
-                    plat.y += deltaY;
-                    plat.height = 20;
-                    plat.width = newPlatformWidth;
-                }
+                if (plat.y === chaoY - deltaY) { plat.y = chaoY; plat.height = newChaoAltura; }
+                else { plat.y += deltaY; plat.height = 20; plat.width = newPlatformWidth; }
             }
             for (let espinho of ESPINHOS) espinho.y += deltaY;
             for (let mob of mobs) { mob.radius = newMobRadius; mob.y += deltaY; }
             for (let cp of checkpoints) cp.y += deltaY;
             sabio.y += deltaY;
             for (let m of moedasArray) m.y += deltaY;
-            for (let pm of PLATAFORMAS_MOVEIS) {
-                pm.y += deltaY;
-                pm.minY += deltaY;
-                pm.maxY += deltaY;
-            }
             for (let pp of PLATAFORMAS_PODRES) pp.y += deltaY;
             for (let cip of CIPOS) cip.ancoraY += deltaY;
             for (let canhao of CANHOES) canhao.y += deltaY;
@@ -3394,18 +3040,13 @@
 
             player.w = newPlayerSize;
             player.h = newPlayerSize;
-            if (player.onGround || player.y + player.h > chaoY) {
-                player.y = chaoY - player.h;
-                player.onGround = true;
-            } else {
-                player.y += deltaY;
-            }
+            if (player.onGround || player.y + player.h > chaoY) { player.y = chaoY - player.h; player.onGround = true; }
+            else player.y += deltaY;
             player.spawnY = chaoY - player.h;
             checkpointY = player.spawnY;
 
             ajustarPosicaoBuraco();
             inicializarCenario();
-
             setTimeout(() => { isResizing = false; }, 50);
         }
 
@@ -3448,10 +3089,7 @@
                         const distX = Math.abs((player.x + player.w/2) - cip.pontaX);
                         const distY = Math.abs((player.y + player.h/2) - cip.pontaY);
                         const dist = Math.sqrt(distX*distX + distY*distY);
-                        if (distX < 250 && distY < 250 && dist < menorDist) {
-                            menorDist = dist;
-                            maisProximo = cip;
-                        }
+                        if (distX < 250 && distY < 250 && dist < menorDist) { menorDist = dist; maisProximo = cip; }
                     }
 
                     if (maisProximo) {
@@ -3459,8 +3097,7 @@
                         maisProximo.ocupado = true;
                         player.x = maisProximo.pontaX - player.w/2;
                         player.y = maisProximo.pontaY;
-                        player.vx = 0;
-                        player.vy = 0;
+                        player.vx = 0; player.vy = 0;
                     } else {
                         executarAtaque();
                         segurandoAtaque = true;
@@ -3477,15 +3114,8 @@
         document.addEventListener('keyup', (e) => {
             if (!jogoIniciado) return;
             const key = e.key.toLowerCase();
-            if (key === 'a' || key === 'd' || key === 'w') {
-                e.preventDefault(); keys[key] = false;
-                return;
-            }
-            if (key === ' ') {
-                segurandoAtaque = false;
-                tempoSegurando = 0;
-                inicioHold = 0;
-            }
+            if (key === 'a' || key === 'd' || key === 'w') { e.preventDefault(); keys[key] = false; return; }
+            if (key === ' ') { segurandoAtaque = false; tempoSegurando = 0; inicioHold = 0; }
         });
 
         function iniciarJogo() {
