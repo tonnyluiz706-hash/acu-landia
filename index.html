@@ -359,25 +359,39 @@
         function playCutscene() {
             if (cutsceneEncerrada) return;
             if (cutsceneIndex >= cutsceneVideos.length) { mostrarBoaSorte(); return; }
+
             cutsceneFade.style.opacity = '0';
             cutsceneText.style.opacity = '0';
             cutsceneVideo.style.opacity = '0';
+
             let caiuNoTexto = false;
+
             const fallbackTexto = () => {
                 if (caiuNoTexto || cutsceneEncerrada) return;
                 caiuNoTexto = true;
                 cutsceneVideo.style.opacity = '0';
                 cutsceneText.textContent = cutsceneTexts[cutsceneIndex];
                 cutsceneText.style.opacity = '1';
-                setTimeout(() => { if (!caiuNoTexto || cutsceneEncerrada) return; avancarCutscene(); }, 3500);
+                setTimeout(() => {
+                    if (!caiuNoTexto || cutsceneEncerrada) return;
+                    avancarCutscene();
+                }, 3500);
             };
+
             cutsceneVideo.onerror = fallbackTexto;
-            cutsceneVideo.oncanplay = () => { if (!caiuNoTexto || cutsceneEncerrada) return; cutsceneVideo.style.opacity = '1'; };
+
+            // ✅ CORRIGIDO: agora mostra o vídeo quando ele carrega
+            cutsceneVideo.oncanplay = () => {
+                if (caiuNoTexto || cutsceneEncerrada) return;
+                cutsceneVideo.style.opacity = '1';
+            };
+
             cutsceneVideo.src = cutsceneVideos[cutsceneIndex];
             cutsceneVideo.currentTime = 0;
             cutsceneVideo.muted = true;
             cutsceneVideo.load();
             cutsceneVideo.play().catch(() => { fallbackTexto(); });
+
             setTimeout(() => {
                 if (caiuNoTexto || cutsceneEncerrada) return;
                 cutsceneText.textContent = cutsceneTexts[cutsceneIndex];
@@ -471,8 +485,7 @@
         let jogadorAgravado = null;
         let cooldownCipo = 0;
 
-        // 🔥 Animações do player
-        let playerSquash = 0;        // - = esticado / + = achatado
+        let playerSquash = 0;
         let playerNoChaoAnterior = true;
 
         const bgImage = new Image(); bgImage.src = 'Bacground.jpg';
@@ -645,14 +658,11 @@
 
         let bolasDeFogo = [];
 
-        // ✅ PLATAFORMAS PODRES agora são PONTES úteis sobre buracos pequenos e degraus
         const PLATAFORMAS_PODRES = [
-            // Pontes temporárias sobre buracos pequenos (200px)
             { x: 1450, y: chaoY - 40, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
             { x: 6550, y: chaoY - 40, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
             { x: 7450, y: chaoY - 40, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
             { x: 8250, y: chaoY - 40, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 },
-            // Degrau útil pra alcançar plataformas em 70000/70500
             { x: 69750, y: chaoY - 60, w: 100, h: 20, tremendo: false, tempoPisada: 0, destruida: false, respawn: 0, alpha: 1 }
         ];
 
@@ -808,7 +818,7 @@
         }
 
         // ============================================
-        // BOSS — MORCEGO ANCESTRAL (REDESENHADO)
+        // BOSS
         // ============================================
         const boss = {
             ativo: false,
@@ -929,7 +939,6 @@
             { x: 83000, y: chaoY - MOB_RADIUS, radius: MOB_RADIUS, speed: 8.5, minX: 82600, maxX: 84000, direction: 1, color: '#aa3a2a', stroke: '#7a1a00', morto: false, hp: 2, knockbackX: 0, knockbackY: 0, emKnockback: false, tipo: 'terrestre', fase: 0 }
         ];
 
-        // ✅ Orc não fica mais preso nos canhões
         function mobPodeAvancar(mob) {
             const proxX = mob.x + (mob.speed + 15) * mob.direction;
             if (proxX < mob.minX || proxX > mob.maxX) return false;
@@ -964,8 +973,8 @@
         let nuvens = [];
         let particulasAmbiente = [];
         let particulas = [];
-        let folhas = [];         // 🍂 animação de folhas voando
-        let borboletas = [];     // 🦋 animação de borboletas
+        let folhas = [];
+        let borboletas = [];
 
         // ============================================
         // CENÁRIO
@@ -1009,7 +1018,6 @@
                 });
             }
 
-            // 🍂 Folhas voando
             folhas = [];
             for (let i = 0; i < 35; i++) {
                 folhas.push({
@@ -1025,7 +1033,6 @@
                 });
             }
 
-            // 🦋 Borboletas
             borboletas = [];
             for (let i = 0; i < 5; i++) {
                 borboletas.push({
@@ -1055,7 +1062,6 @@
                 if (p.y < -20) p.y = H * 0.85;
                 if (p.y > H * 0.9) p.y = -20;
             }
-            // 🍂 folhas
             for (let f of folhas) {
                 f.oscilacao += 0.03;
                 f.x += f.vx + Math.sin(f.oscilacao) * 0.6;
@@ -1064,7 +1070,6 @@
                 if (f.y > H + 20) { f.y = -20; f.x = Math.random() * W; }
                 if (f.x < -20) f.x = W + 20;
             }
-            // 🦋 borboletas
             for (let b of borboletas) {
                 b.fase += 0.02 * b.vel;
                 b.x = b.centroX + Math.cos(b.fase) * b.raioX;
@@ -1073,9 +1078,7 @@
                     b.centroX = cameraX + W + 200 + Math.random() * 200;
                     b.centroY = 100 + Math.random() * (H * 0.5);
                 }
-                if (b.centroX > cameraX + W + 400) {
-                    b.centroX = cameraX - 200;
-                }
+                if (b.centroX > cameraX + W + 400) b.centroX = cameraX - 200;
             }
         }
 
@@ -1330,7 +1333,6 @@
                     if (player.x + player.w > barreiraX && player.x < barreiraX) player.x = barreiraX - player.w;
                 }
 
-                // 🔥 Pulo com squash (estica)
                 if (keys.w && player.onGround) {
                     player.vy = player.jumpPower;
                     player.onGround = false;
@@ -1379,7 +1381,6 @@
                     }
                 }
 
-                // 🔥 Impacto ao aterrissar (squash + partículas)
                 if (player.onGround && !playerNoChaoAnterior) {
                     playerSquash = 0.35;
                     criarParticulas(player.x + player.w/2, player.y + player.h, 6, '#e8d5a0', 2, 12);
@@ -1393,7 +1394,6 @@
                 }
             }
 
-            // Decai squash
             playerSquash *= 0.82;
 
             for (let pp of PLATAFORMAS_PODRES) {
@@ -1520,7 +1520,6 @@
             updateConversa();
             atualizarNivel();
 
-            // NÍVEL 5
             if (passaroCarta.ativo && !carta.caiu) {
                 passaroCarta.fase += 0.35;
                 passaroCarta.x += passaroCarta.vx;
@@ -1588,25 +1587,17 @@
                 } else if (boss.fase === 'falando') {
                     // aguardando diálogo
                 } else if (boss.fase === 'lutando') {
-                    // 🎬 Flutuação vertical suave
                     boss.flutuacaoOffset = Math.sin(boss.timer * 0.035) * 30;
                     boss.y = chaoY - 180 + boss.flutuacaoOffset;
-
-                    // 🎬 Rotação leve (respiração)
                     boss.rotacaoCorpo = Math.sin(boss.timer * 0.02) * 0.05;
 
-                    // 🎬 Movimento horizontal lento seguindo player
                     const alvoX = player.x + player.w / 2;
                     const diffX = alvoX - boss.x;
-                    if (Math.abs(diffX) > 250) {
-                        boss.x += Math.sign(diffX) * 0.7;
-                    }
+                    if (Math.abs(diffX) > 250) boss.x += Math.sign(diffX) * 0.7;
 
-                    // 🎬 Sistema de tiro: 1 a cada 3-5s, com telegraph
                     if (boss.carregando > 0) {
                         boss.carregando--;
                         boss.bocaAberta = Math.min(1, boss.bocaAberta + 0.05);
-                        // Partículas de "carga" na boca
                         if (boss.carregando % 5 === 0) {
                             particulas.push({
                                 x: boss.x + (Math.random() - 0.5) * 40,
@@ -1630,14 +1621,12 @@
                             });
                             criarParticulas(boss.x, boss.y + 20, 25, '#ff6622', 6, 30);
                             boss.bocaAberta = 0;
-                            boss.cooldownTiro = 180 + Math.floor(Math.random() * 120); // 3-5 segundos
+                            boss.cooldownTiro = 180 + Math.floor(Math.random() * 120);
                         }
                     } else {
                         boss.bocaAberta = Math.max(0, boss.bocaAberta - 0.05);
                         boss.cooldownTiro--;
-                        if (boss.cooldownTiro <= 0) {
-                            boss.carregando = 45; // ~0.75s de telegraph
-                        }
+                        if (boss.cooldownTiro <= 0) boss.carregando = 45;
                     }
 
                     const hpRatio = boss.hp / boss.hpMax;
@@ -2019,13 +2008,11 @@
             ctx.restore();
         }
 
-        // 🔥 BOLA DE FOGO MELHORADA (parece fogo de verdade)
         function desenharBolaDeFogo(bola) {
             const bx = bola.x - cameraX;
             const by = bola.y;
             const pulso = 1 + Math.sin(tempoGlobal * 0.4 + bola.x * 0.1) * 0.08;
 
-            // Aura externa (vermelha)
             const gradExterno = ctx.createRadialGradient(bx, by, 0, bx, by, bola.raio * 3);
             gradExterno.addColorStop(0, 'rgba(255, 200, 80, 0.9)');
             gradExterno.addColorStop(0.35, 'rgba(255, 120, 0, 0.7)');
@@ -2034,7 +2021,6 @@
             ctx.fillStyle = gradExterno;
             ctx.beginPath(); ctx.arc(bx, by, bola.raio * 3, 0, Math.PI * 2); ctx.fill();
 
-            // Chamas ao redor (triângulos irregulares)
             const numChamas = 8;
             for (let i = 0; i < numChamas; i++) {
                 const ang = (Math.PI * 2 / numChamas) * i + tempoGlobal * 0.15;
@@ -2050,19 +2036,16 @@
                 ctx.closePath(); ctx.fill();
             }
 
-            // Corpo principal da bola (amarelo brilhante)
             ctx.fillStyle = '#ffcc33';
             ctx.shadowColor = '#ff6600'; ctx.shadowBlur = 30;
             ctx.beginPath(); ctx.arc(bx, by, bola.raio * 0.9 * pulso, 0, Math.PI * 2); ctx.fill();
             ctx.shadowBlur = 0;
 
-            // Núcleo branco quente
             ctx.fillStyle = '#fff8d0';
             ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 20;
             ctx.beginPath(); ctx.arc(bx, by, bola.raio * 0.45 * pulso, 0, Math.PI * 2); ctx.fill();
             ctx.shadowBlur = 0;
 
-            // Núcleo branco puro
             ctx.fillStyle = '#ffffff';
             ctx.beginPath(); ctx.arc(bx, by, bola.raio * 0.22, 0, Math.PI * 2); ctx.fill();
         }
@@ -2226,7 +2209,6 @@
             }
         }
 
-        // 🍂
         function desenharFolhas() {
             for (let f of folhas) {
                 ctx.save();
@@ -2240,7 +2222,6 @@
             ctx.globalAlpha = 1;
         }
 
-        // 🦋
         function desenharBorboletas() {
             for (let b of borboletas) {
                 const asaBat = Math.sin(tempoGlobal * 0.3 + b.fase) * 0.7 + 0.3;
@@ -2248,15 +2229,12 @@
                 ctx.translate(b.x, b.y);
                 ctx.fillStyle = b.cor;
                 ctx.globalAlpha = 0.85;
-                // asa esquerda
                 ctx.save(); ctx.rotate(-asaBat * 0.6);
                 ctx.beginPath(); ctx.ellipse(-b.tamanho * 0.6, 0, b.tamanho * 0.5, b.tamanho * 0.35, 0, 0, Math.PI * 2); ctx.fill();
                 ctx.restore();
-                // asa direita
                 ctx.save(); ctx.rotate(asaBat * 0.6);
                 ctx.beginPath(); ctx.ellipse(b.tamanho * 0.6, 0, b.tamanho * 0.5, b.tamanho * 0.35, 0, 0, Math.PI * 2); ctx.fill();
                 ctx.restore();
-                // corpo
                 ctx.fillStyle = '#3a2a1a';
                 ctx.beginPath(); ctx.ellipse(0, 0, b.tamanho * 0.15, b.tamanho * 0.5, 0, 0, Math.PI * 2); ctx.fill();
                 ctx.restore();
@@ -2264,9 +2242,6 @@
             ctx.globalAlpha = 1;
         }
 
-        // ============================================
-        // BOSS — DESENHO NOVO
-        // ============================================
         function desenharBoss(bx, by) {
             const r = boss.w / 2;
             const flap = Math.sin(boss.batidaAsa) * 0.7;
@@ -2280,7 +2255,6 @@
             ctx.scale(dir, 1);
             ctx.rotate(boss.rotacaoCorpo);
 
-            // Aura sombria
             const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 2);
             gr.addColorStop(0, `rgba(80, 0, 100, ${0.5 * pulsoAura})`);
             gr.addColorStop(0.6, `rgba(60, 0, 80, ${0.25 * pulsoAura})`);
@@ -2288,11 +2262,9 @@
             ctx.fillStyle = gr;
             ctx.beginPath(); ctx.arc(0, 0, r * 2, 0, Math.PI * 2); ctx.fill();
 
-            // ASAS (com membrana entre dedos)
             const desenharAsa = (lado) => {
                 ctx.save();
                 ctx.scale(lado, 1);
-                // Membrana
                 const gradAsa = ctx.createLinearGradient(0, -r * 0.5, r * 1.8, r * 0.3);
                 gradAsa.addColorStop(0, '#4a2050');
                 gradAsa.addColorStop(0.5, '#2a1030');
@@ -2302,21 +2274,15 @@
                 ctx.lineWidth = 3;
                 ctx.beginPath();
                 ctx.moveTo(r * 0.3, -10);
-                // osso do topo
                 ctx.quadraticCurveTo(r * 1.1, -r * (0.9 + flap * 0.6), r * 1.9, -r * (0.4 + flap * 0.5));
-                // ponta
                 ctx.lineTo(r * 1.8, -r * 0.15);
-                // dedo 1
                 ctx.quadraticCurveTo(r * 1.6, r * 0.1, r * 1.5, r * 0.05);
                 ctx.quadraticCurveTo(r * 1.3, r * 0.4, r * 1.1, r * 0.15);
-                // dedo 2
                 ctx.quadraticCurveTo(r * 0.95, r * 0.45, r * 0.75, r * 0.2);
-                // dedo 3
                 ctx.quadraticCurveTo(r * 0.6, r * 0.4, r * 0.4, r * 0.15);
                 ctx.lineTo(r * 0.3, 0);
                 ctx.closePath();
                 ctx.fill(); ctx.stroke();
-                // Ossos (detalhes)
                 ctx.strokeStyle = 'rgba(0,0,0,0.7)';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
@@ -2331,7 +2297,6 @@
                 ctx.moveTo(r * 0.3, -10);
                 ctx.quadraticCurveTo(r * 0.6, r * 0.15, r * 0.75, r * 0.15);
                 ctx.stroke();
-                // Garras na ponta
                 ctx.fillStyle = '#d8c8e0';
                 ctx.beginPath();
                 ctx.moveTo(r * 1.9, -r * (0.4 + flap * 0.5));
@@ -2343,7 +2308,6 @@
             desenharAsa(-1);
             desenharAsa(1);
 
-            // CORPO (torso peludo)
             const gradCorpo = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 0.6);
             gradCorpo.addColorStop(0, '#4a2050');
             gradCorpo.addColorStop(0.7, '#2a1030');
@@ -2355,7 +2319,6 @@
             ctx.ellipse(0, 0, r * 0.45, r * 0.6, 0, 0, Math.PI * 2);
             ctx.fill(); ctx.stroke();
 
-            // Pelinhos no corpo
             ctx.strokeStyle = 'rgba(0,0,0,0.4)';
             ctx.lineWidth = 1;
             for (let i = 0; i < 12; i++) {
@@ -2368,7 +2331,6 @@
                 ctx.stroke();
             }
 
-            // CABEÇA
             const cabecaY = -r * 0.55;
             const gradCabeca = ctx.createRadialGradient(0, cabecaY, 0, 0, cabecaY, r * 0.45);
             gradCabeca.addColorStop(0, '#5a2a60');
@@ -2379,21 +2341,17 @@
             ctx.arc(0, cabecaY, r * 0.4, 0, Math.PI * 2);
             ctx.fill(); ctx.stroke();
 
-            // ORELHAS grandes
             ctx.fillStyle = '#3a1a40';
-            // esquerda
             ctx.beginPath();
             ctx.moveTo(-r * 0.3, cabecaY - r * 0.3);
             ctx.lineTo(-r * 0.55, cabecaY - r * 0.95);
             ctx.lineTo(-r * 0.1, cabecaY - r * 0.4);
             ctx.closePath(); ctx.fill(); ctx.stroke();
-            // direita
             ctx.beginPath();
             ctx.moveTo(r * 0.3, cabecaY - r * 0.3);
             ctx.lineTo(r * 0.55, cabecaY - r * 0.95);
             ctx.lineTo(r * 0.1, cabecaY - r * 0.4);
             ctx.closePath(); ctx.fill(); ctx.stroke();
-            // Detalhe interno orelha
             ctx.strokeStyle = '#8a3a90';
             ctx.lineWidth = 1.5;
             ctx.beginPath();
@@ -2405,10 +2363,8 @@
             ctx.lineTo(r * 0.45, cabecaY - r * 0.8);
             ctx.stroke();
 
-            // OLHOS brilhantes (seguem o player)
             const olhoDirX = (player.x - boss.x) / 400;
             const olhoDirY = (player.y - boss.y) / 400;
-            // Glow ao redor
             ctx.fillStyle = `rgba(255, 30, 0, ${0.5 + Math.sin(tempoGlobal * 0.2) * 0.3})`;
             ctx.shadowColor = '#ff2200'; ctx.shadowBlur = 30;
             ctx.beginPath();
@@ -2416,34 +2372,28 @@
             ctx.arc(r * 0.16, cabecaY - r * 0.05, 12, 0, Math.PI * 2);
             ctx.fill();
             ctx.shadowBlur = 0;
-            // Globo ocular
             ctx.fillStyle = '#ff3300';
             ctx.beginPath();
             ctx.arc(-r * 0.16, cabecaY - r * 0.05, 8, 0, Math.PI * 2);
             ctx.arc(r * 0.16, cabecaY - r * 0.05, 8, 0, Math.PI * 2);
             ctx.fill();
-            // Pupila que segue o player
             ctx.fillStyle = '#000';
             ctx.beginPath();
             ctx.arc(-r * 0.16 + olhoDirX * 3, cabecaY - r * 0.05 + olhoDirY * 3, 4, 0, Math.PI * 2);
             ctx.arc(r * 0.16 + olhoDirX * 3, cabecaY - r * 0.05 + olhoDirY * 3, 4, 0, Math.PI * 2);
             ctx.fill();
-            // Reflexo
             ctx.fillStyle = '#fff';
             ctx.beginPath();
             ctx.arc(-r * 0.18, cabecaY - r * 0.08, 1.5, 0, Math.PI * 2);
             ctx.arc(r * 0.14, cabecaY - r * 0.08, 1.5, 0, Math.PI * 2);
             ctx.fill();
 
-            // BOCA (abre quando atira)
             const bocaY = cabecaY + r * 0.18;
             const alturaBoca = r * 0.15 * (0.3 + boca * 1.2);
-            // Fundo da boca
             ctx.fillStyle = '#0a0000';
             ctx.beginPath();
             ctx.ellipse(0, bocaY, r * 0.22, alturaBoca * 0.7, 0, 0, Math.PI * 2);
             ctx.fill();
-            // Glow vermelho dentro da boca (carga)
             if (cargaGlow > 0) {
                 const grBoca = ctx.createRadialGradient(0, bocaY, 0, 0, bocaY, r * 0.4);
                 grBoca.addColorStop(0, `rgba(255, 240, 100, ${cargaGlow})`);
@@ -2452,7 +2402,6 @@
                 ctx.fillStyle = grBoca;
                 ctx.beginPath(); ctx.arc(0, bocaY, r * 0.4, 0, Math.PI * 2); ctx.fill();
             }
-            // Presas superiores
             ctx.fillStyle = '#fff';
             ctx.beginPath();
             ctx.moveTo(-r * 0.16, bocaY - alturaBoca * 0.3);
@@ -2472,7 +2421,6 @@
             ctx.clearRect(0, 0, W, H);
             desenharCenarioFundo();
 
-            // Plataformas fixas
             for (let plat of platforms) {
                 const sx = plat.x - cameraX;
                 const sy = plat.y;
@@ -2496,7 +2444,6 @@
                 }
             }
 
-            // Plataformas podres
             for (let pp of PLATAFORMAS_PODRES) {
                 if (pp.destruida) continue;
                 const sx = pp.x - cameraX;
@@ -2551,7 +2498,6 @@
             for (let canhao of CANHOES) desenharCanhao(canhao);
             for (let bola of bolasDeFogo) desenharBolaDeFogo(bola);
 
-            // Moedas
             for (let m of moedasArray) {
                 if (m.coletada) continue;
                 const mx = m.x - cameraX;
@@ -2570,7 +2516,6 @@
                 ctx.beginPath(); ctx.arc(mx - 3, my - 3, m.raio * escala * 0.2, 0, Math.PI * 2); ctx.fill();
             }
 
-            // Checkpoints
             for (let cp of checkpoints) {
                 const cx = cp.x - cameraX;
                 if (cx < -50 || cx > W + 50) continue;
@@ -2648,7 +2593,6 @@
                 ctx.fillRect(mx - mob.radius, my - offsetBarra, mob.radius * 2 * (mob.hp / 2), 4);
             }
 
-            // 🎬 PLAYER com squash/stretch
             if (!gameOver) {
                 const px = player.x - cameraX;
                 const py = player.y;
@@ -2686,7 +2630,6 @@
             desenharParticulas();
             desenharParticulasAmbiente();
 
-            // Passarão + carta
             if (passaroCarta.ativo) {
                 const bx = passaroCarta.x - cameraX;
                 const by = passaroCarta.y;
@@ -2747,7 +2690,6 @@
                 ctx.restore();
             }
 
-            // BOSS
             if (boss.ativo) {
                 const bx = boss.x - cameraX;
                 const by = boss.y;
@@ -2811,7 +2753,6 @@
                     grad.addColorStop(1, 'rgba(120, 0, 0, 0)');
                     ctx.fillStyle = grad;
                     ctx.beginPath(); ctx.arc(bxx, byy, b.raio * 3, 0, Math.PI * 2); ctx.fill();
-                    // chamas
                     for (let i = 0; i < 6; i++) {
                         const ang = (Math.PI * 2 / 6) * i + tempoGlobal * 0.2;
                         const dx2 = Math.cos(ang) * b.raio * (1.0 + Math.sin(tempoGlobal * 0.3 + i) * 0.15);
@@ -2823,12 +2764,10 @@
                         ctx.lineTo(bxx + dx2 - b.raio * 0.3, byy + dy2);
                         ctx.closePath(); ctx.fill();
                     }
-                    // corpo
                     ctx.fillStyle = '#ffcc33';
                     ctx.shadowColor = '#ff6600'; ctx.shadowBlur = 25;
                     ctx.beginPath(); ctx.arc(bxx, byy, b.raio * 0.85 * pulso, 0, Math.PI * 2); ctx.fill();
                     ctx.shadowBlur = 0;
-                    // núcleo
                     ctx.fillStyle = '#fff8d0';
                     ctx.beginPath(); ctx.arc(bxx, byy, b.raio * 0.4, 0, Math.PI * 2); ctx.fill();
                     ctx.fillStyle = '#ffffff';
@@ -2860,11 +2799,9 @@
                 }
             }
 
-            // 🍂 folhas + 🦋 borboletas (foreground)
             desenharFolhas();
             desenharBorboletas();
 
-            // HUD
             if (!gameOver) {
                 ctx.fillStyle = 'rgba(255,255,255,0.8)';
                 ctx.font = '20px "Pixelify Sans", monospace';
