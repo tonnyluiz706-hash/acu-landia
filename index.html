@@ -104,6 +104,194 @@
             letter-spacing: 3px; opacity: 0.85; }
         .conquista-nome { font-size: 19px; font-weight: 700; color: #fff; }
         .conquista-desc { font-size: 12px; color: #d8d8d8; opacity: 0.9; }
+
+        /* ===== BOTÃO DE PAUSE ===== */
+        #pauseBtn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 900;
+            font-family: 'Pixelify Sans', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #fff;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #f1c40f;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none;
+            transition: all 0.15s;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+        }
+        #pauseBtn:hover { background: #f1c40f; color: #1a1a1a; transform: scale(1.05); text-shadow: none; }
+        #pauseBtn:active { transform: scale(0.97); }
+        #pauseBtn.visivel { display: block; }
+
+        /* ===== MENU DE PAUSE ===== */
+        #pauseMenu {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 2500;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+        #pauseMenu.aberto { display: flex; }
+
+        .pause-content {
+            max-width: 1000px;
+            width: 100%;
+            max-height: 92vh;
+            background: linear-gradient(135deg, #1a1410 0%, #2a2018 100%);
+            border: 3px solid #f1c40f;
+            border-radius: 16px;
+            padding: 28px;
+            overflow-y: auto;
+            box-shadow: 0 0 60px rgba(241, 196, 15, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+            color: #fff;
+            font-family: 'Pixelify Sans', monospace;
+        }
+        .pause-content::-webkit-scrollbar { width: 10px; }
+        .pause-content::-webkit-scrollbar-track { background: rgba(0,0,0,0.4); border-radius: 10px; }
+        .pause-content::-webkit-scrollbar-thumb { background: #f1c40f; border-radius: 10px; }
+
+        .pause-title {
+            font-size: 44px;
+            color: #f1c40f;
+            text-align: center;
+            margin-bottom: 6px;
+            letter-spacing: 6px;
+            text-shadow: 0 0 20px #f1c40f, 0 0 40px rgba(241, 196, 15, 0.5);
+            font-weight: 700;
+        }
+        .pause-sub {
+            text-align: center;
+            font-size: 16px;
+            color: #ccc;
+            margin-bottom: 22px;
+            letter-spacing: 2px;
+        }
+        .pause-sub span { color: #f1c40f; font-weight: 700; }
+
+        .pause-stats {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .pause-stat {
+            text-align: center;
+            padding: 12px 22px;
+            background: rgba(0,0,0,0.4);
+            border: 2px solid rgba(241, 196, 15, 0.4);
+            border-radius: 10px;
+            min-width: 100px;
+        }
+        .pause-stat-num {
+            font-size: 26px;
+            font-weight: 700;
+            color: #f1c40f;
+            text-shadow: 0 0 10px rgba(241, 196, 15, 0.6);
+        }
+        .pause-stat-label {
+            font-size: 11px;
+            color: #aaa;
+            letter-spacing: 2px;
+            margin-top: 4px;
+        }
+
+        .ach-section-title {
+            font-size: 20px;
+            color: #f1c40f;
+            letter-spacing: 3px;
+            margin: 20px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid rgba(241, 196, 15, 0.3);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .ach-section-title.locked { color: #888; border-color: rgba(120,120,120,0.3); }
+
+        .ach-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .ach-item {
+            display: flex;
+            gap: 12px;
+            padding: 10px 14px;
+            background: rgba(0,0,0,0.4);
+            border: 2px solid #555;
+            border-radius: 10px;
+            align-items: center;
+            transition: transform 0.15s;
+        }
+        .ach-item:hover { transform: translateY(-2px); }
+        .ach-item.desbloqueada {
+            border-color: #f1c40f;
+            background: linear-gradient(135deg, #2a1f0a 0%, #4a3510 100%);
+            box-shadow: 0 0 15px rgba(241, 196, 15, 0.25);
+        }
+        .ach-icon {
+            font-size: 30px;
+            filter: grayscale(1) brightness(0.45);
+            flex-shrink: 0;
+        }
+        .ach-item.desbloqueada .ach-icon {
+            filter: drop-shadow(0 0 8px #f1c40f);
+        }
+        .ach-info { flex: 1; min-width: 0; }
+        .ach-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #777;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .ach-item.desbloqueada .ach-name { color: #fff; }
+        .ach-desc {
+            font-size: 12px;
+            color: #555;
+            line-height: 1.3;
+        }
+        .ach-item.desbloqueada .ach-desc { color: #d8d8d8; }
+
+        .pause-btn-row {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(241, 196, 15, 0.3);
+            flex-wrap: wrap;
+        }
+        .pause-action {
+            font-family: 'Pixelify Sans', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #1a1a1a;
+            padding: 14px 36px;
+            background: linear-gradient(180deg, #ffe066 0%, #f1c40f 50%, #c9a20a 100%);
+            border: 3px solid #8a6a00;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(241, 196, 15, 0.5), 0 5px 0 #6a4a00, inset 0 2px 0 rgba(255,255,255,0.4);
+            transition: all 0.1s;
+        }
+        .pause-action:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        .pause-action:active { transform: translateY(3px); box-shadow: 0 0 20px rgba(241, 196, 15, 0.5), 0 2px 0 #6a4a00, inset 0 2px 0 rgba(255,255,255,0.4); }
     </style>
 </head>
 <body>
@@ -119,38 +307,113 @@
 
     <canvas id="gameCanvas"></canvas>
 
+    <button id="pauseBtn">⏸ PAUSE (P)</button>
+
+    <div id="pauseMenu">
+        <div class="pause-content">
+            <div class="pause-title">⏸ PAUSADO</div>
+            <div class="pause-sub">Conquistas: <span id="pauseAchCount">0 / 31</span></div>
+            
+            <div class="pause-stats">
+                <div class="pause-stat">
+                    <div class="pause-stat-num" id="pauseMoedas">0</div>
+                    <div class="pause-stat-label">MOEDAS</div>
+                </div>
+                <div class="pause-stat">
+                    <div class="pause-stat-num" id="pauseVidas">5</div>
+                    <div class="pause-stat-label">VIDAS</div>
+                </div>
+                <div class="pause-stat">
+                    <div class="pause-stat-num" id="pauseNivel">1</div>
+                    <div class="pause-stat-label">NÍVEL</div>
+                </div>
+            </div>
+
+            <div id="achDesbloqueadas"></div>
+            <div id="achBloqueadas"></div>
+
+            <div class="pause-btn-row">
+                <button class="pause-action" id="resumeBtn">▶ CONTINUAR</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ============================================
-        // CONQUISTAS
+        // CONQUISTAS (31 no total)
         // ============================================
         const CONQUISTAS = {
-            armado:        { nome: "Armado e Perigoso",    desc: "Conseguiu a espada mágica",               desbloqueada: false },
-            aprendiz:      { nome: "Aprendiz do Sábio",    desc: "Ouviu os conselhos do velho sábio",       desbloqueada: false },
-            primeiroSangue:{ nome: "Primeiro Sangue",      desc: "Derrotou seu primeiro inimigo",           desbloqueada: false },
-            exterminador:  { nome: "Exterminador",         desc: "Derrotou TODOS os inimigos do jogo",      desbloqueada: false },
-            tarzan:        { nome: "Tarzan",               desc: "Se balançou no cipó 10 vezes",            desbloqueada: false },
-            rico:          { nome: "Rico!",                desc: "Coletou 100 moedas em uma jornada",       desbloqueada: false },
-            perigo:        { nome: "Bem-vindo ao Perigo",  desc: "Chegou ao temido Nível 4",                desbloqueada: false },
-            cacador:       { nome: "Caçador de Tesouros",  desc: "Coletou TODAS as moedas do jogo",         desbloqueada: false },
-            lenda:         { nome: "Lenda de Acuílândia",  desc: "Zerou o jogo pela primeira vez",          desbloqueada: false },
-            sobrevivente:  { nome: "Sobrevivente",         desc: "Zerou o jogo sem perder nenhuma vida",    desbloqueada: false }
+            // === ORIGINAIS (10) ===
+            armado:         { nome: "Armado e Perigoso",     desc: "Conseguiu a espada mágica",               icone: "⚔️", desbloqueada: false },
+            aprendiz:       { nome: "Aprendiz do Sábio",     desc: "Ouviu os conselhos do velho sábio",       icone: "🧙", desbloqueada: false },
+            primeiroSangue: { nome: "Primeiro Sangue",       desc: "Derrotou seu primeiro inimigo",           icone: "🩸", desbloqueada: false },
+            exterminador:   { nome: "Exterminador",          desc: "Derrotou TODOS os inimigos do jogo",      icone: "💀", desbloqueada: false },
+            tarzan:         { nome: "Tarzan",                desc: "Se balançou no cipó 10 vezes",            icone: "🌿", desbloqueada: false },
+            rico:           { nome: "Rico!",                 desc: "Coletou 100 moedas em uma jornada",       icone: "🪙", desbloqueada: false },
+            perigo:         { nome: "Bem-vindo ao Perigo",   desc: "Chegou ao temido Nível 4",                icone: "☠️", desbloqueada: false },
+            cacador:        { nome: "Caçador de Tesouros",   desc: "Coletou TODAS as moedas do jogo",         icone: "🏹", desbloqueada: false },
+            lenda:          { nome: "Lenda de Acuílândia",   desc: "Zerou o jogo pela primeira vez",          icone: "👑", desbloqueada: false },
+            sobrevivente:   { nome: "Sobrevivente",          desc: "Zerou o jogo sem perder nenhuma vida",    icone: "🛡️", desbloqueada: false },
+
+            // === NOVAS (21) ===
+            saltador:       { nome: "Saltador",              desc: "Pulou 100 vezes",                          icone: "🦘", desbloqueada: false },
+            maratonista:    { nome: "Maratonista",           desc: "Percorreu 50.000 pixels no mundo",         icone: "🏃", desbloqueada: false },
+            morceguicida:   { nome: "Caça-Morcegos",         desc: "Derrotou 15 morcegos voadores",            icone: "🦇", desbloqueada: false },
+            invulneravel:   { nome: "Invulnerável",          desc: "Sobreviveu 90 segundos sem levar dano",    icone: "✨", desbloqueada: false },
+            colecionador:   { nome: "Colecionador",          desc: "Coletou 500 moedas na vida",               icone: "💰", desbloqueada: false },
+            magnata:        { nome: "Magnata",               desc: "Coletou 1500 moedas na vida",              icone: "💎", desbloqueada: false },
+            esquivaPerfeita:{ nome: "Esquiva Perfeita",      desc: "Passou por 30 bolas de fogo dos canhões",  icone: "🔥", desbloqueada: false },
+            cipoMestre:     { nome: "Mestre do Cipó",        desc: "Usou o cipó 50 vezes",                     icone: "🐒", desbloqueada: false },
+            espadaMestre:   { nome: "Mestre da Espada",      desc: "Lançou a espada 20 vezes",                 icone: "🗡️", desbloqueada: false },
+            carteiro:       { nome: "Leitor de Cartas",      desc: "Leu a carta misteriosa do velho amigo",    icone: "📜", desbloqueada: false },
+            explorador:     { nome: "Explorador",            desc: "Ativou todos os checkpoints",              icone: "🚩", desbloqueada: false },
+            bossSlayer:     { nome: "Matador de Deuses",     desc: "Derrotou o Morcego Ancestral",             icone: "🐲", desbloqueada: false },
+            voando:         { nome: "Quase Voando",          desc: "Ficou 3 segundos no ar de uma vez",        icone: "🕊️", desbloqueada: false },
+            semDano:        { nome: "Intocável",             desc: "Passou por perto de 5 espinhos sem morrer",icone: "🌵", desbloqueada: false },
+            ninja:          { nome: "Ninja Silencioso",      desc: "Ficou 60 segundos sem atacar",             icone: "🥷", desbloqueada: false },
+            velocista:      { nome: "Velocista",             desc: "Chegou ao nível 5 em menos de 3 minutos",  icone: "⚡", desbloqueada: false },
+            curioso:        { nome: "Curioso",               desc: "Conversou com o sábio até o fim 3 vezes",  icone: "❓", desbloqueada: false },
+            resistente:     { nome: "Resistente",            desc: "Perdeu 30 vidas no total",                 icone: "💪", desbloqueada: false },
+            perfeito:       { nome: "Perfeição",             desc: "Terminou o jogo com 9 vidas cheias",       icone: "⭐", desbloqueada: false },
+            mestre:         { nome: "Grão-Mestre",           desc: "Desbloqueou 25 conquistas",                icone: "🏆", desbloqueada: false },
+            lendaViva:      { nome: "Lenda Viva",            desc: "Desbloqueou TODAS as conquistas",          icone: "🌟", desbloqueada: false }
         };
 
         let vidasPerdidasTotal = 0;
         let moedasColetadasTotal = 0;
         let cipoUsos = 0;
 
+        // ============ NOVAS VARIÁVEIS DE TRACKING ============
+        let pulosTotal = 0;
+        let distanciaTotal = 0;
+        let ultimoXTracking = 100;
+        let morcegosMortos = 0;
+        let moedasTotaisVida = 0;
+        let bolasEsquivadas = 0;
+        let espadaLancamentos = 0;
+        let tempoSemDano = 0;
+        let tempoSemAtacar = 0;
+        let espinhosPassados = 0;
+        let tempoNoAr = 0;
+        let tempoInicioJogo = 0;
+        let sabioConversasTotal = 0;
+        let jogoPausado = false;
+
         function contarConquistas() { let n = 0; for (let k in CONQUISTAS) if (CONQUISTAS[k].desbloqueada) n++; return n; }
+        function totalConquistas() { return Object.keys(CONQUISTAS).length; }
+
         function desbloquearConquista(id) {
             const c = CONQUISTAS[id];
             if (!c || c.desbloqueada) return;
             c.desbloqueada = true;
-            mostrarToastConquista(c.nome, c.desc);
+            mostrarToastConquista(c.nome, c.desc, c.icone);
+            if (contarConquistas() >= 25) desbloquearConquista('mestre');
+            if (contarConquistas() >= totalConquistas()) desbloquearConquista('lendaViva');
         }
-        function mostrarToastConquista(nome, desc) {
+        function mostrarToastConquista(nome, desc, icone) {
             const toast = document.createElement('div');
             toast.className = 'conquista-toast';
-            toast.innerHTML = `<div class="conquista-icone">🏆</div>
+            toast.innerHTML = `<div class="conquista-icone">${icone || '🏆'}</div>
                 <div class="conquista-texto">
                     <div class="conquista-titulo">Conquista Desbloqueada!</div>
                     <div class="conquista-nome">${nome}</div>
@@ -505,7 +768,7 @@
         const CIPOS = gerarCipos();
 
         // ============================================
-        // DIÁLOGO (espera ENTER)
+        // DIÁLOGO
         // ============================================
         const dialogo = {
             ativo: false, falas: [], index: 0, timer: 0,
@@ -563,6 +826,7 @@
                 vx: dir * 20, frames: 0, voltando: false, angulo: 0
             };
             criarParticulas(player.x + player.w / 2, player.y + player.h / 2, 20, '#88ddff', 6, 25);
+            espadaLancamentos++;
         }
         function updateEspadaLancada() {
             if (!espadaLancada) return;
@@ -579,6 +843,7 @@
                         criarParticulas(mob.x, mob.y, 30, mob.color, 6, 40);
                         criarParticulas(mob.x, mob.y, 15, '#ffffff', 3, 20);
                         desbloquearConquista('primeiroSangue');
+                        if (mob.tipo === 'voador') morcegosMortos++;
                         espadaLancada.voltando = true;
                         break;
                     }
@@ -591,6 +856,7 @@
                             criarMorteAnim(m);
                             m.morto = true;
                             criarParticulas(m.x, m.y, 20, m.color, 5, 30);
+                            morcegosMortos++;
                             espadaLancada.voltando = true;
                             break;
                         }
@@ -924,6 +1190,7 @@
             atacando = false; ataqueTimer = 0;
             segurandoAtaque = false; tempoSegurando = 0; inicioHold = 0;
             playerSquash = 0;
+            tempoSemDano = 0;
         }
         function checkCollisions() {
             for (let mob of mobs) {
@@ -997,7 +1264,9 @@
                 sabio.conversaTerminada = true; sabio.conversaAtiva = false;
                 temEspada = true; barreiraAtiva = false;
                 sabio.desaparecendo = true;
+                sabioConversasTotal++;
                 desbloquearConquista('armado');
+                if (sabioConversasTotal >= 3) desbloquearConquista('curioso');
                 return;
             }
             sabio.timer = 0; sabio.esperandoProxima = false;
@@ -1016,6 +1285,7 @@
         function executarAtaque() {
             if (!temEspada || espadaLancada) return;
             atacando = true; ataqueTimer = 0;
+            tempoSemAtacar = 0;
             criarParticulas(player.x + player.w/2, player.y + player.h/2, 15, '#ffffff', 5, 10);
             for (let mob of mobs) {
                 if (mob.morto) continue;
@@ -1028,6 +1298,7 @@
                         mob.morto = true;
                         criarParticulas(mob.x, mob.y, 30, mob.color, 6, 40);
                         criarParticulas(mob.x, mob.y, 15, '#ffffff', 3, 20);
+                        if (mob.tipo === 'voador') morcegosMortos++;
                         desbloquearConquista('primeiroSangue');
                         let todosMortos = true;
                         for (let mm of mobs) if (!mm.morto) { todosMortos = false; break; }
@@ -1050,6 +1321,7 @@
                         criarMorteAnim(m);
                         m.morto = true;
                         criarParticulas(m.x, m.y, 20, m.color, 5, 30);
+                        morcegosMortos++;
                     }
                 }
             }
@@ -1087,6 +1359,7 @@
             for (let pp of PLATAFORMAS_PODRES) { pp.destruida = false; pp.tremendo = false; pp.tempoPisada = 0; pp.respawn = 0; pp.alpha = 1; }
             for (let cip of CIPOS) cip.ocupado = false;
             for (let canhao of CANHOES) { canhao.cooldown = canhao.cooldownMax; canhao.recoil = 0; canhao.fireGlow = 0; }
+            for (let esp of ESPINHOS) esp._contado = false;
             player.x = player.spawnX; player.y = player.spawnY;
             player.vx = 0; player.vy = 0; player.onGround = false;
             playerSquash = 0;
@@ -1112,6 +1385,13 @@
             dialogo.ativo = false; dialogo.index = 0; dialogo.timer = 0;
             cameraX = player.x - W / 2;
             cameraX = Math.max(0, Math.min(cameraX, WORLD_WIDTH - W));
+            tempoSemDano = 0;
+            tempoSemAtacar = 0;
+            tempoNoAr = 0;
+            tempoInicioJogo = performance.now();
+            ultimoXTracking = player.x;
+            jogoPausado = false;
+            pauseMenu.classList.remove('aberto');
         }
 
         function atualizarNivel() {
@@ -1121,6 +1401,8 @@
             if (nivelAtual === 4 && player.x > 85000) {
                 nivelAtual = 5;
                 mostrarTituloNivel5 = true; contadorTituloNivel5 = 0;
+                const tempoDecorrido = (performance.now() - tempoInicioJogo) / 1000;
+                if (tempoDecorrido < 180) desbloquearConquista('velocista');
                 if (!passaroCarta.ativo && !carta.coletada) {
                     passaroCarta.ativo = true;
                     passaroCarta.x = player.x + 1000;
@@ -1133,7 +1415,7 @@
         function update() {
             tempoGlobal++;
             atualizarCenario();
-            if (nivelConcluido || isResizing || gameOver) return;
+            if (nivelConcluido || isResizing || gameOver || jogoPausado) return;
             if (cooldownCipo > 0) cooldownCipo--;
 
             if (jogadorAgravado) {
@@ -1153,6 +1435,7 @@
                 if (keys.w && player.onGround) {
                     player.vy = player.jumpPower; player.onGround = false;
                     playerSquash = -0.3;
+                    pulosTotal++;
                     criarParticulas(player.x + player.w/2, player.y + player.h, 8, '#ffffff', 3, 15);
                 }
                 player.vy += player.gravity;
@@ -1267,7 +1550,10 @@
                         tamanho: 4 + Math.random() * 3
                     });
                 }
-                if (bola.x < cameraX - 200 || bola.x > cameraX + W + 200 || bola.vida <= 0) bolasDeFogo.splice(i, 1);
+                if (bola.x < cameraX - 200 || bola.x > cameraX + W + 200 || bola.vida <= 0) {
+                    bolasDeFogo.splice(i, 1);
+                    bolasEsquivadas++;
+                }
             }
 
             for (let mob of mobs) {
@@ -1338,7 +1624,7 @@
                 const dy = (player.y + player.h/2) - m.y;
                 if (Math.sqrt(dx*dx + dy*dy) < m.raio + 20) {
                     m.coletada = true;
-                    moedas++; moedasColetadasTotal++;
+                    moedas++; moedasColetadasTotal++; moedasTotaisVida++;
                     criarParticulas(m.x, m.y, 12, '#ffd700', 3, 20);
                     if (moedas >= 100) {
                         moedas -= 100;
@@ -1384,7 +1670,8 @@
                 if (Math.sqrt(dx * dx + dy * dy) < 60) {
                     carta.coletada = true;
                     criarParticulas(carta.x, carta.y, 25, '#fff8c4', 5, 40);
-                    iniciarDialogo(CARTA_TEXTO, () => { podeLancarEspada = true; desbloquearConquista('armado'); }, '📜 Carta Misteriosa');
+                    desbloquearConquista('carteiro');
+                    iniciarDialogo(CARTA_TEXTO, () => { podeLancarEspada = true; }, '📜 Carta Misteriosa');
                 }
             }
 
@@ -1488,7 +1775,9 @@
                 if (boss.fase === 'morrendo' && boss.timer > 120) {
                     boss.fase = 'morto'; boss.morto = true;
                     desbloquearConquista('lenda');
+                    desbloquearConquista('bossSlayer');
                     if (vidasPerdidasTotal === 0) desbloquearConquista('sobrevivente');
+                    if (vidas === MAX_VIDAS) desbloquearConquista('perfeito');
                 }
 
                 for (let i = boss.bolasFogo.length - 1; i >= 0; i--) {
@@ -1528,6 +1817,7 @@
                             criarMorteAnim(m);
                             m.morto = true;
                             criarParticulas(m.x, m.y, 20, m.color, 5, 30);
+                            morcegosMortos++;
                             espadaLancada.voltando = true;
                         }
                     }
@@ -1560,6 +1850,54 @@
             if (mostrarTituloNivel3) { contadorTituloNivel3++; if (contadorTituloNivel3 > 120) mostrarTituloNivel3 = false; }
             if (mostrarTituloNivel4) { contadorTituloNivel4++; if (contadorTituloNivel4 > 120) mostrarTituloNivel4 = false; }
             if (mostrarTituloNivel5) { contadorTituloNivel5++; if (contadorTituloNivel5 > 120) mostrarTituloNivel5 = false; }
+
+            // ============================================
+            // TRACKING DE CONQUISTAS
+            // ============================================
+            const dxTrack = Math.abs(player.x - ultimoXTracking);
+            if (dxTrack < 200) distanciaTotal += dxTrack;
+            ultimoXTracking = player.x;
+            if (distanciaTotal >= 50000) desbloquearConquista('maratonista');
+
+            tempoSemDano++;
+            if (tempoSemDano >= 90 * 60) desbloquearConquista('invulneravel');
+
+            if (temEspada) {
+                tempoSemAtacar++;
+                if (tempoSemAtacar >= 60 * 60) desbloquearConquista('ninja');
+            }
+
+            if (!player.onGround && !jogadorAgravado) {
+                tempoNoAr++;
+                if (tempoNoAr >= 3 * 60) desbloquearConquista('voando');
+            } else {
+                tempoNoAr = 0;
+            }
+
+            if (moedasTotaisVida >= 500) desbloquearConquista('colecionador');
+            if (moedasTotaisVida >= 1500) desbloquearConquista('magnata');
+            if (bolasEsquivadas >= 30) desbloquearConquista('esquivaPerfeita');
+            if (morcegosMortos >= 15) desbloquearConquista('morceguicida');
+            if (espadaLancamentos >= 20) desbloquearConquista('espadaMestre');
+            if (cipoUsos >= 50) desbloquearConquista('cipoMestre');
+            if (pulosTotal >= 100) desbloquearConquista('saltador');
+            if (vidasPerdidasTotal >= 30) desbloquearConquista('resistente');
+
+            // Espinhos passados por perto (sem morrer)
+            for (let esp of ESPINHOS) {
+                if (esp._contado) continue;
+                const dist = Math.abs((player.x + player.w/2) - (esp.x + esp.w/2));
+                if (dist < 40 && player.y + player.h >= chaoY - 10 && player.onGround) {
+                    esp._contado = true;
+                    espinhosPassados++;
+                    if (espinhosPassados >= 5) desbloquearConquista('semDano');
+                }
+            }
+
+            // Checkpoints todos
+            let todosCps = true;
+            for (let cp of checkpoints) if (!cp.ativado) { todosCps = false; break; }
+            if (todosCps) desbloquearConquista('explorador');
         }
 
         // ============================================
@@ -2775,7 +3113,6 @@
                 }
             }
 
-            // ✅ PLATAFORMAS PODRES — usando Plataforma2.png
             for (let pp of PLATAFORMAS_PODRES) {
                 if (pp.destruida) continue;
                 const sx = pp.x - cameraX;
@@ -3092,7 +3429,7 @@
                 ctx.fillText('❤️ ' + vidas, 20, 40);
                 ctx.fillText('Nível ' + nivelAtual, 20, 70);
                 ctx.fillText('🪙 ' + moedas + ' / 100', 20, 100);
-                ctx.fillText('🏆 ' + contarConquistas() + ' / 10', 20, 130);
+                ctx.fillText('🏆 ' + contarConquistas() + ' / ' + totalConquistas(), 20, 130);
                 if (jogadorAgravado) {
                     ctx.fillStyle = 'rgba(255, 255, 100, 0.9)';
                     ctx.fillText('🌿 Agarrado! (ESPAÇO para soltar)', 20, 160);
@@ -3257,9 +3594,79 @@
         }
         window.addEventListener('resize', resize);
 
+        // ============================================
+        // PAUSE
+        // ============================================
+        const pauseBtn = document.getElementById('pauseBtn');
+        const pauseMenu = document.getElementById('pauseMenu');
+        const resumeBtn = document.getElementById('resumeBtn');
+        const pauseAchCount = document.getElementById('pauseAchCount');
+        const pauseMoedas = document.getElementById('pauseMoedas');
+        const pauseVidas = document.getElementById('pauseVidas');
+        const pauseNivel = document.getElementById('pauseNivel');
+        const achDesbloqueadasDiv = document.getElementById('achDesbloqueadas');
+        const achBloqueadasDiv = document.getElementById('achBloqueadas');
+
+        function pausarJogo() {
+            if (jogoPausado || !jogoIniciado || gameOver) return;
+            jogoPausado = true;
+            keys.a = keys.d = keys.w = keys.space = false;
+            segurandoAtaque = false;
+            tempoSegurando = 0;
+            inicioHold = 0;
+            atualizarMenuPause();
+            pauseMenu.classList.add('aberto');
+        }
+
+        function despausarJogo() {
+            if (!jogoPausado) return;
+            jogoPausado = false;
+            pauseMenu.classList.remove('aberto');
+        }
+
+        function atualizarMenuPause() {
+            pauseAchCount.textContent = `${contarConquistas()} / ${totalConquistas()}`;
+            pauseMoedas.textContent = moedas;
+            pauseVidas.textContent = vidas;
+            pauseNivel.textContent = nivelAtual;
+
+            const desbloqueadas = [];
+            const bloqueadas = [];
+            for (let k in CONQUISTAS) {
+                const c = CONQUISTAS[k];
+                const item = `
+                    <div class="ach-item ${c.desbloqueada ? 'desbloqueada' : ''}">
+                        <div class="ach-icon">${c.icone || '🏆'}</div>
+                        <div class="ach-info">
+                            <div class="ach-name">${c.desbloqueada ? c.nome : '???'}</div>
+                            <div class="ach-desc">${c.desbloqueada ? c.desc : 'Conquista bloqueada'}</div>
+                        </div>
+                    </div>`;
+                if (c.desbloqueada) desbloqueadas.push(item);
+                else bloqueadas.push(item);
+            }
+
+            achDesbloqueadasDiv.innerHTML = `<div class="ach-section-title">✅ Desbloqueadas (${desbloqueadas.length})</div>
+                <div class="ach-list">${desbloqueadas.join('') || '<div style="color:#666;padding:10px">Nenhuma ainda...</div>'}</div>`;
+
+            achBloqueadasDiv.innerHTML = `<div class="ach-section-title locked">🔒 Bloqueadas (${bloqueadas.length})</div>
+                <div class="ach-list">${bloqueadas.join('')}</div>`;
+        }
+
+        pauseBtn.addEventListener('click', (e) => { e.stopPropagation(); pausarJogo(); });
+        resumeBtn.addEventListener('click', (e) => { e.stopPropagation(); despausarJogo(); });
+
         document.addEventListener('keydown', (e) => {
             if (!jogoIniciado) return;
             const key = e.key.toLowerCase();
+
+            // === PAUSE ===
+            if (key === 'p' || key === 'escape') {
+                e.preventDefault();
+                if (jogoPausado) despausarJogo(); else pausarJogo();
+                return;
+            }
+            if (jogoPausado) return;
 
             if (dialogo.ativo) {
                 if (e.key === 'Enter') {
@@ -3327,9 +3734,12 @@
         function iniciarJogo() {
             if (jogoIniciado) return;
             jogoIniciado = true;
+            tempoInicioJogo = performance.now();
+            ultimoXTracking = player.x;
             gerarMoedas();
             resize();
             checkpointY = player.spawnY;
+            pauseBtn.classList.add('visivel');
             gameLoop();
         }
     </script>
