@@ -227,7 +227,6 @@ const BINDS_PADRAO = { esquerda:'a', direita:'d', pular:'w', atacar:' ', pause:'
 const BINDS = { ...BINDS_PADRAO };
 let bindAguardando = null;
 
-// Cores com versão clara pra gradiente
 const CORES_PERSONAGEM = [
     { id:'vermelho', nome:'Vermelho', cor:'#e74c3c', corStroke:'#a02a1f', corClara:'#ff7a6a' },
     { id:'azul',     nome:'Azul',     cor:'#3498db', corStroke:'#1f6390', corClara:'#7ac8ff' },
@@ -376,7 +375,8 @@ const imgPlataformaPodre = new Image(); imgPlataformaPodre.src = 'Plataforma2.pn
 
 const CHAO_ALTURA = Math.floor(H * 0.15);
 let chaoY = H - CHAO_ALTURA;
-const PLAYER_SIZE = Math.min(W, H) * 0.045;
+// >>> PERSONAGEM MAIOR <<<
+const PLAYER_SIZE = Math.min(W, H) * 0.058;
 const MOB_RADIUS = Math.min(W, H) * 0.025;
 
 const BURACOS = [
@@ -850,7 +850,6 @@ function checkEspinhos() {
         if (player.x + player.w > e.x && player.x < e.x + e.w && player.y + player.h > e.y && player.y < e.y + e.h) { resetPlayer(); return; }
     }
 }
-// Bolas de fogo — agora somem ao acertar
 function checkBolasDeFogo() {
     for (let i = bolasDeFogo.length - 1; i >= 0; i--) {
         const b = bolasDeFogo[i];
@@ -987,6 +986,8 @@ function restartGame() {
         mobs[i].fase = Math.random()*Math.PI*2;
         mobs[i].walkPhase = Math.random()*Math.PI*2;
         mobs[i].hitFlash = 0; mobs[i].aggro = 0; mobs[i].dustTimer = 0;
+        // >>> NOVOS CAMPOS DE VISÃO <<<
+        mobs[i].timerPerdeuVisao = 0; mobs[i].mostrarInterrogacao = 0; mobs[i].vendoPlayer = false;
         if (mobs[i].tipo === 'terrestre') mobs[i].y = chaoY - mobs[i].radius;
     }
     espadaLancada = null; segurandoAtaque = false; tempoSegurando = 0; inicioHold = 0;
@@ -1069,25 +1070,17 @@ function update() {
                 }
             }
         }
-        // ============================================
-        // CANHÃO — COLISÃO DESBUGADA
-        // ============================================
         for (let canhao of CANHOES) {
             const topoY = canhao.y - 55;
             const left = canhao.x - 25, right = canhao.x + 25;
             const dentroX = player.x + player.w > left && player.x < right;
             if (!dentroX) continue;
-            
             const feet = player.y + player.h;
-            
-            // Cair em cima do canhão
             if (player.vy >= 0 && feet >= topoY && feet <= topoY + 25 + Math.max(0, player.vy)) {
                 player.y = topoY - player.h;
                 player.vy = 0;
                 player.onGround = true;
             }
-            // Empurrar para fora APENAS se estiver realmente dentro do corpo
-            // (pés bem abaixo do topo e ainda acima do chão)
             else if (feet > topoY + 30 && player.y < chaoY - 10) {
                 const centro = player.x + player.w / 2;
                 if (centro < canhao.x) player.x = left - player.w - 1;
@@ -1105,7 +1098,6 @@ function update() {
     }
     playerSquash *= .82;
     
-    // Animar pernas quando andando
     if (Math.abs(player.vx) > 0.5 && player.onGround) playerWalkPhase += 0.25;
     else playerWalkPhase *= 0.85;
 
@@ -1123,7 +1115,6 @@ function update() {
         cip.pontaY = cip.ancoraY + Math.cos(cip.angulo)*cip.comprimento;
     }
 
-    // Canhões — atirar
     for (let canhao of CANHOES) {
         canhao.cooldown--;
         if (canhao.recoil > 0) canhao.recoil--;
@@ -1142,7 +1133,7 @@ function update() {
     }
 
     // ============================================
-    // MOBS — COM PERSEGUIÇÃO
+    // MOBS — VISÃO EM CONE + "?" AO PERDER DE VISTA
     // ============================================
     for (let mob of mobs) {
         if (mob.morto) continue;
@@ -1151,6 +1142,9 @@ function update() {
         if (mob.aggro === undefined) mob.aggro = 0;
         if (mob.dustTimer === undefined) mob.dustTimer = 0;
         if (mob.chasing === undefined) mob.chasing = false;
+        if (mob.timerPerdeuVisao === undefined) mob.timerPerdeuVisao = 0;
+        if (mob.mostrarInterrogacao === undefined) mob.mostrarInterrogacao = 0;
+        if (mob.vendoPlayer === undefined) mob.vendoPlayer = false;
 
         if (mob.hitFlash > 0) mob.hitFlash--;
 
@@ -1158,19 +1152,39 @@ function update() {
         const distX = playerCX - mob.x;
         const distY = playerCY - mob.y;
         const distPlayer = Math.sqrt(distX*distX + distY*distY);
-        const distPlayerX = Math.abs(distX);
 
-        // ============ AGGRO ============
-        // Vê o player se estiver perto (usa distância 2D real)
-        const podeVer = distPlayer < 380;
-        const aggroTarget = podeVer ? 1 : 0;
-        mob.aggro += (aggroTarget - mob.aggro) * 0.07;
+        // ============ VISÃO EM CONE (só vê de frente) ============
+        const dxFrente = distX * mob.direction;
+        const anguloAoPlayer = Math.atan2(distY, dxFrente);
+        const dentroConeVisao = Math.abs(anguloAoPlayer) < Math.PI / 3;
+        const podeVer = distPlayer < 400 && dentroConeVisao && dxFrente > 0;
 
-        // Ativa perseguição
-        if (mob.aggro > 0.7 && !mob.chasing) mob.chasing = true;
-        if (mob.chasing && distPlayer > 650) { mob.chasing = false; mob.aggro = 0; }
+        // ============ ESTADOS DE AGGRO ============
+        if (podeVer) {
+            mob.vendoPlayer = true;
+            mob.timerPerdeuVisao = 0;
+            mob.mostrarInterrogacao = 0;
+            mob.aggro = Math.min(1, mob.aggro + 0.12);
+            if (mob.aggro > 0.7 && !mob.chasing) mob.chasing = true;
+        } else {
+            mob.vendoPlayer = false;
+            if (mob.chasing) {
+                mob.timerPerdeuVisao++;
+                // Depois de ~0,75s sem te ver, aparece "?"
+                if (mob.timerPerdeuVisao === 45) mob.mostrarInterrogacao = 90;
+                // Depois que o "?" sumir, volta a patrulhar
+                if (mob.timerPerdeuVisao > 135) {
+                    mob.chasing = false;
+                    mob.aggro = 0;
+                    mob.timerPerdeuVisao = 0;
+                }
+            } else {
+                mob.aggro = Math.max(0, mob.aggro - 0.08);
+            }
+        }
+        if (mob.mostrarInterrogacao > 0) mob.mostrarInterrogacao--;
+        const confuso = mob.mostrarInterrogacao > 0;
 
-        // Cair no buraco (prioridade)
         if (mob.caindo) {
             mob.vy += 0.55;
             mob.y += mob.vy;
@@ -1182,7 +1196,6 @@ function update() {
             continue;
         }
 
-        // Morrer no espinho
         let morreuEspinho = false;
         for (let e of ESPINHOS) {
             if (mob.x + mob.radius > e.x && mob.x - mob.radius < e.x + e.w &&
@@ -1197,7 +1210,6 @@ function update() {
             continue;
         }
 
-        // Knockback
         if (mob.knockbackX !== 0 || mob.knockbackY !== 0) {
             mob.x += mob.knockbackX; mob.y += mob.knockbackY;
             mob.knockbackX *= .85; mob.knockbackY *= .85;
@@ -1210,7 +1222,6 @@ function update() {
             continue;
         }
 
-        // Mob terrestre cai em buraco
         if (mob.tipo === 'terrestre') {
             let sobreBuraco = false;
             for (let b of BURACOS) {
@@ -1219,14 +1230,16 @@ function update() {
             if (sobreBuraco) { mob.caindo = true; mob.vy = 2; continue; }
         }
 
-        // ============ PERSEGUIÇÃO ============
-        if (mob.chasing) {
+        // ============ MOVIMENTAÇÃO ============
+        if (confuso) {
+            // Confuso — para de andar e olha em volta
+            mob.walkPhase *= 0.88;
+            if (mob.tipo === 'terrestre') mob.y = chaoY - mob.radius;
+        } else if (mob.chasing) {
             if (mob.tipo === 'terrestre') {
-                // Corre na direção do player
                 const dirX = distX > 0 ? 1 : -1;
-                const vel = mob.speed * 1.9; // mais rápido correndo
+                const vel = mob.speed * 1.9;
                 const proxX = mob.x + dirX * vel;
-                // Não entra em buraco
                 let sobreBuraco = false;
                 for (let b of BURACOS) {
                     if (proxX + mob.radius > b.inicio && proxX - mob.radius < b.fim) { sobreBuraco = true; break; }
@@ -1243,16 +1256,14 @@ function update() {
                 }
                 mob.y = chaoY - mob.radius;
             } else {
-                // Voador — persegue em linha reta no ar
                 const d = distPlayer || 1;
                 const vel = mob.speed * 1.4;
                 mob.x += (distX / d) * vel;
                 mob.y += (distY / d) * vel;
                 mob.direction = distX > 0 ? 1 : -1;
-                mob.fase += 0.15; // bater asas rápido
+                mob.fase += 0.15;
             }
         } else {
-            // ============ PATRULHA NORMAL ============
             if (mob.tipo === 'terrestre') {
                 mob.walkPhase += mob.speed * 0.18;
                 mob.dustTimer++;
@@ -1278,7 +1289,6 @@ function update() {
                 mob.fase += .03;
                 const dartOffset = mob.aggro * Math.sin(tempoGlobal*.15 + mob.fase)*12;
                 const yAlvo = (chaoY - 100) + Math.sin(mob.fase)*mob.amplitude + dartOffset;
-                // Volta suavemente pra sua posição de patrulha
                 mob.y += (yAlvo - mob.y) * 0.08;
             }
         }
@@ -1437,7 +1447,6 @@ function update() {
     if (mostrarTituloNivel4) { contadorTituloNivel4++; if (contadorTituloNivel4 > 120) mostrarTituloNivel4 = false; }
     if (mostrarTituloNivel5) { contadorTituloNivel5++; if (contadorTituloNivel5 > 120) mostrarTituloNivel5 = false; }
 
-    // Tracking conquistas
     const dxTrack = Math.abs(player.x - ultimoXTracking);
     if (dxTrack < 200) distanciaTotal += dxTrack;
     ultimoXTracking = player.x;
@@ -1473,199 +1482,375 @@ function update() {
 function desenharPlayerNovo(px, py, w, h) {
     const cor = personagemSelecionado.cor;
     const corEsc = personagemSelecionado.corStroke;
-    const corClara = personagemSelecionada_clara();
-    
+    const corClara = personagemSelecionado.corClara || personagemSelecionado.cor;
+
     const cx = px + w/2;
     const cy = py + h/2;
     const r = w/2;
-    
-    const walking = Math.abs(player.vx) > 0.5;
-    const legSwing = walking ? Math.sin(playerWalkPhase) * r * 0.25 : 0;
-    const armSwing = walking ? -Math.sin(playerWalkPhase) * r * 0.35 : 0;
+
+    const walking = Math.abs(player.vx) > 0.5 && player.onGround;
+    const legSwing = walking ? Math.sin(playerWalkPhase) * r * 0.35 : 0;
+    const armSwing = walking ? -Math.sin(playerWalkPhase) * r * 0.4 : 0;
     const jumpOffset = player.onGround ? 0 : -2;
-    const breathe = 1 + Math.sin(tempoGlobal * 0.06) * 0.03;
-    
+    const breathe = 1 + Math.sin(tempoGlobal * 0.06) * 0.02;
+
+    // Progresso do ataque (0→1)
+    const atkProg = atacando ? (ataqueTimer / DURACAO_ATAQUE) : 0;
+    let armAtkAngle = 0;
+    if (atacando) {
+        if (atkProg < 0.35) {
+            // Windup: braço sobe pra trás
+            armAtkAngle = -atkProg / 0.35 * Math.PI * 0.55;
+        } else if (atkProg < 0.6) {
+            // Golpe: braço desce pra frente
+            armAtkAngle = -Math.PI * 0.55 + (atkProg - 0.35) / 0.25 * Math.PI * 0.95;
+        } else {
+            // Retorno suave
+            armAtkAngle = Math.PI * 0.4 * (1 - (atkProg - 0.6) / 0.4);
+        }
+    }
+
     // SOMBRA
     if (!jogadorAgravado) {
         ctx.fillStyle = 'rgba(0,0,0,0.32)';
         ctx.beginPath();
-        ctx.ellipse(cx, chaoY + 4, w * 0.55 * (1 - playerSquash * 0.4), 4.5, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx, chaoY + 4, w * 0.7 * (1 - playerSquash * 0.4), 5, 0, 0, Math.PI * 2);
         ctx.fill();
     }
-    
+
     ctx.save();
     ctx.translate(cx, cy + jumpOffset);
-    
-    // PERNAS
-    ctx.strokeStyle = corEsc;
-    ctx.lineWidth = Math.max(3, r * 0.28);
+
+    // Espelha conforme direção
+    const dir = ultimaDirecao;
+    ctx.scale(dir, 1);
+
+    // ========== PERNAS ==========
+    const legBaseY = r * 0.35;
+    const legLen = r * 0.55;
+    const backLegX = -r * 0.22;
+    const frontLegX = r * 0.22;
+
     ctx.lineCap = 'round';
+
+    // perna traseira
+    ctx.strokeStyle = corEsc;
+    ctx.lineWidth = Math.max(4, r * 0.32);
     ctx.beginPath();
-    ctx.moveTo(-r * 0.28, r * 0.75);
-    ctx.lineTo(-r * 0.32, r * 1.05 + legSwing);
-    ctx.moveTo(r * 0.28, r * 0.75);
-    ctx.lineTo(r * 0.32, r * 1.05 - legSwing);
+    ctx.moveTo(backLegX, legBaseY);
+    ctx.lineTo(backLegX + legSwing * 0.5, legBaseY + legLen + legSwing * 0.4);
     ctx.stroke();
-    
-    // PÉS
+    // pé traseiro
     ctx.fillStyle = '#3a2010';
     ctx.beginPath();
-    ctx.ellipse(-r * 0.32, r * 1.05 + legSwing, r * 0.22, r * 0.13, 0, 0, Math.PI * 2);
-    ctx.ellipse(r * 0.32, r * 1.05 - legSwing, r * 0.22, r * 0.13, 0, 0, Math.PI * 2);
+    ctx.ellipse(backLegX + legSwing * 0.5 + r*0.05, legBaseY + legLen + legSwing * 0.4 + r*0.05, r*0.25, r*0.14, 0, 0, Math.PI*2);
     ctx.fill();
     ctx.strokeStyle = '#1a0800';
     ctx.lineWidth = 1.5;
     ctx.stroke();
-    
-    // BRAÇO TRAS (atrás do corpo)
+
+    // perna dianteira
     ctx.strokeStyle = corEsc;
-    ctx.lineWidth = Math.max(3, r * 0.25);
-    ctx.lineCap = 'round';
+    ctx.lineWidth = Math.max(4, r * 0.32);
     ctx.beginPath();
-    ctx.moveTo(-r * 0.75, r * 0.05);
-    ctx.lineTo(-r * 0.95, r * 0.35 + armSwing);
+    ctx.moveTo(frontLegX, legBaseY);
+    ctx.lineTo(frontLegX - legSwing * 0.5, legBaseY + legLen - legSwing * 0.4);
     ctx.stroke();
-    
-    // BRAÇO FRENTE
+    // pé dianteiro
+    ctx.fillStyle = '#3a2010';
     ctx.beginPath();
-    ctx.moveTo(r * 0.75, r * 0.05);
-    ctx.lineTo(r * 0.95, r * 0.35 - armSwing);
+    ctx.ellipse(frontLegX - legSwing * 0.5 + r*0.05, legBaseY + legLen - legSwing * 0.4 + r*0.05, r*0.25, r*0.14, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = '#1a0800';
     ctx.stroke();
-    
-    // MÃOS
+
+    // ========== BRAÇO TRASEIRO ==========
+    const shoulderY = -r * 0.05;
+    const backShoulderX = -r * 0.55;
+
+    ctx.strokeStyle = corEsc;
+    ctx.lineWidth = Math.max(4, r * 0.28);
+    ctx.beginPath();
+    ctx.moveTo(backShoulderX, shoulderY);
+    ctx.lineTo(backShoulderX - r*0.15, shoulderY + r*0.4 + armSwing * 0.6);
+    ctx.stroke();
+    // mão traseira
     ctx.fillStyle = corEsc;
     ctx.beginPath();
-    ctx.arc(-r * 0.95, r * 0.35 + armSwing, r * 0.15, 0, Math.PI * 2);
-    ctx.arc(r * 0.95, r * 0.35 - armSwing, r * 0.15, 0, Math.PI * 2);
+    ctx.arc(backShoulderX - r*0.15, shoulderY + r*0.4 + armSwing * 0.6, r*0.17, 0, Math.PI*2);
     ctx.fill();
-    
-    // CORPO (elipse com gradiente radial)
-    const grad = ctx.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.1, 0, 0, r * 1.15);
+    ctx.strokeStyle = '#1a0800';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // ========== TRONCO ==========
+    const bodyTop = -r * 0.1;
+    const bodyBot = r * 0.42;
+    const bodyW = r * 0.8 * breathe;
+
+    const grad = ctx.createRadialGradient(-r*0.25, bodyTop + (bodyBot-bodyTop)*0.3, r*0.05, 0, bodyTop + (bodyBot-bodyTop)*0.5, r*1.0);
     grad.addColorStop(0, corClara);
     grad.addColorStop(0.55, cor);
     grad.addColorStop(1, corEsc);
+
     ctx.fillStyle = grad;
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.ellipse(0, 0, r * 0.92 * breathe, r * 1.0 * (2 - breathe), 0, 0, Math.PI * 2);
+    ctx.moveTo(-bodyW/2, bodyTop + r*0.12);
+    ctx.quadraticCurveTo(-bodyW/2, bodyTop, -bodyW*0.32, bodyTop);
+    ctx.lineTo(bodyW*0.32, bodyTop);
+    ctx.quadraticCurveTo(bodyW/2, bodyTop, bodyW/2, bodyTop + r*0.12);
+    ctx.lineTo(bodyW/2, bodyBot - r*0.1);
+    ctx.quadraticCurveTo(bodyW/2, bodyBot, bodyW*0.35, bodyBot);
+    ctx.lineTo(-bodyW*0.35, bodyBot);
+    ctx.quadraticCurveTo(-bodyW/2, bodyBot, -bodyW/2, bodyBot - r*0.1);
+    ctx.closePath();
     ctx.fill();
     ctx.stroke();
-    
-    // BRILHO superior no corpo
+
+    // Brilho superior do tronco
+    ctx.fillStyle = 'rgba(255,255,255,0.32)';
+    ctx.beginPath();
+    ctx.ellipse(-r*0.2, bodyTop + r*0.15, r*0.3, r*0.15, -0.3, 0, Math.PI*2);
+    ctx.fill();
+
+    // Cinto
+    ctx.fillStyle = '#e74c3c';
+    ctx.strokeStyle = '#a02a1f';
+    ctx.lineWidth = 1.5;
+    ctx.fillRect(-bodyW*0.5, bodyBot - r*0.18, bodyW, r*0.13);
+    ctx.strokeRect(-bodyW*0.5, bodyBot - r*0.18, bodyW, r*0.13);
+    // Fivela
+    ctx.fillStyle = '#f1c40f';
+    ctx.beginPath();
+    ctx.arc(0, bodyBot - r*0.115, r*0.07, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = '#8a6a00';
+    ctx.stroke();
+
+    // ========== BRAÇO DIANTEIRO (segura a espada) ==========
+    const frontShoulderX = r * 0.55;
+    const frontShoulderY = shoulderY;
+    const armAngle = armAtkAngle + (walking && !atacando ? -armSwing * 0.4 : 0);
+    const armLen = r * 0.55;
+
+    const handX = frontShoulderX + Math.sin(armAngle) * armLen;
+    const handY = frontShoulderY + Math.cos(armAngle) * armLen;
+
+    ctx.strokeStyle = corEsc;
+    ctx.lineWidth = Math.max(4, r * 0.28);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(frontShoulderX, frontShoulderY);
+    ctx.quadraticCurveTo(
+        frontShoulderX + Math.sin(armAngle) * armLen * 0.5,
+        frontShoulderY + Math.cos(armAngle) * armLen * 0.5,
+        handX,
+        handY
+    );
+    ctx.stroke();
+
+    // Mão dianteira
+    ctx.fillStyle = corEsc;
+    ctx.beginPath();
+    ctx.arc(handX, handY, r*0.18, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = '#1a0800';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // Brilho na mão
     ctx.fillStyle = 'rgba(255,255,255,0.35)';
     ctx.beginPath();
-    ctx.ellipse(-r * 0.3, -r * 0.4, r * 0.35, r * 0.25, -0.6, 0, Math.PI * 2);
+    ctx.arc(handX - r*0.05, handY - r*0.05, r*0.06, 0, Math.PI*2);
     ctx.fill();
-    
-    // ============ ROSTO ============
-    // Olha pra direção que anda
-    const olharX = ultimaDirecao * r * 0.12;
-    const olharY = player.vy < -3 ? -r * 0.08 : (player.vy > 3 ? r * 0.08 : 0);
-    
-    // OLHOS BRANCOS
-    ctx.fillStyle = '#fff';
+
+    // ========== CABEÇA ==========
+    const headR = r * 0.52;
+    const headCY = -r * 0.55;
+
+    // Orelhas
+    ctx.fillStyle = corEsc;
     ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 1.8;
     ctx.beginPath();
-    ctx.ellipse(-r * 0.32 + olharX, -r * 0.15 + olharY, r * 0.22, r * 0.28, 0, 0, Math.PI * 2);
-    ctx.ellipse(r * 0.32 + olharX, -r * 0.15 + olharY, r * 0.22, r * 0.28, 0, 0, Math.PI * 2);
+    ctx.ellipse(-headR*0.95, headCY + headR*0.05, headR*0.15, headR*0.22, 0, 0, Math.PI*2);
+    ctx.ellipse(headR*0.95, headCY + headR*0.05, headR*0.15, headR*0.22, 0, 0, Math.PI*2);
     ctx.fill();
     ctx.stroke();
-    
-    // PUPILAS
+
+    // Cabeça
+    const headGrad = ctx.createRadialGradient(-headR*0.35, headCY - headR*0.35, headR*0.1, 0, headCY, headR);
+    headGrad.addColorStop(0, corClara);
+    headGrad.addColorStop(0.6, cor);
+    headGrad.addColorStop(1, corEsc);
+    ctx.fillStyle = headGrad;
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(0, headCY, headR, 0, Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Brilho da cabeça
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.beginPath();
+    ctx.ellipse(-headR*0.35, headCY - headR*0.4, headR*0.3, headR*0.18, -0.5, 0, Math.PI*2);
+    ctx.fill();
+
+    // ========== ROSTO ==========
+    const olharY = player.vy < -3 ? -r*0.05 : (player.vy > 3 ? r*0.05 : 0);
+
+    // Olhos brancos
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.ellipse(-headR*0.32, headCY + olharY, headR*0.22, headR*0.28, 0, 0, Math.PI*2);
+    ctx.ellipse(headR*0.32, headCY + olharY, headR*0.22, headR*0.28, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Pupilas
     ctx.fillStyle = '#111';
     ctx.beginPath();
-    ctx.arc(-r * 0.32 + olharX * 1.8, -r * 0.15 + olharY * 1.5, r * 0.12, 0, Math.PI * 2);
-    ctx.arc(r * 0.32 + olharX * 1.8, -r * 0.15 + olharY * 1.5, r * 0.12, 0, Math.PI * 2);
+    ctx.arc(-headR*0.3, headCY + olharY, headR*0.13, 0, Math.PI*2);
+    ctx.arc(headR*0.3, headCY + olharY, headR*0.13, 0, Math.PI*2);
     ctx.fill();
-    
-    // BRILHO DOS OLHOS
+
+    // Brilho dos olhos
     ctx.fillStyle = 'rgba(255,255,255,0.95)';
     ctx.beginPath();
-    ctx.arc(-r * 0.36 + olharX * 1.8, -r * 0.20 + olharY * 1.5, r * 0.045, 0, Math.PI * 2);
-    ctx.arc(r * 0.28 + olharX * 1.8, -r * 0.20 + olharY * 1.5, r * 0.045, 0, Math.PI * 2);
+    ctx.arc(-headR*0.35, headCY - headR*0.05 + olharY, headR*0.05, 0, Math.PI*2);
+    ctx.arc(headR*0.25, headCY - headR*0.05 + olharY, headR*0.05, 0, Math.PI*2);
     ctx.fill();
-    
-    // BOCA (sorriso ou aberta se pulando)
+
+    // Sobrancelhas
     ctx.strokeStyle = '#1a1a1a';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.2;
     ctx.lineCap = 'round';
-    if (player.vy < -2) {
-        // Pulando — boca aberta (surpresa)
-        ctx.fillStyle = '#1a1a1a';
+    if (atacando) {
         ctx.beginPath();
-        ctx.ellipse(0, r * 0.35, r * 0.16, r * 0.2, 0, 0, Math.PI * 2);
-        ctx.fill();
-    } else if (Math.abs(player.vx) > 0.5) {
-        // Andando — sorriso maior
-        ctx.beginPath();
-        ctx.arc(0, r * 0.15, r * 0.3, 0.15, Math.PI - 0.15);
+        ctx.moveTo(-headR*0.5, headCY - headR*0.5);
+        ctx.lineTo(-headR*0.15, headCY - headR*0.3);
+        ctx.moveTo(headR*0.5, headCY - headR*0.5);
+        ctx.lineTo(headR*0.15, headCY - headR*0.3);
         ctx.stroke();
     } else {
-        // Parado — sorriso pequeno
         ctx.beginPath();
-        ctx.arc(0, r * 0.18, r * 0.22, 0.2, Math.PI - 0.2);
+        ctx.moveTo(-headR*0.5, headCY - headR*0.35);
+        ctx.lineTo(-headR*0.15, headCY - headR*0.35);
+        ctx.moveTo(headR*0.5, headCY - headR*0.35);
+        ctx.lineTo(headR*0.15, headCY - headR*0.35);
         ctx.stroke();
     }
-    
-    // BOCHECHAS ROSADAS
+
+    // Boca
+    ctx.strokeStyle = '#1a1a1a';
+    ctx.lineWidth = 2;
+    if (player.vy < -2) {
+        ctx.fillStyle = '#1a1a1a';
+        ctx.beginPath();
+        ctx.ellipse(0, headCY + headR*0.5, headR*0.16, headR*0.2, 0, 0, Math.PI*2);
+        ctx.fill();
+    } else if (atacando) {
+        ctx.fillStyle = '#5a0000';
+        ctx.beginPath();
+        ctx.ellipse(0, headCY + headR*0.5, headR*0.22, headR*0.25, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.strokeStyle = '#1a1a1a';
+        ctx.stroke();
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(-headR*0.15, headCY + headR*0.4, headR*0.1, headR*0.08);
+        ctx.fillRect(headR*0.05, headCY + headR*0.4, headR*0.1, headR*0.08);
+    } else if (walking) {
+        ctx.beginPath();
+        ctx.arc(0, headCY + headR*0.3, headR*0.32, 0.15, Math.PI - 0.15);
+        ctx.stroke();
+    } else {
+        ctx.beginPath();
+        ctx.arc(0, headCY + headR*0.3, headR*0.25, 0.2, Math.PI - 0.2);
+        ctx.stroke();
+    }
+
+    // Bochechas
     ctx.fillStyle = 'rgba(255,120,160,0.55)';
     ctx.beginPath();
-    ctx.arc(-r * 0.6, r * 0.22, r * 0.14, 0, Math.PI * 2);
-    ctx.arc(r * 0.6, r * 0.22, r * 0.14, 0, Math.PI * 2);
+    ctx.arc(-headR*0.6, headCY + headR*0.35, headR*0.16, 0, Math.PI*2);
+    ctx.arc(headR*0.6, headCY + headR*0.35, headR*0.16, 0, Math.PI*2);
     ctx.fill();
-    
-    // TOPETE DE CABELO
+
+    // ========== CABELO / TOPETE ==========
     ctx.fillStyle = corEsc;
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(-r * 0.55, -r * 0.82);
-    ctx.quadraticCurveTo(-r * 0.75, -r * 1.35, -r * 0.15, -r * 1.15);
-    ctx.quadraticCurveTo(-r * 0.05, -r * 1.55, r * 0.35, -r * 1.2);
-    ctx.quadraticCurveTo(r * 0.7, -r * 1.35, r * 0.55, -r * 0.82);
-    ctx.quadraticCurveTo(0, -r * 0.95, -r * 0.55, -r * 0.82);
+    ctx.moveTo(-headR*0.95, headCY - headR*0.15);
+    ctx.quadraticCurveTo(-headR*1.05, headCY - headR*1.05, -headR*0.3, headCY - headR*0.95);
+    ctx.quadraticCurveTo(-headR*0.05, headCY - headR*1.5, headR*0.35, headCY - headR*1.0);
+    ctx.quadraticCurveTo(headR*0.75, headCY - headR*1.4, headR*0.95, headCY - headR*0.6);
+    ctx.quadraticCurveTo(headR*1.0, headCY - headR*0.1, headR*0.7, headCY - headR*0.05);
+    ctx.quadraticCurveTo(0, headCY - headR*0.35, -headR*0.7, headCY - headR*0.05);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-    
-    // DETALHE no topete (linha clara)
+
+    // Detalhe claro no cabelo
     ctx.fillStyle = corClara;
     ctx.beginPath();
-    ctx.ellipse(-r * 0.1, -r * 1.15, r * 0.22, r * 0.08, -0.3, 0, Math.PI * 2);
+    ctx.ellipse(-headR*0.1, headCY - headR*1.05, headR*0.25, headR*0.09, -0.3, 0, Math.PI*2);
     ctx.fill();
-    
-    // CACHECOL / BANDANA no pescoço
+
+    // ========== CACHECOL ==========
     ctx.fillStyle = '#e74c3c';
     ctx.strokeStyle = '#a02a1f';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(-r * 0.75, r * 0.6);
-    ctx.quadraticCurveTo(0, r * 0.75, r * 0.75, r * 0.6);
-    ctx.lineTo(r * 0.55, r * 0.85);
-    ctx.quadraticCurveTo(0, r * 0.95, -r * 0.55, r * 0.85);
+    ctx.moveTo(-r*0.55, r*0.0);
+    ctx.quadraticCurveTo(0, r*0.15, r*0.55, r*0.0);
+    ctx.lineTo(r*0.5, r*0.2);
+    ctx.quadraticCurveTo(0, r*0.32, -r*0.5, r*0.2);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-    // Ponta do cachecol voando
+
+    const voo = Math.sin(tempoGlobal * 0.15) * 6;
     ctx.beginPath();
-    ctx.moveTo(r * 0.5, r * 0.75);
-    ctx.quadraticCurveTo(r * 1.2, r * 0.6 + Math.sin(tempoGlobal * 0.15) * 6, r * 1.35, r * 0.9 + Math.sin(tempoGlobal * 0.15) * 8);
-    ctx.lineTo(r * 1.15, r * 1.0 + Math.sin(tempoGlobal * 0.15) * 8);
-    ctx.quadraticCurveTo(r * 0.9, r * 0.85, r * 0.55, r * 0.9);
+    ctx.moveTo(-r*0.5, r*0.12);
+    ctx.quadraticCurveTo(-r*1.15, r*0.0 + voo, -r*1.35, r*0.35 + voo);
+    ctx.lineTo(-r*1.15, r*0.45 + voo);
+    ctx.quadraticCurveTo(-r*0.9, r*0.25, -r*0.55, r*0.28);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-    
+
     ctx.restore();
+
+    // ============ RASTRO DE ATAQUE ============
+    if (atacando && atkProg > 0.3 && atkProg < 0.78) {
+        const alpha = 1 - Math.abs(atkProg - 0.54) / 0.24;
+        ctx.save();
+        ctx.translate(cx, cy + jumpOffset);
+        ctx.scale(dir, 1);
+        ctx.strokeStyle = `rgba(120,220,255,${Math.max(0, alpha) * 0.9})`;
+        ctx.lineWidth = 8;
+        ctx.lineCap = 'round';
+        ctx.shadowColor = '#66ccff';
+        ctx.shadowBlur = 25;
+        ctx.beginPath();
+        ctx.arc(r * 0.55, -r * 0.05, r * 1.5, -Math.PI * 0.75, Math.PI * 0.45);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.restore();
+    }
 }
+
 function personagemSelecionada_clara() {
     return personagemSelecionado.corClara || personagemSelecionado.cor;
 }
 
 // ============================================
-// DESENHOS DE MOBS (iguais ao anterior)
+// DESENHOS DE MOBS
 // ============================================
 function desenharOrc(mx, my, mob) {
     const r = mob.radius;
@@ -1792,7 +1977,8 @@ function desenharOrc(mx, my, mob) {
         ctx.beginPath(); ctx.ellipse(0, -r*.5, r*1.1, r*1.35, 0, 0, Math.PI*2); ctx.fill();
     }
     ctx.restore();
-    if (aggro > .35) {
+    // "!" de aggro — escondido quando confuso
+    if (aggro > .35 && !(mob.mostrarInterrogacao > 0)) {
         const aggroY = my - r*2.4 - aggro*10;
         const bounce = Math.sin(tempoGlobal*.5)*4;
         ctx.font = 'bold 32px "Pixelify Sans", monospace';
@@ -1801,6 +1987,21 @@ function desenharOrc(mx, my, mob) {
         ctx.shadowColor = '#ff2200'; ctx.shadowBlur = 18 + Math.sin(tempoGlobal*.3)*8;
         ctx.fillText('!', mx, aggroY + bounce);
         ctx.shadowBlur = 0; ctx.textAlign = 'left';
+    }
+    // "?" quando perdeu o player de vista
+    if (mob.mostrarInterrogacao > 0) {
+        const tNorm = 1 - mob.mostrarInterrogacao / 90;
+        const alpha = tNorm < 0.12 ? tNorm / 0.12 : (tNorm > 0.8 ? (1 - tNorm) / 0.2 : 1);
+        const bounce = Math.sin(tempoGlobal * 0.35) * 5;
+        const qY = my - r * 3.0 + bounce;
+        ctx.font = 'bold 42px "Pixelify Sans", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = `rgba(255,220,60,${alpha})`;
+        ctx.shadowColor = '#ffcc00';
+        ctx.shadowBlur = 22 + Math.sin(tempoGlobal * 0.4) * 8;
+        ctx.fillText('?', mx, qY);
+        ctx.shadowBlur = 0;
+        ctx.textAlign = 'left';
     }
 }
 
@@ -1864,7 +2065,8 @@ function desenharMorcego(mx, my, mob) {
         ctx.beginPath(); ctx.arc(0, -r*.4, r*1.6, 0, Math.PI*2); ctx.fill();
     }
     ctx.restore();
-    if (aggro > .4) {
+    // "!" de aggro — escondido quando confuso
+    if (aggro > .4 && !(mob.mostrarInterrogacao > 0)) {
         const aggroY = my - r*2.3 - aggro*10;
         const bounce = Math.sin(tempoGlobal*.5)*4;
         ctx.font = 'bold 26px "Pixelify Sans", monospace';
@@ -1873,6 +2075,21 @@ function desenharMorcego(mx, my, mob) {
         ctx.shadowColor = '#ff3300'; ctx.shadowBlur = 15;
         ctx.fillText('!', mx, aggroY + bounce);
         ctx.shadowBlur = 0; ctx.textAlign = 'left';
+    }
+    // "?" quando perdeu o player de vista
+    if (mob.mostrarInterrogacao > 0) {
+        const tNorm = 1 - mob.mostrarInterrogacao / 90;
+        const alpha = tNorm < 0.12 ? tNorm / 0.12 : (tNorm > 0.8 ? (1 - tNorm) / 0.2 : 1);
+        const bounce = Math.sin(tempoGlobal * 0.35) * 5;
+        const qY = my - r * 3.2 + bounce;
+        ctx.font = 'bold 38px "Pixelify Sans", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = `rgba(255,220,60,${alpha})`;
+        ctx.shadowColor = '#ffcc00';
+        ctx.shadowBlur = 22 + Math.sin(tempoGlobal * 0.4) * 8;
+        ctx.fillText('?', mx, qY);
+        ctx.shadowBlur = 0;
+        ctx.textAlign = 'left';
     }
 }
 
@@ -1977,8 +2194,32 @@ function desenharBolaDeFogo(bola) {
     ctx.beginPath(); ctx.arc(bx, by, bola.raio*.22, 0, Math.PI*2); ctx.fill();
 }
 
+// Espada mágica — agora acompanha a mão do personagem novo
 function desenharEspadaMagica(px, py, w, h, estaAtacando, progresso) {
-    const escala = w/40, maoX = px + w*.9, maoY = py + h*.5;
+    const escala = w/40;
+    const r = w/2;
+    const cx = px + w/2;
+    const cy = py + h/2;
+    const dir = ultimaDirecao;
+
+    // Calcula posição da mão (mesma lógica do desenharPlayerNovo)
+    let armAtkAngle = 0;
+    if (estaAtacando) {
+        if (progresso < 0.35) armAtkAngle = -progresso / 0.35 * Math.PI * 0.55;
+        else if (progresso < 0.6) armAtkAngle = -Math.PI * 0.55 + (progresso - 0.35) / 0.25 * Math.PI * 0.95;
+        else armAtkAngle = Math.PI * 0.4 * (1 - (progresso - 0.6) / 0.4);
+    }
+    const walking = Math.abs(player.vx) > 0.5 && player.onGround;
+    const armSwing = walking ? -Math.sin(playerWalkPhase) * r * 0.4 : 0;
+    const armAngle = armAtkAngle + (walking && !estaAtacando ? -armSwing * 0.4 : 0);
+    const frontShoulderX = r * 0.55;
+    const frontShoulderY = -r * 0.05;
+    const armLen = r * 0.55;
+    const localHandX = frontShoulderX + Math.sin(armAngle) * armLen;
+    const localHandY = frontShoulderY + Math.cos(armAngle) * armLen;
+    const maoX = cx + dir * localHandX;
+    const maoY = cy + localHandY;
+
     const rotInicial = -Math.PI*.78;
     let rotacao;
     if (estaAtacando) {
@@ -2522,7 +2763,6 @@ function draw() {
         ctx.fillStyle = 'rgba(0,255,0,.7)';
         ctx.fillRect(mx - mob.radius, mob.y - offBar, mob.radius*2*(mob.hp/2), 4);
     }
-    // ============ PLAYER NOVO ============
     if (!gameOver) {
         const px = player.x - cameraX, py = player.y;
         desenharPlayerNovo(px, py, player.w, player.h);
@@ -2775,7 +3015,7 @@ function resize() {
     W = window.innerWidth; H = window.innerHeight;
     canvas.width = W; canvas.height = H;
     const newChaoAltura = Math.floor(H*.15);
-    const newPlayerSize = Math.min(W, H)*.045;
+    const newPlayerSize = Math.min(W, H)*.058;
     const newMobRadius = Math.min(W, H)*.025;
     const novoChaoY = H - newChaoAltura;
     const deltaY = novoChaoY - chaoY;
