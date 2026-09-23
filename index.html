@@ -90,7 +90,7 @@ canvas { display:block; width:100vw; height:100vh; background:#000; }
 .char-option { padding:12px; background:rgba(0,0,0,.4); border:3px solid #555; border-radius:10px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:8px; transition:all .15s; }
 .char-option:hover { transform:translateY(-3px); border-color:#88ddff; }
 .char-option.selecionado { border-color:#f1c40f; background:rgba(241,196,15,.15); box-shadow:0 0 20px rgba(241,196,15,.4); }
-.char-preview { width:34px; height:34px; border-radius:50%; border:2px solid #000; }
+.char-preview { width:34px; height:34px; border-radius:6px; border:2px solid #000; }
 .char-name { font-size:12px; color:#fff; font-weight:700; }
 .config-close-btn { font-family:'Pixelify Sans',monospace; font-size:18px; font-weight:700; letter-spacing:2px; color:#1a1a1a; padding:14px 36px; background:linear-gradient(180deg,#a0e8ff 0%,#88ddff 50%,#4aa8cc 100%); border:3px solid #2a6a88; border-radius:10px; cursor:pointer; box-shadow:0 0 20px rgba(136,221,255,.5),0 5px 0 #1a5a78; transition:all .1s; display:block; margin:20px auto 0; }
 .config-close-btn:hover { filter:brightness(1.1); transform:translateY(-2px); }
@@ -99,7 +99,6 @@ canvas { display:block; width:100vw; height:100vh; background:#000; }
 </head>
 <body>
 <div id="startOverlay"><button id="startBtn">START</button></div>
-
 <div id="cutscene">
     <video id="cutsceneVideo" muted playsinline preload="auto"></video>
     <div id="cutsceneText"></div>
@@ -107,12 +106,9 @@ canvas { display:block; width:100vw; height:100vh; background:#000; }
     <button id="skipBtn">SKIP <span class="tecla">ENTER</span></button>
     <div id="cutsceneFade"></div>
 </div>
-
 <canvas id="gameCanvas"></canvas>
-
 <button id="pauseBtn">⏸ PAUSE (P)</button>
 <button id="configBtnTop">⚙️ CONFIG</button>
-
 <div id="pauseMenu">
     <div class="pause-content">
         <div class="pause-title">⏸ PAUSADO</div>
@@ -129,7 +125,6 @@ canvas { display:block; width:100vw; height:100vh; background:#000; }
         </div>
     </div>
 </div>
-
 <div id="configMenu">
     <div class="config-content">
         <div class="config-title">⚙️ CONFIGURAÇÕES</div>
@@ -160,40 +155,40 @@ canvas { display:block; width:100vw; height:100vh; background:#000; }
 
 <script>
 // ============================================
-// CONQUISTAS (31)
+// CONQUISTAS
 // ============================================
 const CONQUISTAS = {
-    armado:         { nome:"Armado e Perigoso", desc:"Conseguiu a espada mágica", icone:"⚔️", desbloqueada:false },
-    aprendiz:       { nome:"Aprendiz do Sábio", desc:"Ouviu os conselhos do velho sábio", icone:"🧙", desbloqueada:false },
-    primeiroSangue: { nome:"Primeiro Sangue", desc:"Derrotou seu primeiro inimigo", icone:"🩸", desbloqueada:false },
-    exterminador:   { nome:"Exterminador", desc:"Derrotou TODOS os inimigos do jogo", icone:"💀", desbloqueada:false },
-    tarzan:         { nome:"Tarzan", desc:"Se balançou no cipó 10 vezes", icone:"🌿", desbloqueada:false },
-    rico:           { nome:"Rico!", desc:"Coletou 100 moedas em uma jornada", icone:"🪙", desbloqueada:false },
-    perigo:         { nome:"Bem-vindo ao Perigo", desc:"Chegou ao temido Nível 4", icone:"☠️", desbloqueada:false },
-    cacador:        { nome:"Caçador de Tesouros", desc:"Coletou TODAS as moedas do jogo", icone:"🏹", desbloqueada:false },
-    lenda:          { nome:"Lenda de Acuílândia", desc:"Zerou o jogo pela primeira vez", icone:"👑", desbloqueada:false },
-    sobrevivente:   { nome:"Sobrevivente", desc:"Zerou o jogo sem perder nenhuma vida", icone:"🛡️", desbloqueada:false },
-    saltador:       { nome:"Saltador", desc:"Pulou 100 vezes", icone:"🦘", desbloqueada:false },
-    maratonista:    { nome:"Maratonista", desc:"Percorreu 50.000 pixels no mundo", icone:"🏃", desbloqueada:false },
-    morceguicida:   { nome:"Caça-Morcegos", desc:"Derrotou 15 morcegos voadores", icone:"🦇", desbloqueada:false },
-    invulneravel:   { nome:"Invulnerável", desc:"Sobreviveu 90 segundos sem levar dano", icone:"✨", desbloqueada:false },
-    colecionador:   { nome:"Colecionador", desc:"Coletou 500 moedas na vida", icone:"💰", desbloqueada:false },
-    magnata:        { nome:"Magnata", desc:"Coletou 1500 moedas na vida", icone:"💎", desbloqueada:false },
-    esquivaPerfeita:{ nome:"Esquiva Perfeita", desc:"Passou por 30 bolas de fogo", icone:"🔥", desbloqueada:false },
-    cipoMestre:     { nome:"Mestre do Cipó", desc:"Usou o cipó 50 vezes", icone:"🐒", desbloqueada:false },
-    espadaMestre:   { nome:"Mestre da Espada", desc:"Lançou a espada 20 vezes", icone:"🗡️", desbloqueada:false },
-    carteiro:       { nome:"Leitor de Cartas", desc:"Leu a carta misteriosa", icone:"📜", desbloqueada:false },
-    explorador:     { nome:"Explorador", desc:"Ativou todos os checkpoints", icone:"🚩", desbloqueada:false },
-    bossSlayer:     { nome:"Matador de Deuses", desc:"Derrotou o Morcego Ancestral", icone:"🐲", desbloqueada:false },
-    voando:         { nome:"Quase Voando", desc:"Ficou 3 segundos no ar de uma vez", icone:"🕊️", desbloqueada:false },
-    semDano:        { nome:"Intocável", desc:"Passou perto de 5 espinhos sem morrer", icone:"🌵", desbloqueada:false },
-    ninja:          { nome:"Ninja Silencioso", desc:"Ficou 60 segundos sem atacar", icone:"🥷", desbloqueada:false },
-    velocista:      { nome:"Velocista", desc:"Chegou ao nível 5 em menos de 3 minutos", icone:"⚡", desbloqueada:false },
-    curioso:        { nome:"Curioso", desc:"Conversou com o sábio até o fim 3 vezes", icone:"❓", desbloqueada:false },
-    resistente:     { nome:"Resistente", desc:"Perdeu 30 vidas no total", icone:"💪", desbloqueada:false },
-    perfeito:       { nome:"Perfeição", desc:"Terminou o jogo com 9 vidas cheias", icone:"⭐", desbloqueada:false },
-    mestre:         { nome:"Grão-Mestre", desc:"Desbloqueou 25 conquistas", icone:"🏆", desbloqueada:false },
-    lendaViva:      { nome:"Lenda Viva", desc:"Desbloqueou TODAS as conquistas", icone:"🌟", desbloqueada:false }
+    armado:{nome:"Armado e Perigoso",desc:"Conseguiu a espada mágica",icone:"⚔️",desbloqueada:false},
+    aprendiz:{nome:"Aprendiz do Sábio",desc:"Ouviu os conselhos do velho sábio",icone:"🧙",desbloqueada:false},
+    primeiroSangue:{nome:"Primeiro Sangue",desc:"Derrotou seu primeiro inimigo",icone:"🩸",desbloqueada:false},
+    exterminador:{nome:"Exterminador",desc:"Derrotou TODOS os inimigos do jogo",icone:"💀",desbloqueada:false},
+    tarzan:{nome:"Tarzan",desc:"Se balançou no cipó 10 vezes",icone:"🌿",desbloqueada:false},
+    rico:{nome:"Rico!",desc:"Coletou 100 moedas em uma jornada",icone:"🪙",desbloqueada:false},
+    perigo:{nome:"Bem-vindo ao Perigo",desc:"Chegou ao temido Nível 4",icone:"☠️",desbloqueada:false},
+    cacador:{nome:"Caçador de Tesouros",desc:"Coletou TODAS as moedas do jogo",icone:"🏹",desbloqueada:false},
+    lenda:{nome:"Lenda de Acuílândia",desc:"Zerou o jogo pela primeira vez",icone:"👑",desbloqueada:false},
+    sobrevivente:{nome:"Sobrevivente",desc:"Zerou o jogo sem perder nenhuma vida",icone:"🛡️",desbloqueada:false},
+    saltador:{nome:"Saltador",desc:"Pulou 100 vezes",icone:"🦘",desbloqueada:false},
+    maratonista:{nome:"Maratonista",desc:"Percorreu 50.000 pixels no mundo",icone:"🏃",desbloqueada:false},
+    morceguicida:{nome:"Caça-Morcegos",desc:"Derrotou 15 morcegos voadores",icone:"🦇",desbloqueada:false},
+    invulneravel:{nome:"Invulnerável",desc:"Sobreviveu 90 segundos sem levar dano",icone:"✨",desbloqueada:false},
+    colecionador:{nome:"Colecionador",desc:"Coletou 500 moedas na vida",icone:"💰",desbloqueada:false},
+    magnata:{nome:"Magnata",desc:"Coletou 1500 moedas na vida",icone:"💎",desbloqueada:false},
+    esquivaPerfeita:{nome:"Esquiva Perfeita",desc:"Passou por 30 bolas de fogo",icone:"🔥",desbloqueada:false},
+    cipoMestre:{nome:"Mestre do Cipó",desc:"Usou o cipó 50 vezes",icone:"🐒",desbloqueada:false},
+    espadaMestre:{nome:"Mestre da Espada",desc:"Lançou a espada 20 vezes",icone:"🗡️",desbloqueada:false},
+    carteiro:{nome:"Leitor de Cartas",desc:"Leu a carta misteriosa",icone:"📜",desbloqueada:false},
+    explorador:{nome:"Explorador",desc:"Ativou todos os checkpoints",icone:"🚩",desbloqueada:false},
+    bossSlayer:{nome:"Matador de Deuses",desc:"Derrotou o Morcego Ancestral",icone:"🐲",desbloqueada:false},
+    voando:{nome:"Quase Voando",desc:"Ficou 3 segundos no ar de uma vez",icone:"🕊️",desbloqueada:false},
+    semDano:{nome:"Intocável",desc:"Passou perto de 5 espinhos sem morrer",icone:"🌵",desbloqueada:false},
+    ninja:{nome:"Ninja Silencioso",desc:"Ficou 60 segundos sem atacar",icone:"🥷",desbloqueada:false},
+    velocista:{nome:"Velocista",desc:"Chegou ao nível 5 em menos de 3 minutos",icone:"⚡",desbloqueada:false},
+    curioso:{nome:"Curioso",desc:"Conversou com o sábio até o fim 3 vezes",icone:"❓",desbloqueada:false},
+    resistente:{nome:"Resistente",desc:"Perdeu 30 vidas no total",icone:"💪",desbloqueada:false},
+    perfeito:{nome:"Perfeição",desc:"Terminou o jogo com 9 vidas cheias",icone:"⭐",desbloqueada:false},
+    mestre:{nome:"Grão-Mestre",desc:"Desbloqueou 25 conquistas",icone:"🏆",desbloqueada:false},
+    lendaViva:{nome:"Lenda Viva",desc:"Desbloqueou TODAS as conquistas",icone:"🌟",desbloqueada:false}
 };
 
 let vidasPerdidasTotal = 0, moedasColetadasTotal = 0, cipoUsos = 0;
@@ -295,9 +290,7 @@ function iniciarCutscene() {
 function playCutscene() {
     if (cutsceneEncerrada) return;
     if (cutsceneIndex >= cutsceneVideos.length) { mostrarBoaSorte(); return; }
-    cutsceneFade.style.opacity = '0';
-    cutsceneText.style.opacity = '0';
-    cutsceneVideo.style.opacity = '0';
+    cutsceneFade.style.opacity = '0'; cutsceneText.style.opacity = '0'; cutsceneVideo.style.opacity = '0';
     let caiuNoTexto = false;
     const fallbackTexto = () => {
         if (caiuNoTexto || cutsceneEncerrada) return;
@@ -361,10 +354,9 @@ let contadorTitulo = 0, contadorTituloNivel2 = 0, contadorTituloNivel3 = 0, cont
 let isResizing = false, gameOver = false, tempoGlobal = 0;
 let checkpointX = 100, checkpointY = 0;
 let temEspada = false, atacando = false, ataqueTimer = 0;
-const ALCANCE_ATAQUE = 120, DURACAO_ATAQUE = 18;
+const ALCANCE_ATAQUE = 130, DURACAO_ATAQUE = 22;
 let barreiraAtiva = false, barreiraX = 0, jogadorAgravado = null, cooldownCipo = 0;
 let playerSquash = 0, playerNoChaoAnterior = true;
-let playerWalkPhase = 0;
 
 let efeitoMorteAtivo = false, efeitoMorteTimer = 0, screenShake = 0, flashMorte = 0;
 
@@ -375,18 +367,17 @@ const imgPlataformaPodre = new Image(); imgPlataformaPodre.src = 'Plataforma2.pn
 
 const CHAO_ALTURA = Math.floor(H * 0.15);
 let chaoY = H - CHAO_ALTURA;
-// >>> PERSONAGEM MAIOR <<<
 const PLAYER_SIZE = Math.min(W, H) * 0.058;
 const MOB_RADIUS = Math.min(W, H) * 0.025;
 
 const BURACOS = [
-    { inicio:1400, fim:1600 },{ inicio:2800, fim:3000 },{ inicio:4500, fim:4700 },
-    { inicio:6500, fim:6700 },{ inicio:7400, fim:7600 },{ inicio:8200, fim:8400 },
-    { inicio:11000, fim:11300 },{ inicio:13000, fim:13300 },{ inicio:16000, fim:16300 },
-    { inicio:19000, fim:19300 },{ inicio:22000, fim:22300 },{ inicio:26000, fim:26300 },
-    { inicio:30000, fim:30300 },{ inicio:35000, fim:35300 },{ inicio:40000, fim:40300 },
-    { inicio:44000, fim:44300 },{ inicio:52000, fim:54000 },{ inicio:59000, fim:61500 },
-    { inicio:67000, fim:69500 },{ inicio:75000, fim:77500 },{ inicio:81000, fim:82500 }
+    { inicio:1400,fim:1600 },{ inicio:2800,fim:3000 },{ inicio:4500,fim:4700 },
+    { inicio:6500,fim:6700 },{ inicio:7400,fim:7600 },{ inicio:8200,fim:8400 },
+    { inicio:11000,fim:11300 },{ inicio:13000,fim:13300 },{ inicio:16000,fim:16300 },
+    { inicio:19000,fim:19300 },{ inicio:22000,fim:22300 },{ inicio:26000,fim:26300 },
+    { inicio:30000,fim:30300 },{ inicio:35000,fim:35300 },{ inicio:40000,fim:40300 },
+    { inicio:44000,fim:44300 },{ inicio:52000,fim:54000 },{ inicio:59000,fim:61500 },
+    { inicio:67000,fim:69500 },{ inicio:75000,fim:77500 },{ inicio:81000,fim:82500 }
 ];
 function estaSobreBuraco(x) { for (let b of BURACOS) if (x + PLAYER_SIZE > b.inicio && x < b.fim) return true; return false; }
 function ajustarPosicaoBuraco() {
@@ -525,14 +516,12 @@ function avancarDialogo() {
 const passaroCarta = { ativo:false,x:0,y:0,vx:-4,fase:0,soltou:false,saiu:false };
 const carta = { ativa:false,caiu:false,x:0,y:0,vy:0,coletada:false,lida:false };
 const CARTA_TEXTO = [
-    "Ao herói de Acuílandia,",
-    "Sou um velho aliado do sábio que te presenteou a espada.",
+    "Ao herói de Acuílandia,","Sou um velho aliado do sábio que te presenteou a espada.",
     "O que dorme nessa caverna já devorou exércitos inteiros...",
     "Mas tua lâmina guarda um poder que ainda não despertaste.",
     "Segura o botão de ataque por 3 segundos para ARREMESSAR a espada.",
     "Ela voará reta, cortará tudo no caminho e voltará à tua mão.",
-    "Usa isso. Vais precisar.",
-    "— Um amigo que ainda observa das sombras"
+    "Usa isso. Vais precisar.","— Um amigo que ainda observa das sombras"
 ];
 let podeLancarEspada = false;
 
@@ -653,54 +642,82 @@ const player = {
 let ultimaDirecao = 1;
 
 const mobs = [
-    { x:900,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:2.0,minX:700,maxX:1200,direction:1,color:'#6a9c3a',stroke:'#4a6c25',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:0,caindo:false,vy:0,chasing:false },
-    { x:2000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:2.8,minX:1800,maxX:2300,direction:1,color:'#7a8c4a',stroke:'#5a6c2a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1,caindo:false,vy:0,chasing:false },
-    { x:3300,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:3.2,minX:3100,maxX:3600,direction:1,color:'#8a6c3a',stroke:'#6a4c1a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:2,caindo:false,vy:0,chasing:false },
-    { x:5000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:3.5,minX:4800,maxX:5300,direction:1,color:'#5a8a5a',stroke:'#3a6a3a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:.5,caindo:false,vy:0,chasing:false },
-    { x:6400,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:3.0,minX:6200,maxX:6600,direction:1,color:'#7a9c3a',stroke:'#5a7c1a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1.3,caindo:false,vy:0,chasing:false },
-    { x:7100,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:3.8,minX:6900,maxX:7300,direction:1,color:'#6a8c4a',stroke:'#4a6c2a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:.8,caindo:false,vy:0,chasing:false },
-    { x:7900,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:4.2,minX:7700,maxX:8100,direction:1,color:'#8a9c5a',stroke:'#6a7c3a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1.7,caindo:false,vy:0,chasing:false },
-    { x:10500,y:chaoY-120,radius:MOB_RADIUS,speed:4.0,minX:10300,maxX:10800,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:40,fase:0,chasing:false },
-    { x:11500,y:chaoY-80,radius:MOB_RADIUS,speed:4.5,minX:11300,maxX:11800,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:50,fase:1.2,chasing:false },
-    { x:12500,y:chaoY-140,radius:MOB_RADIUS,speed:5.0,minX:12300,maxX:12800,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:60,fase:2.5,chasing:false },
-    { x:14000,y:chaoY-100,radius:MOB_RADIUS,speed:4.2,minX:13800,maxX:14300,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:45,fase:.8,chasing:false },
-    { x:15500,y:chaoY-90,radius:MOB_RADIUS,speed:4.8,minX:15300,maxX:15800,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:55,fase:1.8,chasing:false },
-    { x:17000,y:chaoY-110,radius:MOB_RADIUS,speed:5.2,minX:16800,maxX:17300,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:50,fase:3.0,chasing:false },
-    { x:18500,y:chaoY-70,radius:MOB_RADIUS,speed:4.0,minX:18300,maxX:18800,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:40,fase:.3,chasing:false },
-    { x:20000,y:chaoY-130,radius:MOB_RADIUS,speed:4.7,minX:19800,maxX:20300,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:60,fase:1.5,chasing:false },
-    { x:21500,y:chaoY-95,radius:MOB_RADIUS,speed:5.5,minX:21300,maxX:21800,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:50,fase:2.2,chasing:false },
-    { x:23000,y:chaoY-80,radius:MOB_RADIUS,speed:4.3,minX:22800,maxX:23300,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:45,fase:.6,chasing:false },
-    { x:26000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:3.0,minX:25500,maxX:26500,direction:1,color:'#6a9c3a',stroke:'#4a6c25',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:.2,caindo:false,vy:0,chasing:false },
-    { x:27000,y:chaoY-110,radius:MOB_RADIUS,speed:4.5,minX:26500,maxX:27500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:50,fase:.7,chasing:false },
-    { x:28000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:3.5,minX:27500,maxX:28500,direction:1,color:'#7a8c4a',stroke:'#5a6c2a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1.5,caindo:false,vy:0,chasing:false },
-    { x:29000,y:chaoY-90,radius:MOB_RADIUS,speed:4.8,minX:28500,maxX:29500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:55,fase:1.3,chasing:false },
-    { x:30000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:3.8,minX:29500,maxX:30500,direction:1,color:'#8a6c3a',stroke:'#6a4c1a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:2.4,caindo:false,vy:0,chasing:false },
-    { x:31000,y:chaoY-120,radius:MOB_RADIUS,speed:5.0,minX:30500,maxX:31500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:60,fase:2.0,chasing:false },
-    { x:32000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:4.0,minX:31500,maxX:32500,direction:1,color:'#5a8a5a',stroke:'#3a6a3a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:.7,caindo:false,vy:0,chasing:false },
-    { x:33000,y:chaoY-100,radius:MOB_RADIUS,speed:4.6,minX:32500,maxX:33500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:45,fase:.4,chasing:false },
-    { x:34000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:4.2,minX:33500,maxX:34500,direction:1,color:'#7a9c3a',stroke:'#5a7c1a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1.9,caindo:false,vy:0,chasing:false },
-    { x:35000,y:chaoY-80,radius:MOB_RADIUS,speed:5.2,minX:34500,maxX:35500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:50,fase:1.8,chasing:false },
-    { x:36000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:4.5,minX:35500,maxX:36500,direction:1,color:'#6a8c4a',stroke:'#4a6c2a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:.3,caindo:false,vy:0,chasing:false },
-    { x:37000,y:chaoY-110,radius:MOB_RADIUS,speed:5.0,minX:36500,maxX:37500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:55,fase:2.5,chasing:false },
-    { x:38000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:4.8,minX:37500,maxX:38500,direction:1,color:'#8a9c5a',stroke:'#6a7c3a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1.1,caindo:false,vy:0,chasing:false },
-    { x:39000,y:chaoY-90,radius:MOB_RADIUS,speed:5.3,minX:38500,maxX:39500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:60,fase:1.0,chasing:false },
-    { x:40000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:5.0,minX:39500,maxX:40500,direction:1,color:'#6a9c3a',stroke:'#4a6c25',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:2.1,caindo:false,vy:0,chasing:false },
-    { x:41000,y:chaoY-120,radius:MOB_RADIUS,speed:5.5,minX:40500,maxX:41500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:50,fase:.9,chasing:false },
-    { x:42000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:5.2,minX:41500,maxX:42500,direction:1,color:'#7a8c4a',stroke:'#5a6c2a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:.6,caindo:false,vy:0,chasing:false },
-    { x:43000,y:chaoY-100,radius:MOB_RADIUS,speed:5.6,minX:42500,maxX:43500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:55,fase:1.4,chasing:false },
-    { x:44000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:5.4,minX:43500,maxX:44500,direction:1,color:'#8a6c3a',stroke:'#6a4c1a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:2.8,caindo:false,vy:0,chasing:false },
-    { x:45000,y:chaoY-80,radius:MOB_RADIUS,speed:5.8,minX:44500,maxX:45500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:60,fase:2.2,chasing:false },
-    { x:46000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:5.6,minX:45500,maxX:46500,direction:1,color:'#5a8a5a',stroke:'#3a6a3a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1.6,caindo:false,vy:0,chasing:false },
-    { x:48500,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:6.0,minX:48000,maxX:49000,direction:1,color:'#8a3a1a',stroke:'#5a1a00',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:0,caindo:false,vy:0,chasing:false },
-    { x:54500,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:6.5,minX:54000,maxX:55200,direction:1,color:'#9a4a2a',stroke:'#6a2a00',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1,caindo:false,vy:0,chasing:false },
-    { x:56500,y:chaoY-130,radius:MOB_RADIUS,speed:6.8,minX:55500,maxX:57500,direction:1,color:'#6a3a7a',stroke:'#3a1a52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:60,fase:0,chasing:false },
-    { x:62000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:7.0,minX:61500,maxX:63000,direction:1,color:'#aa3a1a',stroke:'#7a1a00',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:2,caindo:false,vy:0,chasing:false },
-    { x:65500,y:chaoY-110,radius:MOB_RADIUS,speed:7.2,minX:64500,maxX:66500,direction:1,color:'#7a3a8a',stroke:'#4a1a5a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:65,fase:1.5,chasing:false },
-    { x:70500,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:7.5,minX:70000,maxX:71500,direction:1,color:'#9a4a1a',stroke:'#6a2a00',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:.5,caindo:false,vy:0,chasing:false },
-    { x:73000,y:chaoY-130,radius:MOB_RADIUS,speed:7.8,minX:72000,maxX:74000,direction:1,color:'#6a3a8a',stroke:'#3a1a5a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:70,fase:2.5,chasing:false },
-    { x:78500,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:8.0,minX:78000,maxX:79500,direction:1,color:'#ba4a1a',stroke:'#8a2a00',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1,caindo:false,vy:0,chasing:false },
-    { x:83000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:8.5,minX:82600,maxX:84000,direction:1,color:'#aa3a2a',stroke:'#7a1a00',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:0,caindo:false,vy:0,chasing:false }
+    { x:900,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:2.0,minX:700,maxX:1200,direction:1,color:'#6a9c3a',stroke:'#4a6c25',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:0,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:2000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:2.8,minX:1800,maxX:2300,direction:1,color:'#7a8c4a',stroke:'#5a6c2a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:3300,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:3.2,minX:3100,maxX:3600,direction:1,color:'#8a6c3a',stroke:'#6a4c1a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:2,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:5000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:3.5,minX:4800,maxX:5300,direction:1,color:'#5a8a5a',stroke:'#3a6a3a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:.5,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:6400,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:3.0,minX:6200,maxX:6600,direction:1,color:'#7a9c3a',stroke:'#5a7c1a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1.3,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:7100,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:3.8,minX:6900,maxX:7300,direction:1,color:'#6a8c4a',stroke:'#4a6c2a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:.8,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:7900,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:4.2,minX:7700,maxX:8100,direction:1,color:'#8a9c5a',stroke:'#6a7c3a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1.7,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:10500,y:chaoY-120,radius:MOB_RADIUS,speed:4.0,minX:10300,maxX:10800,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:40,fase:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:11500,y:chaoY-80,radius:MOB_RADIUS,speed:4.5,minX:11300,maxX:11800,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:50,fase:1.2,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:12500,y:chaoY-140,radius:MOB_RADIUS,speed:5.0,minX:12300,maxX:12800,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:60,fase:2.5,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:14000,y:chaoY-100,radius:MOB_RADIUS,speed:4.2,minX:13800,maxX:14300,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:45,fase:.8,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:15500,y:chaoY-90,radius:MOB_RADIUS,speed:4.8,minX:15300,maxX:15800,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:55,fase:1.8,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:17000,y:chaoY-110,radius:MOB_RADIUS,speed:5.2,minX:16800,maxX:17300,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:50,fase:3.0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:18500,y:chaoY-70,radius:MOB_RADIUS,speed:4.0,minX:18300,maxX:18800,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:40,fase:.3,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:20000,y:chaoY-130,radius:MOB_RADIUS,speed:4.7,minX:19800,maxX:20300,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:60,fase:1.5,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:21500,y:chaoY-95,radius:MOB_RADIUS,speed:5.5,minX:21300,maxX:21800,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:50,fase:2.2,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:23000,y:chaoY-80,radius:MOB_RADIUS,speed:4.3,minX:22800,maxX:23300,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:45,fase:.6,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:26000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:3.0,minX:25500,maxX:26500,direction:1,color:'#6a9c3a',stroke:'#4a6c25',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:.2,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:27000,y:chaoY-110,radius:MOB_RADIUS,speed:4.5,minX:26500,maxX:27500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:50,fase:.7,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:28000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:3.5,minX:27500,maxX:28500,direction:1,color:'#7a8c4a',stroke:'#5a6c2a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1.5,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:29000,y:chaoY-90,radius:MOB_RADIUS,speed:4.8,minX:28500,maxX:29500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:55,fase:1.3,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:30000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:3.8,minX:29500,maxX:30500,direction:1,color:'#8a6c3a',stroke:'#6a4c1a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:2.4,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:31000,y:chaoY-120,radius:MOB_RADIUS,speed:5.0,minX:30500,maxX:31500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:60,fase:2.0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:32000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:4.0,minX:31500,maxX:32500,direction:1,color:'#5a8a5a',stroke:'#3a6a3a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:.7,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:33000,y:chaoY-100,radius:MOB_RADIUS,speed:4.6,minX:32500,maxX:33500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:45,fase:.4,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:34000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:4.2,minX:33500,maxX:34500,direction:1,color:'#7a9c3a',stroke:'#5a7c1a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1.9,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:35000,y:chaoY-80,radius:MOB_RADIUS,speed:5.2,minX:34500,maxX:35500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:50,fase:1.8,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:36000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:4.5,minX:35500,maxX:36500,direction:1,color:'#6a8c4a',stroke:'#4a6c2a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:.3,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:37000,y:chaoY-110,radius:MOB_RADIUS,speed:5.0,minX:36500,maxX:37500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:55,fase:2.5,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:38000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:4.8,minX:37500,maxX:38500,direction:1,color:'#8a9c5a',stroke:'#6a7c3a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1.1,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:39000,y:chaoY-90,radius:MOB_RADIUS,speed:5.3,minX:38500,maxX:39500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:60,fase:1.0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:40000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:5.0,minX:39500,maxX:40500,direction:1,color:'#6a9c3a',stroke:'#4a6c25',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:2.1,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:41000,y:chaoY-120,radius:MOB_RADIUS,speed:5.5,minX:40500,maxX:41500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:50,fase:.9,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:42000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:5.2,minX:41500,maxX:42500,direction:1,color:'#7a8c4a',stroke:'#5a6c2a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:.6,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:43000,y:chaoY-100,radius:MOB_RADIUS,speed:5.6,minX:42500,maxX:43500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:55,fase:1.4,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:44000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:5.4,minX:43500,maxX:44500,direction:1,color:'#8a6c3a',stroke:'#6a4c1a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:2.8,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:45000,y:chaoY-80,radius:MOB_RADIUS,speed:5.8,minX:44500,maxX:45500,direction:1,color:'#5d4a7a',stroke:'#3d2e52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:60,fase:2.2,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:46000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:5.6,minX:45500,maxX:46500,direction:1,color:'#5a8a5a',stroke:'#3a6a3a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1.6,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:48500,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:6.0,minX:48000,maxX:49000,direction:1,color:'#8a3a1a',stroke:'#5a1a00',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:0,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:54500,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:6.5,minX:54000,maxX:55200,direction:1,color:'#9a4a2a',stroke:'#6a2a00',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:56500,y:chaoY-130,radius:MOB_RADIUS,speed:6.8,minX:55500,maxX:57500,direction:1,color:'#6a3a7a',stroke:'#3a1a52',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:60,fase:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:62000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:7.0,minX:61500,maxX:63000,direction:1,color:'#aa3a1a',stroke:'#7a1a00',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:2,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:65500,y:chaoY-110,radius:MOB_RADIUS,speed:7.2,minX:64500,maxX:66500,direction:1,color:'#7a3a8a',stroke:'#4a1a5a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:65,fase:1.5,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:70500,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:7.5,minX:70000,maxX:71500,direction:1,color:'#9a4a1a',stroke:'#6a2a00',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:.5,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:73000,y:chaoY-130,radius:MOB_RADIUS,speed:7.8,minX:72000,maxX:74000,direction:1,color:'#6a3a8a',stroke:'#3a1a5a',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'voador',amplitude:70,fase:2.5,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:78500,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:8.0,minX:78000,maxX:79500,direction:1,color:'#ba4a1a',stroke:'#8a2a00',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:1,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 },
+    { x:83000,y:chaoY-MOB_RADIUS,radius:MOB_RADIUS,speed:8.5,minX:82600,maxX:84000,direction:1,color:'#aa3a2a',stroke:'#7a1a00',morto:false,hp:2,knockbackX:0,knockbackY:0,emKnockback:false,tipo:'terrestre',fase:0,caindo:false,vy:0,chasing:false,estado:'patrulha',tempoSemVer:0,tempoProcurando:0,tempoNoticing:0 }
 ];
+
+// ============================================
+// VISÃO DO MOB — AGORA MAIS JUSTA
+// ============================================
+const VISAO_ALCANCE = 250;                 // Alcance curto (era 420)
+const VISAO_MEIO_ANGULO = Math.PI / 5;     // Cone estreito (~72° total, era ~128°)
+const NOTICING_FRAMES = 18;                // ~0.3s pra reagir (não é instantâneo)
+const PERDE_VISAO_FRAMES = 90;             // ~1.5s sem ver → "?"
+const PROCURA_FRAMES = 90;                 // ~1.5s procurando → volta a patrulhar
+
+function mobVePlayer(mob) {
+    if (mob.morto || mob.caindo) return false;
+    const pCX = player.x + player.w / 2;
+    const pCY = player.y + player.h / 2;
+    const dx = pCX - mob.x;
+    const dy = pCY - mob.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist > VISAO_ALCANCE) return false;
+    if (dist < 35) return true; // Colado, sempre vê
+
+    // Player precisa estar na direção que o mob olha
+    const playerNaFrente = (mob.direction === 1 && dx > 0) || (mob.direction === -1 && dx < 0);
+    if (!playerNaFrente) return false;
+
+    const angulo = Math.atan2(dy, Math.abs(dx));
+    return Math.abs(angulo) < VISAO_MEIO_ANGULO;
+}
 
 function mobPodeAvancar(mob) {
     const proxX = mob.x + (mob.speed + 15) * mob.direction;
@@ -854,11 +871,7 @@ function checkBolasDeFogo() {
     for (let i = bolasDeFogo.length - 1; i >= 0; i--) {
         const b = bolasDeFogo[i];
         const dx = (player.x + player.w/2) - b.x, dy = (player.y + player.h/2) - b.y;
-        if (Math.sqrt(dx*dx + dy*dy) < player.w/2 + b.raio) {
-            bolasDeFogo.splice(i, 1);
-            resetPlayer();
-            return;
-        }
+        if (Math.sqrt(dx*dx + dy*dy) < player.w/2 + b.raio) { bolasDeFogo.splice(i, 1); resetPlayer(); return; }
     }
 }
 function criarParticulas(x, y, qtd, cor, vel, vida) {
@@ -983,11 +996,10 @@ function restartGame() {
         mobs[i].morto = false; mobs[i].direction = 1; mobs[i].hp = 2;
         mobs[i].knockbackX = 0; mobs[i].knockbackY = 0; mobs[i].emKnockback = false;
         mobs[i].caindo = false; mobs[i].vy = 0; mobs[i].chasing = false;
+        mobs[i].estado = 'patrulha'; mobs[i].tempoSemVer = 0; mobs[i].tempoProcurando = 0; mobs[i].tempoNoticing = 0;
         mobs[i].fase = Math.random()*Math.PI*2;
         mobs[i].walkPhase = Math.random()*Math.PI*2;
         mobs[i].hitFlash = 0; mobs[i].aggro = 0; mobs[i].dustTimer = 0;
-        // >>> NOVOS CAMPOS DE VISÃO <<<
-        mobs[i].timerPerdeuVisao = 0; mobs[i].mostrarInterrogacao = 0; mobs[i].vendoPlayer = false;
         if (mobs[i].tipo === 'terrestre') mobs[i].y = chaoY - mobs[i].radius;
     }
     espadaLancada = null; segurandoAtaque = false; tempoSegurando = 0; inicioHold = 0;
@@ -1071,20 +1083,17 @@ function update() {
             }
         }
         for (let canhao of CANHOES) {
-            const topoY = canhao.y - 55;
-            const left = canhao.x - 25, right = canhao.x + 25;
-            const dentroX = player.x + player.w > left && player.x < right;
-            if (!dentroX) continue;
-            const feet = player.y + player.h;
-            if (player.vy >= 0 && feet >= topoY && feet <= topoY + 25 + Math.max(0, player.vy)) {
-                player.y = topoY - player.h;
-                player.vy = 0;
-                player.onGround = true;
+            const topoY = canhao.y - 55, left = canhao.x - 25, right = canhao.x + 25;
+            if (player.x + player.w > left && player.x < right) {
+                if (player.vy >= 0 && player.y + player.h >= topoY && player.y + player.h <= topoY + 20 + player.vy) {
+                    player.y = topoY - player.h; player.vy = 0; player.onGround = true;
+                }
             }
-            else if (feet > topoY + 30 && player.y < chaoY - 10) {
-                const centro = player.x + player.w / 2;
-                if (centro < canhao.x) player.x = left - player.w - 1;
-                else player.x = right + 1;
+            if (player.y + player.h > topoY + 30 && player.y < chaoY - 10) {
+                if (player.x + player.w > left && player.x < right) {
+                    const dE = Math.abs(player.x + player.w - left), dD = Math.abs(right - player.x);
+                    if (dE < dD) player.x = left - player.w; else player.x = right;
+                }
             }
         }
         if (player.onGround && !playerNoChaoAnterior) {
@@ -1097,9 +1106,6 @@ function update() {
         }
     }
     playerSquash *= .82;
-    
-    if (Math.abs(player.vx) > 0.5 && player.onGround) playerWalkPhase += 0.25;
-    else playerWalkPhase *= 0.85;
 
     for (let pp of PLATAFORMAS_PODRES) {
         if (pp.destruida) { pp.respawn++; if (pp.respawn > 300) { pp.destruida = false; pp.tremendo = false; pp.tempoPisada = 0; pp.respawn = 0; pp.alpha = 1; } continue; }
@@ -1133,7 +1139,7 @@ function update() {
     }
 
     // ============================================
-    // MOBS — VISÃO EM CONE + "?" AO PERDER DE VISTA
+    // MOBS — VISÃO JUSTA + DELAY DE REAÇÃO
     // ============================================
     for (let mob of mobs) {
         if (mob.morto) continue;
@@ -1141,49 +1147,64 @@ function update() {
         if (mob.hitFlash === undefined) mob.hitFlash = 0;
         if (mob.aggro === undefined) mob.aggro = 0;
         if (mob.dustTimer === undefined) mob.dustTimer = 0;
-        if (mob.chasing === undefined) mob.chasing = false;
-        if (mob.timerPerdeuVisao === undefined) mob.timerPerdeuVisao = 0;
-        if (mob.mostrarInterrogacao === undefined) mob.mostrarInterrogacao = 0;
-        if (mob.vendoPlayer === undefined) mob.vendoPlayer = false;
+        if (mob.estado === undefined) mob.estado = 'patrulha';
+        if (mob.tempoSemVer === undefined) mob.tempoSemVer = 0;
+        if (mob.tempoProcurando === undefined) mob.tempoProcurando = 0;
+        if (mob.tempoNoticing === undefined) mob.tempoNoticing = 0;
 
         if (mob.hitFlash > 0) mob.hitFlash--;
 
-        const playerCX = player.x + player.w/2, playerCY = player.y + player.h/2;
-        const distX = playerCX - mob.x;
-        const distY = playerCY - mob.y;
-        const distPlayer = Math.sqrt(distX*distX + distY*distY);
+        const vePlayerAgora = mobVePlayer(mob);
 
-        // ============ VISÃO EM CONE (só vê de frente) ============
-        const dxFrente = distX * mob.direction;
-        const anguloAoPlayer = Math.atan2(distY, dxFrente);
-        const dentroConeVisao = Math.abs(anguloAoPlayer) < Math.PI / 3;
-        const podeVer = distPlayer < 400 && dentroConeVisao && dxFrente > 0;
-
-        // ============ ESTADOS DE AGGRO ============
-        if (podeVer) {
-            mob.vendoPlayer = true;
-            mob.timerPerdeuVisao = 0;
-            mob.mostrarInterrogacao = 0;
+        // ============ MÁQUINA DE ESTADOS ============
+        if (mob.estado === 'patrulha') {
+            mob.chasing = false;
+            mob.aggro = Math.max(0, mob.aggro - 0.08);
+            mob.tempoNoticing = 0;
+            if (vePlayerAgora) {
+                // Começa a "notar" o player (delay de reação)
+                mob.estado = 'notando';
+            }
+        } else if (mob.estado === 'notando') {
+            mob.chasing = false;
+            mob.aggro = Math.min(0.5, mob.aggro + 0.05);
+            mob.tempoNoticing++;
+            if (!vePlayerAgora) {
+                mob.estado = 'patrulha';
+                mob.tempoNoticing = 0;
+            } else if (mob.tempoNoticing >= NOTICING_FRAMES) {
+                mob.estado = 'perseguindo';
+                mob.tempoSemVer = 0;
+                mob.aggro = 0.7;
+            }
+        } else if (mob.estado === 'perseguindo') {
+            mob.chasing = true;
             mob.aggro = Math.min(1, mob.aggro + 0.12);
-            if (mob.aggro > 0.7 && !mob.chasing) mob.chasing = true;
-        } else {
-            mob.vendoPlayer = false;
-            if (mob.chasing) {
-                mob.timerPerdeuVisao++;
-                // Depois de ~0,75s sem te ver, aparece "?"
-                if (mob.timerPerdeuVisao === 45) mob.mostrarInterrogacao = 90;
-                // Depois que o "?" sumir, volta a patrulhar
-                if (mob.timerPerdeuVisao > 135) {
-                    mob.chasing = false;
-                    mob.aggro = 0;
-                    mob.timerPerdeuVisao = 0;
-                }
+            if (vePlayerAgora) {
+                mob.tempoSemVer = 0;
             } else {
-                mob.aggro = Math.max(0, mob.aggro - 0.08);
+                mob.tempoSemVer++;
+                if (mob.tempoSemVer > PERDE_VISAO_FRAMES) {
+                    mob.estado = 'procurando';
+                    mob.tempoProcurando = 0;
+                    mob.chasing = false;
+                }
+            }
+        } else if (mob.estado === 'procurando') {
+            mob.chasing = false;
+            mob.aggro = Math.max(0.25, mob.aggro - 0.02);
+            if (vePlayerAgora) {
+                mob.estado = 'perseguindo';
+                mob.tempoSemVer = 0;
+            } else {
+                mob.tempoProcurando++;
+                if (mob.tempoProcurando > PROCURA_FRAMES) {
+                    mob.estado = 'patrulha';
+                    mob.aggro = 0;
+                    mob.tempoProcurando = 0;
+                }
             }
         }
-        if (mob.mostrarInterrogacao > 0) mob.mostrarInterrogacao--;
-        const confuso = mob.mostrarInterrogacao > 0;
 
         if (mob.caindo) {
             mob.vy += 0.55;
@@ -1230,15 +1251,14 @@ function update() {
             if (sobreBuraco) { mob.caindo = true; mob.vy = 2; continue; }
         }
 
-        // ============ MOVIMENTAÇÃO ============
-        if (confuso) {
-            // Confuso — para de andar e olha em volta
-            mob.walkPhase *= 0.88;
-            if (mob.tipo === 'terrestre') mob.y = chaoY - mob.radius;
-        } else if (mob.chasing) {
+        if (mob.chasing) {
+            const playerCX = player.x + player.w/2, playerCY = player.y + player.h/2;
+            const distX = playerCX - mob.x;
+            const distY = playerCY - mob.y;
+
             if (mob.tipo === 'terrestre') {
                 const dirX = distX > 0 ? 1 : -1;
-                const vel = mob.speed * 1.9;
+                const vel = mob.speed * 1.75;
                 const proxX = mob.x + dirX * vel;
                 let sobreBuraco = false;
                 for (let b of BURACOS) {
@@ -1256,8 +1276,8 @@ function update() {
                 }
                 mob.y = chaoY - mob.radius;
             } else {
-                const d = distPlayer || 1;
-                const vel = mob.speed * 1.4;
+                const d = Math.sqrt(distX*distX + distY*distY) || 1;
+                const vel = mob.speed * 1.3;
                 mob.x += (distX / d) * vel;
                 mob.y += (distY / d) * vel;
                 mob.direction = distX > 0 ? 1 : -1;
@@ -1271,12 +1291,14 @@ function update() {
                     mob.dustTimer = 0;
                     particulas.push({ x:mob.x + (Math.random()-.5)*mob.radius, y:chaoY - 3, vx:(Math.random()-.5)*1.5, vy:-.5-Math.random()*.8, vida:20, vidaMax:20, cor:'#c9b088', tamanho:2+Math.random()*3 });
                 }
-                if (!mobPodeAvancar(mob)) { mob.direction *= -1; continue; }
-                mob.x += mob.speed * mob.direction;
-                if (mob.x > mob.maxX || mob.x < mob.minX) {
-                    mob.direction *= -1;
-                    if (mob.x < mob.minX) mob.x = mob.minX;
-                    if (mob.x > mob.maxX) mob.x = mob.maxX;
+                if (!mobPodeAvancar(mob)) { mob.direction *= -1; }
+                else {
+                    mob.x += mob.speed * mob.direction;
+                    if (mob.x > mob.maxX || mob.x < mob.minX) {
+                        mob.direction *= -1;
+                        if (mob.x < mob.minX) mob.x = mob.minX;
+                        if (mob.x > mob.maxX) mob.x = mob.maxX;
+                    }
                 }
                 mob.y = chaoY - mob.radius;
             } else {
@@ -1477,376 +1499,269 @@ function update() {
 }
 
 // ============================================
-// ============ PERSONAGEM NOVO ============
+// ============ PERSONAGEM QUADRADO DE VOLTA ============
 // ============================================
 function desenharPlayerNovo(px, py, w, h) {
     const cor = personagemSelecionado.cor;
     const corEsc = personagemSelecionado.corStroke;
-    const corClara = personagemSelecionado.corClara || personagemSelecionado.cor;
+    const corClara = personagemSelecionado.corClara;
 
-    const cx = px + w/2;
-    const cy = py + h/2;
-    const r = w/2;
+    // Squash/stretch
+    const sw = w * (1 + playerSquash * 0.5);
+    const sh = h * (1 - playerSquash * 0.5);
+    const sx2 = px + (w - sw) / 2;
+    const sy2 = py + (h - sh);
 
-    const walking = Math.abs(player.vx) > 0.5 && player.onGround;
-    const legSwing = walking ? Math.sin(playerWalkPhase) * r * 0.35 : 0;
-    const armSwing = walking ? -Math.sin(playerWalkPhase) * r * 0.4 : 0;
-    const jumpOffset = player.onGround ? 0 : -2;
-    const breathe = 1 + Math.sin(tempoGlobal * 0.06) * 0.02;
+    // Ataque progresso 0 → 1 (0-0.28 puxa, 0.28-0.55 bate, 0.55-1 volta)
+    const atkProg = atacando ? ataqueTimer / DURACAO_ATAQUE : 0;
 
-    // Progresso do ataque (0→1)
-    const atkProg = atacando ? (ataqueTimer / DURACAO_ATAQUE) : 0;
-    let armAtkAngle = 0;
+    // Angulo do braço direito
+    let armAngle = 0;
     if (atacando) {
-        if (atkProg < 0.35) {
-            // Windup: braço sobe pra trás
-            armAtkAngle = -atkProg / 0.35 * Math.PI * 0.55;
-        } else if (atkProg < 0.6) {
-            // Golpe: braço desce pra frente
-            armAtkAngle = -Math.PI * 0.55 + (atkProg - 0.35) / 0.25 * Math.PI * 0.95;
-        } else {
-            // Retorno suave
-            armAtkAngle = Math.PI * 0.4 * (1 - (atkProg - 0.6) / 0.4);
-        }
+        if (atkProg < 0.28) armAngle = -(atkProg / 0.28) * 1.2;
+        else if (atkProg < 0.55) armAngle = -1.2 + ((atkProg - 0.28) / 0.27) * 2.8;
+        else armAngle = 1.6 * (1 - (atkProg - 0.55) / 0.45);
     }
 
     // SOMBRA
     if (!jogadorAgravado) {
-        ctx.fillStyle = 'rgba(0,0,0,0.32)';
+        ctx.fillStyle = 'rgba(0,0,0,.32)';
         ctx.beginPath();
-        ctx.ellipse(cx, chaoY + 4, w * 0.7 * (1 - playerSquash * 0.4), 5, 0, 0, Math.PI * 2);
+        ctx.ellipse(px + w/2, chaoY + 3, w * 0.55 * (1 - playerSquash * 0.4), 4.5, 0, 0, Math.PI * 2);
         ctx.fill();
     }
 
     ctx.save();
-    ctx.translate(cx, cy + jumpOffset);
+    ctx.translate(sx2 + sw/2, sy2 + sh/2);
 
-    // Espelha conforme direção
-    const dir = ultimaDirecao;
-    ctx.scale(dir, 1);
+    const half = sw / 2;
+    const halfH = sh / 2;
 
-    // ========== PERNAS ==========
-    const legBaseY = r * 0.35;
-    const legLen = r * 0.55;
-    const backLegX = -r * 0.22;
-    const frontLegX = r * 0.22;
-
+    // ============ BRAÇO ESQUERDO (atrás do corpo) ============
+    const shoulderY = -halfH * 0.15;
+    const armLen = halfH * 0.85;
+    ctx.strokeStyle = corEsc;
+    ctx.lineWidth = Math.max(4, half * 0.28);
     ctx.lineCap = 'round';
-
-    // perna traseira
-    ctx.strokeStyle = corEsc;
-    ctx.lineWidth = Math.max(4, r * 0.32);
-    ctx.beginPath();
-    ctx.moveTo(backLegX, legBaseY);
-    ctx.lineTo(backLegX + legSwing * 0.5, legBaseY + legLen + legSwing * 0.4);
-    ctx.stroke();
-    // pé traseiro
-    ctx.fillStyle = '#3a2010';
-    ctx.beginPath();
-    ctx.ellipse(backLegX + legSwing * 0.5 + r*0.05, legBaseY + legLen + legSwing * 0.4 + r*0.05, r*0.25, r*0.14, 0, 0, Math.PI*2);
-    ctx.fill();
-    ctx.strokeStyle = '#1a0800';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // perna dianteira
-    ctx.strokeStyle = corEsc;
-    ctx.lineWidth = Math.max(4, r * 0.32);
-    ctx.beginPath();
-    ctx.moveTo(frontLegX, legBaseY);
-    ctx.lineTo(frontLegX - legSwing * 0.5, legBaseY + legLen - legSwing * 0.4);
-    ctx.stroke();
-    // pé dianteiro
-    ctx.fillStyle = '#3a2010';
-    ctx.beginPath();
-    ctx.ellipse(frontLegX - legSwing * 0.5 + r*0.05, legBaseY + legLen - legSwing * 0.4 + r*0.05, r*0.25, r*0.14, 0, 0, Math.PI*2);
-    ctx.fill();
-    ctx.strokeStyle = '#1a0800';
-    ctx.stroke();
-
-    // ========== BRAÇO TRASEIRO ==========
-    const shoulderY = -r * 0.05;
-    const backShoulderX = -r * 0.55;
-
-    ctx.strokeStyle = corEsc;
-    ctx.lineWidth = Math.max(4, r * 0.28);
-    ctx.beginPath();
-    ctx.moveTo(backShoulderX, shoulderY);
-    ctx.lineTo(backShoulderX - r*0.15, shoulderY + r*0.4 + armSwing * 0.6);
-    ctx.stroke();
-    // mão traseira
+    let maoEsqX, maoEsqY;
+    if (!player.onGround) {
+        ctx.beginPath();
+        ctx.moveTo(-half - 2, shoulderY);
+        ctx.lineTo(-half - 10, shoulderY - 12);
+        ctx.stroke();
+        maoEsqX = -half - 10; maoEsqY = shoulderY - 12;
+    } else {
+        const armSwingL = -Math.sin(tempoGlobal * 0.15) * 3;
+        ctx.beginPath();
+        ctx.moveTo(-half - 2, shoulderY);
+        ctx.lineTo(-half - 8, shoulderY + armLen + armSwingL);
+        ctx.stroke();
+        maoEsqX = -half - 8; maoEsqY = shoulderY + armLen + armSwingL;
+    }
+    // Mão
     ctx.fillStyle = corEsc;
-    ctx.beginPath();
-    ctx.arc(backShoulderX - r*0.15, shoulderY + r*0.4 + armSwing * 0.6, r*0.17, 0, Math.PI*2);
-    ctx.fill();
-    ctx.strokeStyle = '#1a0800';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
+    ctx.beginPath(); ctx.arc(maoEsqX, maoEsqY, half * 0.28, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.stroke();
 
-    // ========== TRONCO ==========
-    const bodyTop = -r * 0.1;
-    const bodyBot = r * 0.42;
-    const bodyW = r * 0.8 * breathe;
-
-    const grad = ctx.createRadialGradient(-r*0.25, bodyTop + (bodyBot-bodyTop)*0.3, r*0.05, 0, bodyTop + (bodyBot-bodyTop)*0.5, r*1.0);
-    grad.addColorStop(0, corClara);
-    grad.addColorStop(0.55, cor);
-    grad.addColorStop(1, corEsc);
-
-    ctx.fillStyle = grad;
-    ctx.strokeStyle = '#000';
+    // ============ CORPO (QUADRADO) ============
+    ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 14;
+    const gradBody = ctx.createLinearGradient(-half, -halfH, half, halfH);
+    gradBody.addColorStop(0, corClara);
+    gradBody.addColorStop(0.5, cor);
+    gradBody.addColorStop(1, corEsc);
+    ctx.fillStyle = gradBody;
+    ctx.strokeStyle = corEsc;
     ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.moveTo(-bodyW/2, bodyTop + r*0.12);
-    ctx.quadraticCurveTo(-bodyW/2, bodyTop, -bodyW*0.32, bodyTop);
-    ctx.lineTo(bodyW*0.32, bodyTop);
-    ctx.quadraticCurveTo(bodyW/2, bodyTop, bodyW/2, bodyTop + r*0.12);
-    ctx.lineTo(bodyW/2, bodyBot - r*0.1);
-    ctx.quadraticCurveTo(bodyW/2, bodyBot, bodyW*0.35, bodyBot);
-    ctx.lineTo(-bodyW*0.35, bodyBot);
-    ctx.quadraticCurveTo(-bodyW/2, bodyBot, -bodyW/2, bodyBot - r*0.1);
-    ctx.closePath();
+    ctx.roundRect(-half, -halfH, sw, sh, 8);
     ctx.fill();
     ctx.stroke();
+    ctx.shadowBlur = 0;
 
-    // Brilho superior do tronco
-    ctx.fillStyle = 'rgba(255,255,255,0.32)';
+    // Brilho no canto
+    ctx.fillStyle = 'rgba(255,255,255,0.22)';
     ctx.beginPath();
-    ctx.ellipse(-r*0.2, bodyTop + r*0.15, r*0.3, r*0.15, -0.3, 0, Math.PI*2);
+    ctx.ellipse(-half * 0.35, -halfH * 0.4, half * 0.35, halfH * 0.22, -0.3, 0, Math.PI * 2);
     ctx.fill();
 
-    // Cinto
-    ctx.fillStyle = '#e74c3c';
-    ctx.strokeStyle = '#a02a1f';
-    ctx.lineWidth = 1.5;
-    ctx.fillRect(-bodyW*0.5, bodyBot - r*0.18, bodyW, r*0.13);
-    ctx.strokeRect(-bodyW*0.5, bodyBot - r*0.18, bodyW, r*0.13);
-    // Fivela
-    ctx.fillStyle = '#f1c40f';
-    ctx.beginPath();
-    ctx.arc(0, bodyBot - r*0.115, r*0.07, 0, Math.PI*2);
-    ctx.fill();
-    ctx.strokeStyle = '#8a6a00';
-    ctx.stroke();
-
-    // ========== BRAÇO DIANTEIRO (segura a espada) ==========
-    const frontShoulderX = r * 0.55;
-    const frontShoulderY = shoulderY;
-    const armAngle = armAtkAngle + (walking && !atacando ? -armSwing * 0.4 : 0);
-    const armLen = r * 0.55;
-
-    const handX = frontShoulderX + Math.sin(armAngle) * armLen;
-    const handY = frontShoulderY + Math.cos(armAngle) * armLen;
-
+    // ============ BRAÇO DIREITO (com ataque) ============
+    ctx.save();
+    ctx.translate(half + 2, shoulderY);
+    ctx.rotate(armAngle);
     ctx.strokeStyle = corEsc;
-    ctx.lineWidth = Math.max(4, r * 0.28);
+    ctx.lineWidth = Math.max(4, half * 0.28);
     ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(frontShoulderX, frontShoulderY);
-    ctx.quadraticCurveTo(
-        frontShoulderX + Math.sin(armAngle) * armLen * 0.5,
-        frontShoulderY + Math.cos(armAngle) * armLen * 0.5,
-        handX,
-        handY
-    );
-    ctx.stroke();
 
-    // Mão dianteira
-    ctx.fillStyle = corEsc;
-    ctx.beginPath();
-    ctx.arc(handX, handY, r*0.18, 0, Math.PI*2);
-    ctx.fill();
-    ctx.strokeStyle = '#1a0800';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    // Brilho na mão
-    ctx.fillStyle = 'rgba(255,255,255,0.35)';
-    ctx.beginPath();
-    ctx.arc(handX - r*0.05, handY - r*0.05, r*0.06, 0, Math.PI*2);
-    ctx.fill();
-
-    // ========== CABEÇA ==========
-    const headR = r * 0.52;
-    const headCY = -r * 0.55;
-
-    // Orelhas
-    ctx.fillStyle = corEsc;
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1.8;
-    ctx.beginPath();
-    ctx.ellipse(-headR*0.95, headCY + headR*0.05, headR*0.15, headR*0.22, 0, 0, Math.PI*2);
-    ctx.ellipse(headR*0.95, headCY + headR*0.05, headR*0.15, headR*0.22, 0, 0, Math.PI*2);
-    ctx.fill();
-    ctx.stroke();
-
-    // Cabeça
-    const headGrad = ctx.createRadialGradient(-headR*0.35, headCY - headR*0.35, headR*0.1, 0, headCY, headR);
-    headGrad.addColorStop(0, corClara);
-    headGrad.addColorStop(0.6, cor);
-    headGrad.addColorStop(1, corEsc);
-    ctx.fillStyle = headGrad;
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    ctx.arc(0, headCY, headR, 0, Math.PI*2);
-    ctx.fill();
-    ctx.stroke();
-
-    // Brilho da cabeça
-    ctx.fillStyle = 'rgba(255,255,255,0.35)';
-    ctx.beginPath();
-    ctx.ellipse(-headR*0.35, headCY - headR*0.4, headR*0.3, headR*0.18, -0.5, 0, Math.PI*2);
-    ctx.fill();
-
-    // ========== ROSTO ==========
-    const olharY = player.vy < -3 ? -r*0.05 : (player.vy > 3 ? r*0.05 : 0);
-
-    // Olhos brancos
-    ctx.fillStyle = '#fff';
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1.8;
-    ctx.beginPath();
-    ctx.ellipse(-headR*0.32, headCY + olharY, headR*0.22, headR*0.28, 0, 0, Math.PI*2);
-    ctx.ellipse(headR*0.32, headCY + olharY, headR*0.22, headR*0.28, 0, 0, Math.PI*2);
-    ctx.fill();
-    ctx.stroke();
-
-    // Pupilas
-    ctx.fillStyle = '#111';
-    ctx.beginPath();
-    ctx.arc(-headR*0.3, headCY + olharY, headR*0.13, 0, Math.PI*2);
-    ctx.arc(headR*0.3, headCY + olharY, headR*0.13, 0, Math.PI*2);
-    ctx.fill();
-
-    // Brilho dos olhos
-    ctx.fillStyle = 'rgba(255,255,255,0.95)';
-    ctx.beginPath();
-    ctx.arc(-headR*0.35, headCY - headR*0.05 + olharY, headR*0.05, 0, Math.PI*2);
-    ctx.arc(headR*0.25, headCY - headR*0.05 + olharY, headR*0.05, 0, Math.PI*2);
-    ctx.fill();
-
-    // Sobrancelhas
-    ctx.strokeStyle = '#1a1a1a';
-    ctx.lineWidth = 2.2;
-    ctx.lineCap = 'round';
-    if (atacando) {
+    let maoDirX, maoDirY;
+    if (!player.onGround && !atacando) {
         ctx.beginPath();
-        ctx.moveTo(-headR*0.5, headCY - headR*0.5);
-        ctx.lineTo(-headR*0.15, headCY - headR*0.3);
-        ctx.moveTo(headR*0.5, headCY - headR*0.5);
-        ctx.lineTo(headR*0.15, headCY - headR*0.3);
+        ctx.moveTo(0, 0);
+        ctx.lineTo(10, -12);
         ctx.stroke();
+        maoDirX = 10; maoDirY = -12;
     } else {
         ctx.beginPath();
-        ctx.moveTo(-headR*0.5, headCY - headR*0.35);
-        ctx.lineTo(-headR*0.15, headCY - headR*0.35);
-        ctx.moveTo(headR*0.5, headCY - headR*0.35);
-        ctx.lineTo(headR*0.15, headCY - headR*0.35);
+        ctx.moveTo(0, 0);
+        ctx.lineTo(8, armLen);
         ctx.stroke();
+        maoDirX = 8; maoDirY = armLen;
     }
-
-    // Boca
-    ctx.strokeStyle = '#1a1a1a';
-    ctx.lineWidth = 2;
-    if (player.vy < -2) {
-        ctx.fillStyle = '#1a1a1a';
-        ctx.beginPath();
-        ctx.ellipse(0, headCY + headR*0.5, headR*0.16, headR*0.2, 0, 0, Math.PI*2);
-        ctx.fill();
-    } else if (atacando) {
-        ctx.fillStyle = '#5a0000';
-        ctx.beginPath();
-        ctx.ellipse(0, headCY + headR*0.5, headR*0.22, headR*0.25, 0, 0, Math.PI*2);
-        ctx.fill();
-        ctx.strokeStyle = '#1a1a1a';
-        ctx.stroke();
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(-headR*0.15, headCY + headR*0.4, headR*0.1, headR*0.08);
-        ctx.fillRect(headR*0.05, headCY + headR*0.4, headR*0.1, headR*0.08);
-    } else if (walking) {
-        ctx.beginPath();
-        ctx.arc(0, headCY + headR*0.3, headR*0.32, 0.15, Math.PI - 0.15);
-        ctx.stroke();
-    } else {
-        ctx.beginPath();
-        ctx.arc(0, headCY + headR*0.3, headR*0.25, 0.2, Math.PI - 0.2);
-        ctx.stroke();
-    }
-
-    // Bochechas
-    ctx.fillStyle = 'rgba(255,120,160,0.55)';
-    ctx.beginPath();
-    ctx.arc(-headR*0.6, headCY + headR*0.35, headR*0.16, 0, Math.PI*2);
-    ctx.arc(headR*0.6, headCY + headR*0.35, headR*0.16, 0, Math.PI*2);
-    ctx.fill();
-
-    // ========== CABELO / TOPETE ==========
+    // Mão direita
     ctx.fillStyle = corEsc;
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(-headR*0.95, headCY - headR*0.15);
-    ctx.quadraticCurveTo(-headR*1.05, headCY - headR*1.05, -headR*0.3, headCY - headR*0.95);
-    ctx.quadraticCurveTo(-headR*0.05, headCY - headR*1.5, headR*0.35, headCY - headR*1.0);
-    ctx.quadraticCurveTo(headR*0.75, headCY - headR*1.4, headR*0.95, headCY - headR*0.6);
-    ctx.quadraticCurveTo(headR*1.0, headCY - headR*0.1, headR*0.7, headCY - headR*0.05);
-    ctx.quadraticCurveTo(0, headCY - headR*0.35, -headR*0.7, headCY - headR*0.05);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    ctx.beginPath(); ctx.arc(maoDirX, maoDirY, half * 0.28, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.stroke();
 
-    // Detalhe claro no cabelo
-    ctx.fillStyle = corClara;
-    ctx.beginPath();
-    ctx.ellipse(-headR*0.1, headCY - headR*1.05, headR*0.25, headR*0.09, -0.3, 0, Math.PI*2);
-    ctx.fill();
-
-    // ========== CACHECOL ==========
-    ctx.fillStyle = '#e74c3c';
-    ctx.strokeStyle = '#a02a1f';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(-r*0.55, r*0.0);
-    ctx.quadraticCurveTo(0, r*0.15, r*0.55, r*0.0);
-    ctx.lineTo(r*0.5, r*0.2);
-    ctx.quadraticCurveTo(0, r*0.32, -r*0.5, r*0.2);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    const voo = Math.sin(tempoGlobal * 0.15) * 6;
-    ctx.beginPath();
-    ctx.moveTo(-r*0.5, r*0.12);
-    ctx.quadraticCurveTo(-r*1.15, r*0.0 + voo, -r*1.35, r*0.35 + voo);
-    ctx.lineTo(-r*1.15, r*0.45 + voo);
-    ctx.quadraticCurveTo(-r*0.9, r*0.25, -r*0.55, r*0.28);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.restore();
-
-    // ============ RASTRO DE ATAQUE ============
-    if (atacando && atkProg > 0.3 && atkProg < 0.78) {
-        const alpha = 1 - Math.abs(atkProg - 0.54) / 0.24;
+    // ============ ESPADA NA MÃO ============
+    if (temEspada && !espadaLancada) {
         ctx.save();
-        ctx.translate(cx, cy + jumpOffset);
-        ctx.scale(dir, 1);
-        ctx.strokeStyle = `rgba(120,220,255,${Math.max(0, alpha) * 0.9})`;
-        ctx.lineWidth = 8;
+        ctx.translate(maoDirX, maoDirY);
+        ctx.rotate(-0.5);
+        const escala = half / 18;
+
+        // Cabo
+        ctx.fillStyle = '#5a3a1a';
+        ctx.strokeStyle = '#3a1a00';
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(-2 * escala, 0, 4 * escala, 8 * escala);
+        ctx.strokeRect(-2 * escala, 0, 4 * escala, 8 * escala);
+        // Pombo
+        ctx.fillStyle = '#d4a44a';
+        ctx.beginPath(); ctx.arc(0, 9 * escala, 2.5 * escala, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Guarda
+        ctx.fillStyle = '#d4a44a';
+        ctx.fillRect(-7 * escala, -3 * escala, 14 * escala, 3 * escala);
+        ctx.strokeRect(-7 * escala, -3 * escala, 14 * escala, 3 * escala);
+        // Lâmina
+        const gradL = ctx.createLinearGradient(0, 0, 0, -28 * escala);
+        gradL.addColorStop(0, '#e8f4ff'); gradL.addColorStop(0.5, '#b8d8ee'); gradL.addColorStop(1, '#aaddff');
+        ctx.fillStyle = gradL;
+        ctx.strokeStyle = '#4a7a9a';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(-2.5 * escala, -3 * escala);
+        ctx.lineTo(-2 * escala, -26 * escala);
+        ctx.lineTo(0, -34 * escala);
+        ctx.lineTo(2 * escala, -26 * escala);
+        ctx.lineTo(2.5 * escala, -3 * escala);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        // Brilho
+        ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+        ctx.lineWidth = 0.7;
+        ctx.beginPath(); ctx.moveTo(0, -3 * escala); ctx.lineTo(0, -31 * escala); ctx.stroke();
+        // Aura mágica
+        ctx.shadowColor = '#66ccff'; ctx.shadowBlur = 12;
+        ctx.strokeStyle = 'rgba(120,220,255,0.85)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(0, -3 * escala); ctx.lineTo(0, -31 * escala); ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        ctx.restore();
+    }
+
+    // Efeito de arco de golpe
+    if (atacando && atkProg > 0.28 && atkProg < 0.7) {
+        const t = (atkProg - 0.28) / 0.42;
+        const alpha = (1 - Math.abs(t - 0.5) * 2) * 0.85;
+        ctx.save();
+        ctx.strokeStyle = `rgba(150,230,255,${alpha})`;
+        ctx.lineWidth = 3;
         ctx.lineCap = 'round';
         ctx.shadowColor = '#66ccff';
-        ctx.shadowBlur = 25;
+        ctx.shadowBlur = 20;
         ctx.beginPath();
-        ctx.arc(r * 0.55, -r * 0.05, r * 1.5, -Math.PI * 0.75, Math.PI * 0.45);
+        ctx.arc(half + 2, shoulderY, halfH * 1.05, -Math.PI * 0.9 + armAngle, -Math.PI * 0.1 + armAngle);
         ctx.stroke();
         ctx.shadowBlur = 0;
         ctx.restore();
     }
-}
 
-function personagemSelecionada_clara() {
-    return personagemSelecionado.corClara || personagemSelecionado.cor;
+    ctx.restore();
+
+    // ============ OLHOS ============
+    const eyeSize = sw * 0.22;
+    const eyeOffset = sw * 0.20;
+    const olharX = ultimaDirecao * sw * 0.03;
+    const olharY = player.vy < -3 ? -3 : (player.vy > 3 ? 2 : 0);
+    const baseY = -sh * 0.10;
+
+    // Branco dos olhos
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(-eyeOffset - eyeSize/2 + olharX, baseY - eyeSize/2 + olharY, eyeSize, eyeSize, 3);
+    ctx.roundRect(eyeOffset - eyeSize/2 + olharX, baseY - eyeSize/2 + olharY, eyeSize, eyeSize, 3);
+    ctx.fill();
+    ctx.stroke();
+
+    // Pupilas
+    ctx.fillStyle = '#2c3e50';
+    const pupil = eyeSize * 0.45;
+    ctx.beginPath();
+    ctx.roundRect(-eyeOffset - pupil/2 + olharX * 1.5, baseY - pupil/2 + olharY * 1.3, pupil, pupil, 2);
+    ctx.roundRect(eyeOffset - pupil/2 + olharX * 1.5, baseY - pupil/2 + olharY * 1.3, pupil, pupil, 2);
+    ctx.fill();
+
+    // Brilho nas pupilas
+    ctx.fillStyle = '#fff';
+    const brilho = pupil * 0.3;
+    ctx.beginPath();
+    ctx.arc(-eyeOffset - pupil/2 + brilho * 0.8 + olharX * 1.5, baseY - pupil/2 + brilho * 0.8 + olharY * 1.3, brilho, 0, Math.PI * 2);
+    ctx.arc(eyeOffset - pupil/2 + brilho * 0.8 + olharX * 1.5, baseY - pupil/2 + brilho * 0.8 + olharY * 1.3, brilho, 0, Math.PI * 2);
+    ctx.fill();
+
+    // ============ BOCA ============
+    ctx.strokeStyle = '#1a1a1a';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    if (atacando) {
+        ctx.fillStyle = '#1a1a1a';
+        ctx.beginPath();
+        ctx.ellipse(0, sh * 0.20, sw * 0.08, sh * 0.10, 0, 0, Math.PI * 2);
+        ctx.fill();
+    } else if (player.vy < -2) {
+        ctx.fillStyle = '#1a1a1a';
+        ctx.beginPath();
+        ctx.ellipse(0, sh * 0.20, sw * 0.08, sh * 0.12, 0, 0, Math.PI * 2);
+        ctx.fill();
+    } else if (Math.abs(player.vx) > 0.5 && player.onGround) {
+        ctx.beginPath();
+        ctx.arc(0, sh * 0.12, sw * 0.18, 0.15, Math.PI - 0.15);
+        ctx.stroke();
+    } else {
+        ctx.beginPath();
+        ctx.arc(0, sh * 0.14, sw * 0.13, 0.2, Math.PI - 0.2);
+        ctx.stroke();
+    }
+
+    // Boas-vindas rosadas
+    ctx.fillStyle = 'rgba(255,120,160,0.45)';
+    ctx.beginPath();
+    ctx.ellipse(-sw * 0.32, sh * 0.12, sw * 0.10, sh * 0.06, 0, 0, Math.PI * 2);
+    ctx.ellipse(sw * 0.32, sh * 0.12, sw * 0.10, sh * 0.06, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // ============ CHAPÉU / TOPETE ============
+    ctx.fillStyle = corEsc;
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-half * 0.85, -halfH + 2);
+    ctx.quadraticCurveTo(-half * 0.5, -halfH - 18, 0, -halfH - 14);
+    ctx.quadraticCurveTo(half * 0.6, -halfH - 18, half * 0.85, -halfH + 2);
+    ctx.lineTo(half * 0.7, -halfH + 6);
+    ctx.quadraticCurveTo(0, -halfH - 6, -half * 0.7, -halfH + 6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    // Brilho no topete
+    ctx.fillStyle = corClara;
+    ctx.beginPath();
+    ctx.ellipse(-half * 0.15, -halfH - 10, half * 0.32, 3, -0.15, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
 }
 
 // ============================================
@@ -1977,32 +1892,6 @@ function desenharOrc(mx, my, mob) {
         ctx.beginPath(); ctx.ellipse(0, -r*.5, r*1.1, r*1.35, 0, 0, Math.PI*2); ctx.fill();
     }
     ctx.restore();
-    // "!" de aggro — escondido quando confuso
-    if (aggro > .35 && !(mob.mostrarInterrogacao > 0)) {
-        const aggroY = my - r*2.4 - aggro*10;
-        const bounce = Math.sin(tempoGlobal*.5)*4;
-        ctx.font = 'bold 32px "Pixelify Sans", monospace';
-        ctx.textAlign = 'center';
-        ctx.fillStyle = `rgba(255,60,30,${aggro})`;
-        ctx.shadowColor = '#ff2200'; ctx.shadowBlur = 18 + Math.sin(tempoGlobal*.3)*8;
-        ctx.fillText('!', mx, aggroY + bounce);
-        ctx.shadowBlur = 0; ctx.textAlign = 'left';
-    }
-    // "?" quando perdeu o player de vista
-    if (mob.mostrarInterrogacao > 0) {
-        const tNorm = 1 - mob.mostrarInterrogacao / 90;
-        const alpha = tNorm < 0.12 ? tNorm / 0.12 : (tNorm > 0.8 ? (1 - tNorm) / 0.2 : 1);
-        const bounce = Math.sin(tempoGlobal * 0.35) * 5;
-        const qY = my - r * 3.0 + bounce;
-        ctx.font = 'bold 42px "Pixelify Sans", monospace';
-        ctx.textAlign = 'center';
-        ctx.fillStyle = `rgba(255,220,60,${alpha})`;
-        ctx.shadowColor = '#ffcc00';
-        ctx.shadowBlur = 22 + Math.sin(tempoGlobal * 0.4) * 8;
-        ctx.fillText('?', mx, qY);
-        ctx.shadowBlur = 0;
-        ctx.textAlign = 'left';
-    }
 }
 
 function desenharMorcego(mx, my, mob) {
@@ -2065,34 +1954,98 @@ function desenharMorcego(mx, my, mob) {
         ctx.beginPath(); ctx.arc(0, -r*.4, r*1.6, 0, Math.PI*2); ctx.fill();
     }
     ctx.restore();
-    // "!" de aggro — escondido quando confuso
-    if (aggro > .4 && !(mob.mostrarInterrogacao > 0)) {
-        const aggroY = my - r*2.3 - aggro*10;
-        const bounce = Math.sin(tempoGlobal*.5)*4;
-        ctx.font = 'bold 26px "Pixelify Sans", monospace';
+}
+
+// ============================================
+// CONE DE VISÃO + SÍMBOLOS (! e ?)
+// ============================================
+function desenharConeVisao(mob) {
+    if (mob.morto || mob.caindo) return;
+    // Só desenha em estado de patrulha (não perseguindo)
+    if (mob.estado !== 'patrulha' && mob.estado !== 'notando') return;
+    const mx = mob.x - cameraX;
+    if (mx < -VISAO_ALCANCE - 50 || mx > W + VISAO_ALCANCE + 50) return;
+    const my = mob.y;
+    
+    // Cone de visão (semicírculo achatado na direção que olha)
+    ctx.save();
+    ctx.translate(mx, my);
+    ctx.scale(mob.direction, 1); // espelha se olhando pra esquerda
+    
+    // Gradiente do cone
+    const grad = ctx.createRadialGradient(0, 0, 20, 0, 0, VISAO_ALCANCE);
+    grad.addColorStop(0, 'rgba(255, 80, 40, 0.0)');
+    grad.addColorStop(0.6, 'rgba(255, 80, 40, 0.08)');
+    grad.addColorStop(1, 'rgba(255, 80, 40, 0.0)');
+    ctx.fillStyle = grad;
+    
+    // Desenha o cone
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, VISAO_ALCANCE, -VISAO_MEIO_ANGULO, VISAO_MEIO_ANGULO);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Borda do cone (linha sutil)
+    ctx.strokeStyle = 'rgba(255, 80, 40, 0.25)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(Math.cos(-VISAO_MEIO_ANGULO) * VISAO_ALCANCE, Math.sin(-VISAO_MEIO_ANGULO) * VISAO_ALCANCE);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(Math.cos(VISAO_MEIO_ANGULO) * VISAO_ALCANCE, Math.sin(VISAO_MEIO_ANGULO) * VISAO_ALCANCE);
+    ctx.stroke();
+    
+    // Arco final
+    ctx.beginPath();
+    ctx.arc(0, 0, VISAO_ALCANCE, -VISAO_MEIO_ANGULO, VISAO_MEIO_ANGULO);
+    ctx.stroke();
+    
+    ctx.restore();
+}
+
+function desenharSimboloMob(mob) {
+    if (mob.morto) return;
+    const mx = mob.x - cameraX;
+    if (mx < -100 || mx > W + 100) return;
+    const my = mob.y;
+    const r = mob.radius;
+
+    if (mob.estado === 'perseguindo' || mob.estado === 'notando') {
+        const aggro = mob.aggro || 0;
+        if (aggro > 0.35) {
+            const aggroY = my - r * 2.6 - aggro * 12;
+            const bounce = Math.sin(tempoGlobal * 0.5) * 4;
+            ctx.font = 'bold 34px "Pixelify Sans", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = `rgba(255,60,30,${aggro})`;
+            ctx.shadowColor = '#ff2200';
+            ctx.shadowBlur = 20 + Math.sin(tempoGlobal * 0.3) * 8;
+            ctx.fillText('!', mx, aggroY + bounce);
+            ctx.shadowBlur = 0;
+            ctx.textAlign = 'left';
+        }
+    } else if (mob.estado === 'procurando') {
+        const t = mob.tempoProcurando;
+        const aparecer = Math.min(1, t / 15);
+        const flut = Math.sin(tempoGlobal * 0.15) * 4;
+        const aggroY = my - r * 2.6 + flut;
+        ctx.font = 'bold 34px "Pixelify Sans", monospace';
         ctx.textAlign = 'center';
-        ctx.fillStyle = `rgba(255,80,40,${aggro})`;
-        ctx.shadowColor = '#ff3300'; ctx.shadowBlur = 15;
-        ctx.fillText('!', mx, aggroY + bounce);
-        ctx.shadowBlur = 0; ctx.textAlign = 'left';
-    }
-    // "?" quando perdeu o player de vista
-    if (mob.mostrarInterrogacao > 0) {
-        const tNorm = 1 - mob.mostrarInterrogacao / 90;
-        const alpha = tNorm < 0.12 ? tNorm / 0.12 : (tNorm > 0.8 ? (1 - tNorm) / 0.2 : 1);
-        const bounce = Math.sin(tempoGlobal * 0.35) * 5;
-        const qY = my - r * 3.2 + bounce;
-        ctx.font = 'bold 38px "Pixelify Sans", monospace';
-        ctx.textAlign = 'center';
-        ctx.fillStyle = `rgba(255,220,60,${alpha})`;
-        ctx.shadowColor = '#ffcc00';
-        ctx.shadowBlur = 22 + Math.sin(tempoGlobal * 0.4) * 8;
-        ctx.fillText('?', mx, qY);
+        ctx.globalAlpha = aparecer;
+        ctx.fillStyle = '#ffd700';
+        ctx.shadowColor = '#ffaa00';
+        ctx.shadowBlur = 18 + Math.sin(tempoGlobal * 0.2) * 6;
+        ctx.fillText('?', mx, aggroY);
         ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
         ctx.textAlign = 'left';
     }
 }
 
+// ============================================
+// OUTROS DESENHOS
+// ============================================
 function desenharCanhao(canhao) {
     const cx = canhao.x - cameraX, cy = canhao.y, dir = canhao.direcao;
     const recoil = canhao.recoil || 0, fireGlow = canhao.fireGlow || 0;
@@ -2192,112 +2145,6 @@ function desenharBolaDeFogo(bola) {
     ctx.shadowBlur = 0;
     ctx.fillStyle = '#fff';
     ctx.beginPath(); ctx.arc(bx, by, bola.raio*.22, 0, Math.PI*2); ctx.fill();
-}
-
-// Espada mágica — agora acompanha a mão do personagem novo
-function desenharEspadaMagica(px, py, w, h, estaAtacando, progresso) {
-    const escala = w/40;
-    const r = w/2;
-    const cx = px + w/2;
-    const cy = py + h/2;
-    const dir = ultimaDirecao;
-
-    // Calcula posição da mão (mesma lógica do desenharPlayerNovo)
-    let armAtkAngle = 0;
-    if (estaAtacando) {
-        if (progresso < 0.35) armAtkAngle = -progresso / 0.35 * Math.PI * 0.55;
-        else if (progresso < 0.6) armAtkAngle = -Math.PI * 0.55 + (progresso - 0.35) / 0.25 * Math.PI * 0.95;
-        else armAtkAngle = Math.PI * 0.4 * (1 - (progresso - 0.6) / 0.4);
-    }
-    const walking = Math.abs(player.vx) > 0.5 && player.onGround;
-    const armSwing = walking ? -Math.sin(playerWalkPhase) * r * 0.4 : 0;
-    const armAngle = armAtkAngle + (walking && !estaAtacando ? -armSwing * 0.4 : 0);
-    const frontShoulderX = r * 0.55;
-    const frontShoulderY = -r * 0.05;
-    const armLen = r * 0.55;
-    const localHandX = frontShoulderX + Math.sin(armAngle) * armLen;
-    const localHandY = frontShoulderY + Math.cos(armAngle) * armLen;
-    const maoX = cx + dir * localHandX;
-    const maoY = cy + localHandY;
-
-    const rotInicial = -Math.PI*.78;
-    let rotacao;
-    if (estaAtacando) {
-        const t = progresso;
-        const eased = t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2)/2;
-        rotacao = rotInicial + eased*Math.PI*2;
-    } else rotacao = -.15;
-    const pulso = .75 + Math.sin(tempoGlobal*.12)*.25;
-    const intensAtaque = estaAtacando ? 1.6 : 1;
-    const flutuacao = estaAtacando ? 0 : Math.sin(tempoGlobal*.08)*1.5;
-    const raioAura = 45*(estaAtacando ? 1.4 : 1);
-    const gradAura = ctx.createRadialGradient(maoX, maoY+flutuacao, 0, maoX, maoY+flutuacao, raioAura);
-    gradAura.addColorStop(0, `rgba(120,220,255,${.55*pulso*intensAtaque})`);
-    gradAura.addColorStop(.5, `rgba(80,180,255,${.25*pulso*intensAtaque})`);
-    gradAura.addColorStop(1, 'rgba(80,180,255,0)');
-    ctx.fillStyle = gradAura;
-    ctx.beginPath(); ctx.arc(maoX, maoY+flutuacao, raioAura, 0, Math.PI*2); ctx.fill();
-    if (estaAtacando && progresso > .05) {
-        const distPonta = 46*escala, num = 24;
-        for (let i = 0; i < num; i++) {
-            const t1 = i/num, t2 = (i+1)/num;
-            const r1 = rotInicial + (rotacao - rotInicial)*t1;
-            const r2 = rotInicial + (rotacao - rotInicial)*t2;
-            const x1 = maoX + Math.sin(r1)*distPonta, y1 = maoY + flutuacao - Math.cos(r1)*distPonta;
-            const x2 = maoX + Math.sin(r2)*distPonta, y2 = maoY + flutuacao - Math.cos(r2)*distPonta;
-            const alpha = (i/num)*.75*(1 - progresso*.4);
-            ctx.strokeStyle = `rgba(150,230,255,${alpha})`;
-            ctx.lineWidth = (2 + i*.3)*escala; ctx.lineCap = 'round';
-            ctx.shadowColor = '#66ccff'; ctx.shadowBlur = 14;
-            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-        }
-        ctx.shadowBlur = 0; ctx.lineCap = 'butt';
-    }
-    ctx.save();
-    ctx.translate(maoX, maoY+flutuacao); ctx.rotate(rotacao);
-    ctx.fillStyle = '#8a6a2a'; ctx.strokeStyle = '#4a3000'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(0, 22*escala, 4*escala, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#ff2244'; ctx.shadowColor = '#ff2244'; ctx.shadowBlur = 8*pulso;
-    ctx.beginPath(); ctx.arc(0, 22*escala, 2.2*escala, 0, Math.PI*2); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#5a3a1a'; ctx.strokeStyle = '#3a1a00'; ctx.lineWidth = 1;
-    ctx.fillRect(-3*escala, 8*escala, 6*escala, 12*escala);
-    ctx.strokeRect(-3*escala, 8*escala, 6*escala, 12*escala);
-    ctx.strokeStyle = '#3a1a00'; ctx.lineWidth = 1.2;
-    for (let i = 0; i < 4; i++) {
-        const yy = 9*escala + i*3*escala;
-        ctx.beginPath(); ctx.moveTo(-3*escala, yy); ctx.lineTo(3*escala, yy+1.5*escala); ctx.stroke();
-    }
-    ctx.fillStyle = '#d4a44a'; ctx.strokeStyle = '#8a5a10'; ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(-10*escala, 6*escala); ctx.lineTo(10*escala, 6*escala); ctx.lineTo(8*escala, 9*escala); ctx.lineTo(-8*escala, 9*escala);
-    ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#ff2244'; ctx.shadowColor = '#ff2244'; ctx.shadowBlur = 10*pulso;
-    ctx.beginPath();
-    ctx.moveTo(0, 4*escala); ctx.lineTo(3*escala, 7*escala); ctx.lineTo(0, 10*escala); ctx.lineTo(-3*escala, 7*escala);
-    ctx.closePath(); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = '#8a0010'; ctx.lineWidth = .8; ctx.stroke();
-    ctx.shadowColor = '#66ccff'; ctx.shadowBlur = 14*pulso*intensAtaque;
-    const gradL = ctx.createLinearGradient(0, 0, 0, -45*escala);
-    gradL.addColorStop(0, '#e8f4ff'); gradL.addColorStop(.4, '#b8d8ee');
-    gradL.addColorStop(.7, '#88aacc'); gradL.addColorStop(1, '#aaddff');
-    ctx.fillStyle = gradL; ctx.strokeStyle = '#4a7a9a'; ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(-3.5*escala, 5*escala); ctx.lineTo(-3*escala, -38*escala); ctx.lineTo(0, -46*escala);
-    ctx.lineTo(3*escala, -38*escala); ctx.lineTo(3.5*escala, 5*escala);
-    ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = .8;
-    ctx.beginPath(); ctx.moveTo(0, 3*escala); ctx.lineTo(0, -42*escala); ctx.stroke();
-    const runaPulso = .5 + Math.sin(tempoGlobal*.15)*.5;
-    ctx.strokeStyle = `rgba(120,220,255,${runaPulso*intensAtaque})`;
-    ctx.shadowColor = '#66ccff'; ctx.shadowBlur = 8*pulso; ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(0, -20*escala); ctx.lineTo(2.5*escala, -17*escala); ctx.lineTo(0, -14*escala); ctx.lineTo(-2.5*escala, -17*escala);
-    ctx.closePath(); ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.restore();
 }
 
 function desenharCipo(cip) {
@@ -2751,6 +2598,7 @@ function draw() {
         ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     }
     if (nivelAtual === 5) desenharCaverna();
+    // MOBS
     for (let mob of mobs) {
         if (mob.morto) continue;
         const mx = mob.x - cameraX;
@@ -2763,13 +2611,19 @@ function draw() {
         ctx.fillStyle = 'rgba(0,255,0,.7)';
         ctx.fillRect(mx - mob.radius, mob.y - offBar, mob.radius*2*(mob.hp/2), 4);
     }
+    // CONE DE VISÃO (antes dos símbolos, para ficar sutil no fundo)
+    for (let mob of mobs) {
+        if (mob.morto) continue;
+        desenharConeVisao(mob);
+    }
+    // SÍMBOLOS "!" e "?"
+    for (let mob of mobs) {
+        if (mob.morto) continue;
+        desenharSimboloMob(mob);
+    }
     if (!gameOver) {
         const px = player.x - cameraX, py = player.y;
         desenharPlayerNovo(px, py, player.w, player.h);
-        if (temEspada && !espadaLancada) {
-            const prog = atacando ? (ataqueTimer/DURACAO_ATAQUE) : 0;
-            desenharEspadaMagica(px, py, player.w, player.h, atacando, prog);
-        }
     }
     desenharParticulas();
     desenharParticulasAmbiente();
@@ -3048,9 +2902,6 @@ function resize() {
 }
 window.addEventListener('resize', resize);
 
-// ============================================
-// PAUSE / CONFIG
-// ============================================
 const pauseBtn = document.getElementById('pauseBtn');
 const configBtnTop = document.getElementById('configBtnTop');
 const pauseMenu = document.getElementById('pauseMenu');
@@ -3146,7 +2997,6 @@ document.querySelectorAll('.bind-btn').forEach(btn => {
     });
 });
 
-// INPUT
 document.addEventListener('keydown', (e) => {
     if (!jogoIniciado) return;
     const key = e.key.toLowerCase();
@@ -3242,4 +3092,4 @@ function iniciarJogo() {
 }
 </script>
 </body>
-</html>
+</html>aaaa
