@@ -127,6 +127,7 @@
         #pauseMenu.aberto { display: flex; }
 
         .pause-content {
+            position: relative;
             max-width: 1000px; width: 100%; max-height: 92vh;
             background: linear-gradient(135deg, #1a1410 0%, #2a2018 100%);
             border: 3px solid #f1c40f; border-radius: 16px;
@@ -232,97 +233,105 @@
         .pause-action:hover { filter: brightness(1.1); transform: translateY(-2px); }
         .pause-action:active { transform: translateY(3px); box-shadow: 0 0 20px rgba(241, 196, 15, 0.5), 0 2px 0 #6a4a00, inset 0 2px 0 rgba(255,255,255,0.4); }
 
-        /* ===== BOTÕES DE ENGRENAGEM ===== */
+        /* ===== BOTÕES DE ENGRENAGEM (DISCRETOS) ===== */
         .settings-gear {
             font-family: 'Pixelify Sans', monospace;
             font-weight: 700;
             color: #f1c40f;
-            background: rgba(0, 0, 0, 0.75);
-            border: 2px solid #f1c40f;
-            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.55);
+            border: 2px solid rgba(241, 196, 15, 0.55);
+            border-radius: 50%;
             cursor: pointer;
-            transition: all 0.15s;
-            box-shadow: 0 0 15px rgba(241, 196, 15, 0.5);
+            transition: all 0.18s ease;
+            opacity: 0.55;
         }
-        .settings-gear:hover { background: #f1c40f; color: #1a1a1a; transform: scale(1.08); }
+        .settings-gear:hover {
+            opacity: 1;
+            background: rgba(241, 196, 15, 0.95);
+            color: #1a1a1a;
+            border-color: #f1c40f;
+            transform: scale(1.12);
+        }
         .settings-gear:active { transform: scale(0.95); }
 
         #startSettingsBtn {
-            position: fixed; top: 20px; right: 20px; z-index: 2100;
-            font-size: 32px; padding: 8px 14px; line-height: 1;
+            position: fixed; top: 16px; right: 16px; z-index: 2100;
+            font-size: 18px; width: 38px; height: 38px; line-height: 1;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0;
         }
+
+        /* Botão de engrenagem do pause: fica escondido no canto do card */
         #pauseSettingsBtn {
-            font-family: 'Pixelify Sans', monospace;
-            font-size: 18px; font-weight: 700; letter-spacing: 2px;
-            color: #f1c40f; padding: 14px 30px;
-            background: linear-gradient(180deg, #4a3510 0%, #2a1f0a 100%);
-            border: 3px solid #f1c40f; border-radius: 10px; cursor: pointer;
-            box-shadow: 0 0 20px rgba(241, 196, 15, 0.4), 0 5px 0 #1a1410, inset 0 2px 0 rgba(255,255,255,0.15);
-            transition: all 0.1s;
+            position: absolute;
+            top: 14px; right: 14px;
+            width: 34px; height: 34px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; padding: 0;
+            z-index: 5;
         }
-        #pauseSettingsBtn:hover { background: #f1c40f; color: #1a1a1a; transform: translateY(-2px); }
-        #pauseSettingsBtn:active { transform: translateY(2px); }
 
         /* ===== MENU DE CONFIGURAÇÕES ===== */
         #settingsMenu {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.94); z-index: 3200;
+            background: rgba(0, 0, 0, 0.88); z-index: 3200;
             display: none; justify-content: center; align-items: center;
             padding: 20px; overflow-y: auto;
         }
         #settingsMenu.aberto { display: flex; }
 
         .settings-content {
-            max-width: 660px; width: 100%; max-height: 92vh;
-            background: linear-gradient(135deg, #1a1410 0%, #2a2018 100%);
-            border: 3px solid #f1c40f; border-radius: 16px;
-            padding: 28px; overflow-y: auto;
+            max-width: 520px; width: 100%; max-height: 90vh;
+            background: linear-gradient(135deg, #17120d 0%, #241c14 100%);
+            border: 2px solid rgba(241, 196, 15, 0.7); border-radius: 14px;
+            padding: 22px; overflow-y: auto;
             color: #fff; font-family: 'Pixelify Sans', monospace;
-            box-shadow: 0 0 60px rgba(241, 196, 15, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+            box-shadow: 0 0 40px rgba(241, 196, 15, 0.25), inset 0 1px 0 rgba(255,255,255,0.08);
         }
-        .settings-content::-webkit-scrollbar { width: 10px; }
-        .settings-content::-webkit-scrollbar-track { background: rgba(0,0,0,0.4); border-radius: 10px; }
-        .settings-content::-webkit-scrollbar-thumb { background: #f1c40f; border-radius: 10px; }
+        .settings-content::-webkit-scrollbar { width: 8px; }
+        .settings-content::-webkit-scrollbar-track { background: rgba(0,0,0,0.4); border-radius: 8px; }
+        .settings-content::-webkit-scrollbar-thumb { background: #f1c40f; border-radius: 8px; }
 
         .settings-title {
-            font-size: 34px; color: #f1c40f; text-align: center;
-            margin-bottom: 22px; letter-spacing: 4px; font-weight: 700;
-            text-shadow: 0 0 20px #f1c40f, 0 0 40px rgba(241, 196, 15, 0.5);
+            font-size: 24px; color: #f1c40f; text-align: center;
+            margin-bottom: 18px; letter-spacing: 4px; font-weight: 700;
+            text-shadow: 0 0 15px rgba(241, 196, 15, 0.6);
         }
 
         .settings-section {
-            margin-bottom: 20px; padding-bottom: 16px;
-            border-bottom: 2px solid rgba(241, 196, 15, 0.2);
+            margin-bottom: 16px; padding-bottom: 14px;
+            border-bottom: 1px solid rgba(241, 196, 15, 0.15);
         }
         .settings-section:last-of-type { border-bottom: none; }
 
         .settings-label {
-            font-size: 15px; color: #f1c40f; letter-spacing: 2px;
-            text-transform: uppercase; margin-bottom: 12px; font-weight: 700;
+            font-size: 12px; color: #f1c40f; letter-spacing: 2px;
+            text-transform: uppercase; margin-bottom: 10px; font-weight: 700;
+            opacity: 0.9;
         }
-        .settings-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .settings-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 
         #colorPicker {
-            width: 66px; height: 42px; border: 3px solid #8a6a00;
+            width: 54px; height: 36px; border: 2px solid rgba(241, 196, 15, 0.6);
             border-radius: 8px; cursor: pointer; background: transparent; padding: 2px;
         }
         #colorPicker::-webkit-color-swatch-wrapper { padding: 0; }
         #colorPicker::-webkit-color-swatch { border: none; border-radius: 5px; }
 
-        .color-presets { display: flex; gap: 8px; flex-wrap: wrap; }
+        .color-presets { display: flex; gap: 6px; flex-wrap: wrap; }
         .color-preset {
-            width: 34px; height: 34px; border-radius: 8px;
-            border: 3px solid rgba(255,255,255,0.25); cursor: pointer;
+            width: 28px; height: 28px; border-radius: 7px;
+            border: 2px solid rgba(255,255,255,0.2); cursor: pointer;
             transition: transform 0.12s, border-color 0.12s;
         }
         .color-preset:hover { transform: scale(1.12); border-color: #f1c40f; }
-        .color-preset.ativo { border-color: #fff; transform: scale(1.12); box-shadow: 0 0 14px rgba(255,255,255,0.7); }
+        .color-preset.ativo { border-color: #fff; transform: scale(1.12); box-shadow: 0 0 10px rgba(255,255,255,0.6); }
 
-        .shape-options { display: flex; gap: 10px; flex-wrap: wrap; }
+        .shape-options { display: flex; gap: 8px; flex-wrap: wrap; }
         .shape-option {
-            width: 64px; height: 64px; padding: 0;
+            width: 52px; height: 52px; padding: 0;
             background: rgba(0,0,0,0.5);
-            border: 3px solid #555; border-radius: 12px;
+            border: 2px solid #444; border-radius: 10px;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
             transition: all 0.15s;
         }
@@ -330,82 +339,82 @@
         .shape-option.ativo {
             border-color: #f1c40f;
             background: linear-gradient(135deg, #2a1f0a 0%, #4a3510 100%);
-            box-shadow: 0 0 18px rgba(241, 196, 15, 0.5);
+            box-shadow: 0 0 14px rgba(241, 196, 15, 0.5);
         }
-        .shape-option svg { width: 40px; height: 40px; }
+        .shape-option svg { width: 32px; height: 32px; }
 
-        .volume-row { display: flex; align-items: center; gap: 14px; }
-        .volume-icon { font-size: 22px; }
+        .volume-row { display: flex; align-items: center; gap: 12px; }
+        .volume-icon { font-size: 18px; opacity: 0.8; }
         #volumeSlider {
-            flex: 1; height: 8px; -webkit-appearance: none; appearance: none;
-            background: rgba(0,0,0,0.6); border-radius: 5px; outline: none;
-            border: 2px solid rgba(241, 196, 15, 0.5);
+            flex: 1; height: 6px; -webkit-appearance: none; appearance: none;
+            background: rgba(0,0,0,0.6); border-radius: 4px; outline: none;
+            border: 1px solid rgba(241, 196, 15, 0.4);
         }
         #volumeSlider::-webkit-slider-thumb {
             -webkit-appearance: none; appearance: none;
-            width: 22px; height: 22px; background: #f1c40f; border-radius: 50%;
-            cursor: pointer; box-shadow: 0 0 10px rgba(241, 196, 15, 0.8);
+            width: 18px; height: 18px; background: #f1c40f; border-radius: 50%;
+            cursor: pointer; box-shadow: 0 0 8px rgba(241, 196, 15, 0.7);
         }
         #volumeSlider::-moz-range-thumb {
-            width: 22px; height: 22px; background: #f1c40f; border-radius: 50%;
-            cursor: pointer; border: none; box-shadow: 0 0 10px rgba(241, 196, 15, 0.8);
+            width: 18px; height: 18px; background: #f1c40f; border-radius: 50%;
+            cursor: pointer; border: none; box-shadow: 0 0 8px rgba(241, 196, 15, 0.7);
         }
-        #volumeValue { color: #f1c40f; font-weight: 700; min-width: 52px; text-align: right; }
+        #volumeValue { color: #f1c40f; font-weight: 700; min-width: 44px; text-align: right; font-size: 13px; }
 
-        .keybinds { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .keybinds { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .keybind-row {
             display: flex; align-items: center; justify-content: space-between;
-            gap: 10px; background: rgba(0,0,0,0.4); padding: 10px 14px;
-            border-radius: 8px; border: 2px solid rgba(241, 196, 15, 0.25);
+            gap: 8px; background: rgba(0,0,0,0.35); padding: 8px 12px;
+            border-radius: 8px; border: 1px solid rgba(241, 196, 15, 0.2);
         }
-        .keybind-label { font-size: 14px; color: #ddd; }
+        .keybind-label { font-size: 12px; color: #ccc; }
         .keybind-btn {
             font-family: 'Pixelify Sans', monospace;
-            font-size: 15px; font-weight: 700; letter-spacing: 1px;
+            font-size: 13px; font-weight: 700; letter-spacing: 1px;
             color: #1a1a1a;
             background: linear-gradient(180deg, #ffe066 0%, #f1c40f 50%, #c9a20a 100%);
-            border: 2px solid #8a6a00; border-radius: 7px;
-            padding: 6px 14px; min-width: 68px; cursor: pointer; text-align: center;
-            box-shadow: 0 3px 0 #6a4a00; transition: all 0.1s;
+            border: 2px solid #8a6a00; border-radius: 6px;
+            padding: 4px 10px; min-width: 56px; cursor: pointer; text-align: center;
+            box-shadow: 0 2px 0 #6a4a00; transition: all 0.1s;
         }
         .keybind-btn:hover { filter: brightness(1.1); }
-        .keybind-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #6a4a00; }
+        .keybind-btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #6a4a00; }
         .keybind-btn.capturando {
             background: linear-gradient(180deg, #66ccff 0%, #3399cc 100%);
             color: #fff;
             animation: pulsarTecla 0.8s ease-in-out infinite;
         }
         @keyframes pulsarTecla {
-            0%, 100% { box-shadow: 0 3px 0 #6a4a00, 0 0 10px rgba(102, 204, 255, 0.6); }
-            50%      { box-shadow: 0 3px 0 #6a4a00, 0 0 25px rgba(102, 204, 255, 1); }
+            0%, 100% { box-shadow: 0 2px 0 #6a4a00, 0 0 8px rgba(102, 204, 255, 0.5); }
+            50%      { box-shadow: 0 2px 0 #6a4a00, 0 0 20px rgba(102, 204, 255, 1); }
         }
 
         .settings-btn-row {
-            display: flex; gap: 12px; justify-content: center;
-            margin-top: 22px; padding-top: 18px;
-            border-top: 2px solid rgba(241, 196, 15, 0.3); flex-wrap: wrap;
+            display: flex; gap: 10px; justify-content: center;
+            margin-top: 16px; padding-top: 14px;
+            border-top: 1px solid rgba(241, 196, 15, 0.2); flex-wrap: wrap;
         }
         .settings-action {
             font-family: 'Pixelify Sans', monospace;
-            font-size: 17px; font-weight: 700; letter-spacing: 2px;
-            color: #1a1a1a; padding: 13px 30px;
+            font-size: 14px; font-weight: 700; letter-spacing: 2px;
+            color: #1a1a1a; padding: 10px 24px;
             background: linear-gradient(180deg, #ffe066 0%, #f1c40f 50%, #c9a20a 100%);
-            border: 3px solid #8a6a00; border-radius: 10px; cursor: pointer;
-            box-shadow: 0 0 20px rgba(241, 196, 15, 0.5), 0 5px 0 #6a4a00, inset 0 2px 0 rgba(255,255,255,0.4);
+            border: 2px solid #8a6a00; border-radius: 8px; cursor: pointer;
+            box-shadow: 0 0 15px rgba(241, 196, 15, 0.4), 0 4px 0 #6a4a00, inset 0 1px 0 rgba(255,255,255,0.35);
             transition: all 0.1s;
         }
-        .settings-action:hover { filter: brightness(1.1); transform: translateY(-2px); }
-        .settings-action:active { transform: translateY(3px); box-shadow: 0 0 20px rgba(241, 196, 15, 0.5), 0 2px 0 #6a4a00, inset 0 2px 0 rgba(255,255,255,0.4); }
+        .settings-action:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .settings-action:active { transform: translateY(2px); box-shadow: 0 0 15px rgba(241, 196, 15, 0.4), 0 1px 0 #6a4a00, inset 0 1px 0 rgba(255,255,255,0.35); }
         .settings-action.secundario {
             background: linear-gradient(180deg, #555 0%, #333 100%);
-            color: #fff; border-color: #222;
-            box-shadow: 0 0 15px rgba(0,0,0,0.5), 0 5px 0 #111, inset 0 2px 0 rgba(255,255,255,0.15);
+            color: #eee; border-color: #222;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5), 0 4px 0 #111, inset 0 1px 0 rgba(255,255,255,0.12);
         }
     </style>
 </head>
 <body>
     <div id="startOverlay"><button id="startBtn">START</button></div>
-    <button id="startSettingsBtn" class="settings-gear" title="Configurações">⚙️</button>
+    <button id="startSettingsBtn" class="settings-gear" title="Configurações">⚙</button>
 
     <div id="cutscene">
         <video id="cutsceneVideo" muted playsinline preload="auto"></video>
@@ -421,6 +430,7 @@
 
     <div id="pauseMenu">
         <div class="pause-content">
+            <button id="pauseSettingsBtn" class="settings-gear" title="Configurações">⚙</button>
             <div class="pause-title">⏸ PAUSADO</div>
             <div class="pause-sub">Conquistas: <span id="pauseAchCount">0 / 31</span></div>
             
@@ -444,14 +454,13 @@
 
             <div class="pause-btn-row">
                 <button class="pause-action" id="resumeBtn">▶ CONTINUAR</button>
-                <button class="pause-action" id="pauseSettingsBtn">⚙️ CONFIGURAÇÕES</button>
             </div>
         </div>
     </div>
 
     <div id="settingsMenu">
         <div class="settings-content">
-            <div class="settings-title">⚙️ CONFIGURAÇÕES</div>
+            <div class="settings-title">⚙ CONFIGURAÇÕES</div>
 
             <div class="settings-section">
                 <div class="settings-label">🎨 Cor do Personagem</div>
@@ -477,22 +486,22 @@
             </div>
 
             <div class="settings-section">
-                <div class="settings-label">⌨️ Controles</div>
+                <div class="settings-label">⌨ Controles</div>
                 <div class="keybinds">
                     <div class="keybind-row">
-                        <span class="keybind-label">⬅️ Esquerda</span>
+                        <span class="keybind-label">⬅ Esquerda</span>
                         <button class="keybind-btn" data-action="left">A</button>
                     </div>
                     <div class="keybind-row">
-                        <span class="keybind-label">➡️ Direita</span>
+                        <span class="keybind-label">➡ Direita</span>
                         <button class="keybind-btn" data-action="right">D</button>
                     </div>
                     <div class="keybind-row">
-                        <span class="keybind-label">⬆️ Pular</span>
+                        <span class="keybind-label">⬆ Pular</span>
                         <button class="keybind-btn" data-action="jump">W</button>
                     </div>
                     <div class="keybind-row">
-                        <span class="keybind-label">⚔️ Atacar</span>
+                        <span class="keybind-label">⚔ Atacar</span>
                         <button class="keybind-btn" data-action="attack">ESPAÇO</button>
                     </div>
                 </div>
@@ -3492,19 +3501,31 @@
                 ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 12;
                 desenharFormaPlayer(sx2, sy2, sw, sh);
                 ctx.shadowBlur = 0;
-                const rr = Math.min(sw, sh) / 2;
+
+                // ===== OLHOS CORRIGIDOS =====
+                const m = Math.min(sw, sh);
                 const cx2 = sx2 + sw / 2, cy2 = sy2 + sh / 2;
-                const eyeSize = rr * 0.3;
-                const eyeY = cy2 - rr * 0.15;
-                const eyeLX = cx2 - rr * 0.5;
-                const eyeRX = cx2 + rr * 0.5 - eyeSize;
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(eyeLX, eyeY, eyeSize, eyeSize);
-                ctx.fillRect(eyeRX, eyeY, eyeSize, eyeSize);
+                const eyeSize = m * 0.14;
+                const eyeGap = m * 0.16;
+                const eyeY = cy2 - m * 0.08;
+                const eyeLX = cx2 - eyeGap;
+                const eyeRX = cx2 + eyeGap;
+                const lookX = ultimaDirecao * eyeSize * 0.18;
+
+                // Órbitas (branco)
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(eyeLX, eyeY, eyeSize / 2, 0, Math.PI * 2);
+                ctx.arc(eyeRX, eyeY, eyeSize / 2, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Pupilas
                 ctx.fillStyle = '#2c3e50';
-                const pupil = eyeSize * 0.45;
-                ctx.fillRect(eyeLX + pupil * 0.5, eyeY + pupil * 0.5, pupil, pupil);
-                ctx.fillRect(eyeRX + pupil * 0.5, eyeY + pupil * 0.5, pupil, pupil);
+                ctx.beginPath();
+                ctx.arc(eyeLX + lookX, eyeY, eyeSize / 2 * 0.5, 0, Math.PI * 2);
+                ctx.arc(eyeRX + lookX, eyeY, eyeSize / 2 * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+
                 if (temEspada && !espadaLancada) {
                     const progressoAtaque = atacando ? (ataqueTimer / DURACAO_ATAQUE) : 0;
                     desenharEspadaMagica(px, py, player.w, player.h, atacando, progressoAtaque);
