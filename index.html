@@ -231,10 +231,181 @@
         }
         .pause-action:hover { filter: brightness(1.1); transform: translateY(-2px); }
         .pause-action:active { transform: translateY(3px); box-shadow: 0 0 20px rgba(241, 196, 15, 0.5), 0 2px 0 #6a4a00, inset 0 2px 0 rgba(255,255,255,0.4); }
+
+        /* ===== BOTÕES DE ENGRENAGEM ===== */
+        .settings-gear {
+            font-family: 'Pixelify Sans', monospace;
+            font-weight: 700;
+            color: #f1c40f;
+            background: rgba(0, 0, 0, 0.75);
+            border: 2px solid #f1c40f;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 0 15px rgba(241, 196, 15, 0.5);
+        }
+        .settings-gear:hover { background: #f1c40f; color: #1a1a1a; transform: scale(1.08); }
+        .settings-gear:active { transform: scale(0.95); }
+
+        #startSettingsBtn {
+            position: fixed; top: 20px; right: 20px; z-index: 2100;
+            font-size: 32px; padding: 8px 14px; line-height: 1;
+        }
+        #pauseSettingsBtn {
+            font-family: 'Pixelify Sans', monospace;
+            font-size: 18px; font-weight: 700; letter-spacing: 2px;
+            color: #f1c40f; padding: 14px 30px;
+            background: linear-gradient(180deg, #4a3510 0%, #2a1f0a 100%);
+            border: 3px solid #f1c40f; border-radius: 10px; cursor: pointer;
+            box-shadow: 0 0 20px rgba(241, 196, 15, 0.4), 0 5px 0 #1a1410, inset 0 2px 0 rgba(255,255,255,0.15);
+            transition: all 0.1s;
+        }
+        #pauseSettingsBtn:hover { background: #f1c40f; color: #1a1a1a; transform: translateY(-2px); }
+        #pauseSettingsBtn:active { transform: translateY(2px); }
+
+        /* ===== MENU DE CONFIGURAÇÕES ===== */
+        #settingsMenu {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.94); z-index: 3200;
+            display: none; justify-content: center; align-items: center;
+            padding: 20px; overflow-y: auto;
+        }
+        #settingsMenu.aberto { display: flex; }
+
+        .settings-content {
+            max-width: 660px; width: 100%; max-height: 92vh;
+            background: linear-gradient(135deg, #1a1410 0%, #2a2018 100%);
+            border: 3px solid #f1c40f; border-radius: 16px;
+            padding: 28px; overflow-y: auto;
+            color: #fff; font-family: 'Pixelify Sans', monospace;
+            box-shadow: 0 0 60px rgba(241, 196, 15, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+        .settings-content::-webkit-scrollbar { width: 10px; }
+        .settings-content::-webkit-scrollbar-track { background: rgba(0,0,0,0.4); border-radius: 10px; }
+        .settings-content::-webkit-scrollbar-thumb { background: #f1c40f; border-radius: 10px; }
+
+        .settings-title {
+            font-size: 34px; color: #f1c40f; text-align: center;
+            margin-bottom: 22px; letter-spacing: 4px; font-weight: 700;
+            text-shadow: 0 0 20px #f1c40f, 0 0 40px rgba(241, 196, 15, 0.5);
+        }
+
+        .settings-section {
+            margin-bottom: 20px; padding-bottom: 16px;
+            border-bottom: 2px solid rgba(241, 196, 15, 0.2);
+        }
+        .settings-section:last-of-type { border-bottom: none; }
+
+        .settings-label {
+            font-size: 15px; color: #f1c40f; letter-spacing: 2px;
+            text-transform: uppercase; margin-bottom: 12px; font-weight: 700;
+        }
+        .settings-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+        #colorPicker {
+            width: 66px; height: 42px; border: 3px solid #8a6a00;
+            border-radius: 8px; cursor: pointer; background: transparent; padding: 2px;
+        }
+        #colorPicker::-webkit-color-swatch-wrapper { padding: 0; }
+        #colorPicker::-webkit-color-swatch { border: none; border-radius: 5px; }
+
+        .color-presets { display: flex; gap: 8px; flex-wrap: wrap; }
+        .color-preset {
+            width: 34px; height: 34px; border-radius: 8px;
+            border: 3px solid rgba(255,255,255,0.25); cursor: pointer;
+            transition: transform 0.12s, border-color 0.12s;
+        }
+        .color-preset:hover { transform: scale(1.12); border-color: #f1c40f; }
+        .color-preset.ativo { border-color: #fff; transform: scale(1.12); box-shadow: 0 0 14px rgba(255,255,255,0.7); }
+
+        .shape-options { display: flex; gap: 10px; flex-wrap: wrap; }
+        .shape-option {
+            width: 64px; height: 64px; padding: 0;
+            background: rgba(0,0,0,0.5);
+            border: 3px solid #555; border-radius: 12px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s;
+        }
+        .shape-option:hover { border-color: #f1c40f; transform: translateY(-2px); }
+        .shape-option.ativo {
+            border-color: #f1c40f;
+            background: linear-gradient(135deg, #2a1f0a 0%, #4a3510 100%);
+            box-shadow: 0 0 18px rgba(241, 196, 15, 0.5);
+        }
+        .shape-option svg { width: 40px; height: 40px; }
+
+        .volume-row { display: flex; align-items: center; gap: 14px; }
+        .volume-icon { font-size: 22px; }
+        #volumeSlider {
+            flex: 1; height: 8px; -webkit-appearance: none; appearance: none;
+            background: rgba(0,0,0,0.6); border-radius: 5px; outline: none;
+            border: 2px solid rgba(241, 196, 15, 0.5);
+        }
+        #volumeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 22px; height: 22px; background: #f1c40f; border-radius: 50%;
+            cursor: pointer; box-shadow: 0 0 10px rgba(241, 196, 15, 0.8);
+        }
+        #volumeSlider::-moz-range-thumb {
+            width: 22px; height: 22px; background: #f1c40f; border-radius: 50%;
+            cursor: pointer; border: none; box-shadow: 0 0 10px rgba(241, 196, 15, 0.8);
+        }
+        #volumeValue { color: #f1c40f; font-weight: 700; min-width: 52px; text-align: right; }
+
+        .keybinds { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .keybind-row {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 10px; background: rgba(0,0,0,0.4); padding: 10px 14px;
+            border-radius: 8px; border: 2px solid rgba(241, 196, 15, 0.25);
+        }
+        .keybind-label { font-size: 14px; color: #ddd; }
+        .keybind-btn {
+            font-family: 'Pixelify Sans', monospace;
+            font-size: 15px; font-weight: 700; letter-spacing: 1px;
+            color: #1a1a1a;
+            background: linear-gradient(180deg, #ffe066 0%, #f1c40f 50%, #c9a20a 100%);
+            border: 2px solid #8a6a00; border-radius: 7px;
+            padding: 6px 14px; min-width: 68px; cursor: pointer; text-align: center;
+            box-shadow: 0 3px 0 #6a4a00; transition: all 0.1s;
+        }
+        .keybind-btn:hover { filter: brightness(1.1); }
+        .keybind-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #6a4a00; }
+        .keybind-btn.capturando {
+            background: linear-gradient(180deg, #66ccff 0%, #3399cc 100%);
+            color: #fff;
+            animation: pulsarTecla 0.8s ease-in-out infinite;
+        }
+        @keyframes pulsarTecla {
+            0%, 100% { box-shadow: 0 3px 0 #6a4a00, 0 0 10px rgba(102, 204, 255, 0.6); }
+            50%      { box-shadow: 0 3px 0 #6a4a00, 0 0 25px rgba(102, 204, 255, 1); }
+        }
+
+        .settings-btn-row {
+            display: flex; gap: 12px; justify-content: center;
+            margin-top: 22px; padding-top: 18px;
+            border-top: 2px solid rgba(241, 196, 15, 0.3); flex-wrap: wrap;
+        }
+        .settings-action {
+            font-family: 'Pixelify Sans', monospace;
+            font-size: 17px; font-weight: 700; letter-spacing: 2px;
+            color: #1a1a1a; padding: 13px 30px;
+            background: linear-gradient(180deg, #ffe066 0%, #f1c40f 50%, #c9a20a 100%);
+            border: 3px solid #8a6a00; border-radius: 10px; cursor: pointer;
+            box-shadow: 0 0 20px rgba(241, 196, 15, 0.5), 0 5px 0 #6a4a00, inset 0 2px 0 rgba(255,255,255,0.4);
+            transition: all 0.1s;
+        }
+        .settings-action:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        .settings-action:active { transform: translateY(3px); box-shadow: 0 0 20px rgba(241, 196, 15, 0.5), 0 2px 0 #6a4a00, inset 0 2px 0 rgba(255,255,255,0.4); }
+        .settings-action.secundario {
+            background: linear-gradient(180deg, #555 0%, #333 100%);
+            color: #fff; border-color: #222;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5), 0 5px 0 #111, inset 0 2px 0 rgba(255,255,255,0.15);
+        }
     </style>
 </head>
 <body>
     <div id="startOverlay"><button id="startBtn">START</button></div>
+    <button id="startSettingsBtn" class="settings-gear" title="Configurações">⚙️</button>
 
     <div id="cutscene">
         <video id="cutsceneVideo" muted playsinline preload="auto"></video>
@@ -273,6 +444,63 @@
 
             <div class="pause-btn-row">
                 <button class="pause-action" id="resumeBtn">▶ CONTINUAR</button>
+                <button class="pause-action" id="pauseSettingsBtn">⚙️ CONFIGURAÇÕES</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="settingsMenu">
+        <div class="settings-content">
+            <div class="settings-title">⚙️ CONFIGURAÇÕES</div>
+
+            <div class="settings-section">
+                <div class="settings-label">🎨 Cor do Personagem</div>
+                <div class="settings-row">
+                    <input type="color" id="colorPicker" value="#e74c3c">
+                    <div class="color-presets" id="colorPresets"></div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <div class="settings-label">⭐ Formato do Personagem</div>
+                <div class="shape-options" id="shapeOptions"></div>
+            </div>
+
+            <div class="settings-section">
+                <div class="settings-label">🔊 Volume</div>
+                <div class="volume-row">
+                    <span class="volume-icon">🔈</span>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="100">
+                    <span class="volume-icon">🔊</span>
+                    <span id="volumeValue">100%</span>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <div class="settings-label">⌨️ Controles</div>
+                <div class="keybinds">
+                    <div class="keybind-row">
+                        <span class="keybind-label">⬅️ Esquerda</span>
+                        <button class="keybind-btn" data-action="left">A</button>
+                    </div>
+                    <div class="keybind-row">
+                        <span class="keybind-label">➡️ Direita</span>
+                        <button class="keybind-btn" data-action="right">D</button>
+                    </div>
+                    <div class="keybind-row">
+                        <span class="keybind-label">⬆️ Pular</span>
+                        <button class="keybind-btn" data-action="jump">W</button>
+                    </div>
+                    <div class="keybind-row">
+                        <span class="keybind-label">⚔️ Atacar</span>
+                        <button class="keybind-btn" data-action="attack">ESPAÇO</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-btn-row">
+                <button class="settings-action" id="settingsClose">✔ FECHAR</button>
+                <button class="settings-action secundario" id="settingsReset">↺ RESETAR</button>
             </div>
         </div>
     </div>
@@ -314,6 +542,82 @@
             mestre:         { nome: "Grão-Mestre",           desc: "Desbloqueou 25 conquistas",                icone: "🏆", desbloqueada: false },
             lendaViva:      { nome: "Lenda Viva",            desc: "Desbloqueou TODAS as conquistas",          icone: "🌟", desbloqueada: false }
         };
+
+        // ============================================
+        // CONFIGURAÇÕES (SETTINGS)
+        // ============================================
+        const config = {
+            playerColor: '#e74c3c',
+            playerShape: 'square',
+            volume: 1.0,
+            keys: { left: 'a', right: 'd', jump: 'w', attack: ' ' }
+        };
+        const CONFIG_PADRAO = JSON.parse(JSON.stringify(config));
+
+        const PRESET_CORES = [
+            '#e74c3c', '#3498db', '#2ecc71', '#f1c40f',
+            '#9b59b6', '#e67e22', '#1abc9c', '#ff6bcb',
+            '#ffffff', '#2c3e50'
+        ];
+        const FORMATOS = ['square','circle','triangle','star','diamond','hexagon'];
+
+        const shapeSVGs = {
+            square:   '<svg viewBox="0 0 40 40"><rect x="5" y="5" width="30" height="30" fill="currentColor" stroke="rgba(0,0,0,0.35)" stroke-width="2"/></svg>',
+            circle:   '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="currentColor" stroke="rgba(0,0,0,0.35)" stroke-width="2"/></svg>',
+            triangle: '<svg viewBox="0 0 40 40"><polygon points="20,5 35,35 5,35" fill="currentColor" stroke="rgba(0,0,0,0.35)" stroke-width="2"/></svg>',
+            star:     '<svg viewBox="0 0 40 40"><polygon points="20,3 25,15 38,15 27,24 32,37 20,29 8,37 13,24 2,15 15,15" fill="currentColor" stroke="rgba(0,0,0,0.35)" stroke-width="2"/></svg>',
+            diamond:  '<svg viewBox="0 0 40 40"><polygon points="20,4 36,20 20,36 4,20" fill="currentColor" stroke="rgba(0,0,0,0.35)" stroke-width="2"/></svg>',
+            hexagon:  '<svg viewBox="0 0 40 40"><polygon points="20,4 34,12 34,28 20,36 6,28 6,12" fill="currentColor" stroke="rgba(0,0,0,0.35)" stroke-width="2"/></svg>'
+        };
+
+        function salvarConfig() {
+            try { localStorage.setItem('acuilandia_config', JSON.stringify(config)); } catch (e) {}
+        }
+        function carregarConfig() {
+            try {
+                const raw = localStorage.getItem('acuilandia_config');
+                if (raw) {
+                    const obj = JSON.parse(raw);
+                    if (obj.playerColor) config.playerColor = obj.playerColor;
+                    if (obj.playerShape) config.playerShape = obj.playerShape;
+                    if (typeof obj.volume === 'number') config.volume = obj.volume;
+                    if (obj.keys) Object.assign(config.keys, obj.keys);
+                }
+            } catch (e) {}
+        }
+        carregarConfig();
+
+        function nomeTecla(k) {
+            if (!k) return '—';
+            if (k === ' ') return 'ESPAÇO';
+            if (k === 'arrowup') return '↑';
+            if (k === 'arrowdown') return '↓';
+            if (k === 'arrowleft') return '←';
+            if (k === 'arrowright') return '→';
+            if (k === 'enter') return 'ENTER';
+            if (k === 'shift') return 'SHIFT';
+            if (k === 'control') return 'CTRL';
+            if (k === 'alt') return 'ALT';
+            if (k === 'tab') return 'TAB';
+            if (k === 'escape') return 'ESC';
+            if (k.length === 1) return k.toUpperCase();
+            return k.toUpperCase();
+        }
+
+        function hexParaRgb(hex) {
+            const c = hex.replace('#','');
+            return { r: parseInt(c.substr(0,2),16), g: parseInt(c.substr(2,2),16), b: parseInt(c.substr(4,2),16) };
+        }
+        function escurecerCor(hex, fator) {
+            const {r,g,b} = hexParaRgb(hex);
+            return `rgb(${Math.max(0,Math.floor(r*(1-fator)))},${Math.max(0,Math.floor(g*(1-fator)))},${Math.max(0,Math.floor(b*(1-fator)))})`;
+        }
+
+        function aplicarConfig() {
+            if (typeof audioHome !== 'undefined' && audioHome) {
+                audioHome.volume = Math.max(0, Math.min(1, config.volume));
+            }
+        }
 
         let vidasPerdidasTotal = 0;
         let moedasColetadasTotal = 0;
@@ -381,6 +685,7 @@
         }
         function tocarHome() {
             conectarHomeNoGain();
+            aplicarConfig();
             if (audioCtxHome && audioCtxHome.state === 'suspended') audioCtxHome.resume().catch(() => {});
             audioHome.play().catch(() => {});
         }
@@ -2977,6 +3282,44 @@
             ctx.restore();
         }
 
+        function desenharFormaPlayer(x, y, w, h) {
+            const cx = x + w / 2, cy = y + h / 2, r = Math.min(w, h) / 2;
+            const cor = config.playerColor;
+            const corBorda = escurecerCor(cor, 0.35);
+            ctx.fillStyle = cor;
+            ctx.strokeStyle = corBorda;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            switch (config.playerShape) {
+                case 'circle':   ctx.arc(cx, cy, r, 0, Math.PI * 2); break;
+                case 'triangle': ctx.moveTo(cx, y); ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.closePath(); break;
+                case 'star': {
+                    const innerR = r * 0.45;
+                    for (let i = 0; i < 10; i++) {
+                        const ang = -Math.PI / 2 + i * Math.PI / 5;
+                        const rad = i % 2 === 0 ? r : innerR;
+                        const px = cx + Math.cos(ang) * rad;
+                        const py = cy + Math.sin(ang) * rad;
+                        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                    }
+                    ctx.closePath(); break;
+                }
+                case 'diamond':  ctx.moveTo(cx, y); ctx.lineTo(x + w, cy); ctx.lineTo(cx, y + h); ctx.lineTo(x, cy); ctx.closePath(); break;
+                case 'hexagon': {
+                    for (let i = 0; i < 6; i++) {
+                        const ang = -Math.PI / 2 + i * Math.PI / 3;
+                        const px = cx + Math.cos(ang) * r;
+                        const py = cy + Math.sin(ang) * r;
+                        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                    }
+                    ctx.closePath(); break;
+                }
+                default: ctx.rect(x, y, w, h); break;
+            }
+            ctx.fill();
+            ctx.stroke();
+        }
+
         function draw() {
             ctx.clearRect(0, 0, W, H);
             desenharCenarioFundo();
@@ -3147,19 +3490,21 @@
                 const sx2 = px + (player.w - sw) / 2;
                 const sy2 = py + (player.h - sh);
                 ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 12;
-                ctx.fillStyle = '#e74c3c';
-                ctx.fillRect(sx2, sy2, sw, sh);
+                desenharFormaPlayer(sx2, sy2, sw, sh);
                 ctx.shadowBlur = 0;
-                ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 2;
-                ctx.strokeRect(sx2, sy2, sw, sh);
-                const eyeSize = sw * 0.2, eyeOffset = sw * 0.2;
+                const rr = Math.min(sw, sh) / 2;
+                const cx2 = sx2 + sw / 2, cy2 = sy2 + sh / 2;
+                const eyeSize = rr * 0.3;
+                const eyeY = cy2 - rr * 0.15;
+                const eyeLX = cx2 - rr * 0.5;
+                const eyeRX = cx2 + rr * 0.5 - eyeSize;
                 ctx.fillStyle = '#fff';
-                ctx.fillRect(sx2 + eyeOffset, sy2 + eyeOffset, eyeSize, eyeSize);
-                ctx.fillRect(sx2 + sw - eyeOffset - eyeSize, sy2 + eyeOffset, eyeSize, eyeSize);
+                ctx.fillRect(eyeLX, eyeY, eyeSize, eyeSize);
+                ctx.fillRect(eyeRX, eyeY, eyeSize, eyeSize);
                 ctx.fillStyle = '#2c3e50';
-                const pupil = eyeSize * 0.4;
-                ctx.fillRect(sx2 + eyeOffset + pupil * 0.5, sy2 + eyeOffset + pupil * 0.5, pupil, pupil);
-                ctx.fillRect(sx2 + sw - eyeOffset - eyeSize + pupil * 0.5, sy2 + eyeOffset + pupil * 0.5, pupil, pupil);
+                const pupil = eyeSize * 0.45;
+                ctx.fillRect(eyeLX + pupil * 0.5, eyeY + pupil * 0.5, pupil, pupil);
+                ctx.fillRect(eyeRX + pupil * 0.5, eyeY + pupil * 0.5, pupil, pupil);
                 if (temEspada && !espadaLancada) {
                     const progressoAtaque = atacando ? (ataqueTimer / DURACAO_ATAQUE) : 0;
                     desenharEspadaMagica(px, py, player.w, player.h, atacando, progressoAtaque);
@@ -3543,9 +3888,159 @@
         pauseBtn.addEventListener('click', (e) => { e.stopPropagation(); pausarJogo(); });
         resumeBtn.addEventListener('click', (e) => { e.stopPropagation(); despausarJogo(); });
 
+        // ============================================
+        // SETTINGS UI
+        // ============================================
+        const settingsMenu = document.getElementById('settingsMenu');
+        const startSettingsBtn = document.getElementById('startSettingsBtn');
+        const pauseSettingsBtn = document.getElementById('pauseSettingsBtn');
+        const settingsClose = document.getElementById('settingsClose');
+        const settingsReset = document.getElementById('settingsReset');
+        const colorPicker = document.getElementById('colorPicker');
+        const colorPresets = document.getElementById('colorPresets');
+        const shapeOptions = document.getElementById('shapeOptions');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        const keybindBtns = document.querySelectorAll('.keybind-btn');
+        let capturandoTecla = null;
+
+        function abrirSettings() {
+            settingsMenu.classList.add('aberto');
+            colorPicker.value = config.playerColor;
+            volumeSlider.value = Math.round(config.volume * 100);
+            volumeValue.textContent = Math.round(config.volume * 100) + '%';
+            atualizarBotoesKeybind();
+            atualizarPresetsCor();
+            atualizarShapeOptions();
+        }
+        function fecharSettings() {
+            settingsMenu.classList.remove('aberto');
+            capturandoTecla = null;
+            atualizarBotoesKeybind();
+        }
+
+        function buildColorPresets() {
+            colorPresets.innerHTML = '';
+            PRESET_CORES.forEach(cor => {
+                const btn = document.createElement('button');
+                btn.className = 'color-preset';
+                btn.style.background = cor;
+                btn.dataset.cor = cor;
+                btn.addEventListener('click', () => {
+                    config.playerColor = cor;
+                    colorPicker.value = cor;
+                    salvarConfig();
+                    atualizarPresetsCor();
+                    atualizarShapeOptions();
+                });
+                colorPresets.appendChild(btn);
+            });
+        }
+        function atualizarPresetsCor() {
+            colorPresets.querySelectorAll('.color-preset').forEach(b => {
+                b.classList.toggle('ativo', b.dataset.cor.toLowerCase() === config.playerColor.toLowerCase());
+            });
+        }
+        colorPicker.addEventListener('input', () => {
+            config.playerColor = colorPicker.value;
+            salvarConfig();
+            atualizarPresetsCor();
+            atualizarShapeOptions();
+        });
+
+        function buildShapeOptions() {
+            shapeOptions.innerHTML = '';
+            FORMATOS.forEach(f => {
+                const btn = document.createElement('button');
+                btn.className = 'shape-option';
+                btn.dataset.shape = f;
+                btn.title = f;
+                btn.innerHTML = shapeSVGs[f];
+                btn.addEventListener('click', () => {
+                    config.playerShape = f;
+                    salvarConfig();
+                    atualizarShapeOptions();
+                });
+                shapeOptions.appendChild(btn);
+            });
+        }
+        function atualizarShapeOptions() {
+            shapeOptions.querySelectorAll('.shape-option').forEach(b => {
+                b.classList.toggle('ativo', b.dataset.shape === config.playerShape);
+                b.style.color = config.playerColor;
+            });
+        }
+
+        volumeSlider.addEventListener('input', () => {
+            config.volume = volumeSlider.value / 100;
+            volumeValue.textContent = volumeSlider.value + '%';
+            aplicarConfig();
+            salvarConfig();
+        });
+
+        function atualizarBotoesKeybind() {
+            keybindBtns.forEach(btn => {
+                btn.textContent = nomeTecla(config.keys[btn.dataset.action]);
+                btn.classList.toggle('capturando', capturandoTecla === btn.dataset.action);
+            });
+        }
+        keybindBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                capturandoTecla = btn.dataset.action;
+                atualizarBotoesKeybind();
+            });
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (!capturandoTecla) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            if (e.key === 'Escape') {
+                capturandoTecla = null;
+            } else {
+                config.keys[capturandoTecla] = e.key.toLowerCase();
+                salvarConfig();
+                capturandoTecla = null;
+            }
+            atualizarBotoesKeybind();
+        }, true);
+
+        startSettingsBtn.addEventListener('click', (e) => { e.stopPropagation(); abrirSettings(); });
+        pauseSettingsBtn.addEventListener('click', (e) => { e.stopPropagation(); abrirSettings(); });
+        settingsClose.addEventListener('click', (e) => { e.stopPropagation(); fecharSettings(); });
+        settingsReset.addEventListener('click', () => {
+            Object.assign(config, JSON.parse(JSON.stringify(CONFIG_PADRAO)));
+            salvarConfig();
+            colorPicker.value = config.playerColor;
+            volumeSlider.value = Math.round(config.volume * 100);
+            volumeValue.textContent = Math.round(config.volume * 100) + '%';
+            aplicarConfig();
+            atualizarBotoesKeybind();
+            atualizarPresetsCor();
+            atualizarShapeOptions();
+        });
+
+        buildColorPresets();
+        buildShapeOptions();
+        atualizarBotoesKeybind();
+        atualizarPresetsCor();
+        atualizarShapeOptions();
+        colorPicker.value = config.playerColor;
+        volumeSlider.value = Math.round(config.volume * 100);
+        volumeValue.textContent = Math.round(config.volume * 100) + '%';
+
+        // ============================================
+        // INPUT DO JOGO
+        // ============================================
         document.addEventListener('keydown', (e) => {
             if (!jogoIniciado) return;
             const key = e.key.toLowerCase();
+
+            if (settingsMenu.classList.contains('aberto')) {
+                if (e.key === 'Escape' && !capturandoTecla) { e.preventDefault(); fecharSettings(); }
+                return;
+            }
 
             if (key === 'p' || key === 'escape') {
                 e.preventDefault();
@@ -3555,31 +4050,24 @@
             if (jogoPausado) return;
 
             if (dialogo.ativo) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    avancarDialogo();
-                }
+                if (e.key === 'Enter') { e.preventDefault(); avancarDialogo(); }
                 return;
             }
 
-            if (key === 'a' || key === 'd' || key === 'w') {
-                e.preventDefault();
-                keys[key] = true;
-                return;
-            }
-            if (key === ' ') {
+            if (key === config.keys.left)  { e.preventDefault(); keys.a = true; return; }
+            if (key === config.keys.right) { e.preventDefault(); keys.d = true; return; }
+            if (key === config.keys.jump)  { e.preventDefault(); keys.w = true; return; }
+            if (key === config.keys.attack) {
                 e.preventDefault();
                 if (jogadorAgravado) {
                     const omega = Math.cos(jogadorAgravado.fase) * jogadorAgravado.anguloMax * jogadorAgravado.velocidade;
                     const velLinear = jogadorAgravado.comprimento * omega;
                     player.vx = velLinear * Math.cos(jogadorAgravado.angulo);
                     player.vy = -velLinear * Math.sin(jogadorAgravado.angulo) - 6;
-                    if (omega > 0) player.vx += 3;
-                    else if (omega < 0) player.vx -= 3;
+                    if (omega > 0) player.vx += 3; else if (omega < 0) player.vx -= 3;
                     jogadorAgravado.ocupado = false;
                     jogadorAgravado = null;
-                    cooldownCipo = 15;
-                    cipoUsos++;
+                    cooldownCipo = 15; cipoUsos++;
                     if (cipoUsos >= 10) desbloquearConquista('tarzan');
                     return;
                 }
@@ -3613,8 +4101,10 @@
         document.addEventListener('keyup', (e) => {
             if (!jogoIniciado) return;
             const key = e.key.toLowerCase();
-            if (key === 'a' || key === 'd' || key === 'w') { e.preventDefault(); keys[key] = false; return; }
-            if (key === ' ') { segurandoAtaque = false; tempoSegurando = 0; inicioHold = 0; }
+            if (key === config.keys.left)  { e.preventDefault(); keys.a = false; return; }
+            if (key === config.keys.right) { e.preventDefault(); keys.d = false; return; }
+            if (key === config.keys.jump)  { e.preventDefault(); keys.w = false; return; }
+            if (key === config.keys.attack) { segurandoAtaque = false; tempoSegurando = 0; inicioHold = 0; }
         });
 
         function iniciarJogo() {
